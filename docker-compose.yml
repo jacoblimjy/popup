@@ -1,3 +1,4 @@
+# TODO: Add initialisation for backend and frontend for easier development
 services:
   db:
     image: mysql:8.0
