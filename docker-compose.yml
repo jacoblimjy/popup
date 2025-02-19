@@ -1,0 +1,13 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: vrc_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: vrc
+      MYSQL_USER: vrcuser
+      MYSQL_PASSWORD: vrcpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database/database/init:/docker-entrypoint-initdb.d
