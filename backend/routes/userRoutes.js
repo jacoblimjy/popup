@@ -1,9 +1,63 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const db = require('../db');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const db = require("../db");
 
-router.get("/", (req, res) => {
-  res.send("Welcome to the user route");
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) return res.status(401).json({ message: "No token provided" });
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ message: "Invalid token" });
+    req.user = user;
+    next();
+  });
+};
+
+router.post("/signup", async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+
+    const [existingUsers] = await db.execute(
+      "SELECT * FROM Users WHERE email = ?",
+      [email]
+    );
+
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    const [roles] = await db.execute(
+      "SELECT role_id FROM Roles WHERE role_id = 1"
+    );
+
+    if (roles.length === 0) {
+      await db.execute(
+        "INSERT INTO Roles (role_id, role_name) VALUES (1, 'parent')"
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const [result] = await db.execute(
+      "INSERT INTO Users (username, email, password_hash, role_id, date_created) VALUES (?, ?, ?, 1, NOW())",
+      [username, email, hashedPassword]
+    );
+
+    res.status(201).json({
+      userId: result.insertId,
+      message: "User created successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
 });
 
 module.exports = router;
