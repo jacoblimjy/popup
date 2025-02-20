@@ -138,4 +138,33 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+router.delete("/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const [users] = await db.execute("SELECT * FROM Users WHERE user_id = ?", [
+      userId,
+    ]);
+
+    if (users.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const [result] = await db.execute("DELETE FROM Users WHERE user_id = ?", [
+      userId,
+    ]);
+
+    res.json({
+      message: "User deleted successfully",
+      userId: userId,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;
