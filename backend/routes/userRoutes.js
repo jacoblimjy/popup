@@ -108,4 +108,34 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  try {
+    const { username, email } = req.body;
+    const userId = req.params.id;
+
+    const [users] = await db.execute("SELECT * FROM Users WHERE user_id = ?", [
+      userId,
+    ]);
+
+    if (users.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const [result] = await db.execute(
+      "UPDATE Users SET username = ?, email = ? WHERE user_id = ?",
+      [username, email, userId]
+    );
+
+    res.json({
+      message: "User updated successfully",
+      userId: userId,
+      username: username,
+      email: email,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
