@@ -1,10 +1,13 @@
+CREATE DATABASE IF NOT EXISTS vrc;
+USE vrc;
+
 CREATE TABLE Roles (
     role_id INTEGER PRIMARY KEY,
     role_name VARCHAR(255)
 );
 
 CREATE TABLE Users (
-    user_id INTEGER PRIMARY KEY,
+    user_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     role_id INTEGER,
     username VARCHAR(255),
     email VARCHAR(255),
@@ -14,7 +17,7 @@ CREATE TABLE Users (
 );
 
 CREATE TABLE Children (
-    child_id INTEGER PRIMARY KEY,
+    child_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     user_id INTEGER,
     child_name VARCHAR(255),
     date_created TIMESTAMP,
@@ -49,7 +52,7 @@ CREATE TABLE Questions (
 );
 
 CREATE TABLE Child_Performance (
-    up_id INTEGER PRIMARY KEY,
+    up_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     child_id INTEGER,
     topic_id INTEGER,
     accuracy_score FLOAT,
@@ -64,7 +67,7 @@ CREATE TABLE Child_Performance (
 );
 
 CREATE TABLE Attempted_Questions (
-    aq_id INTEGER PRIMARY KEY,
+    aq_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     child_id INTEGER,
     question_id INTEGER,
     child_answer VARCHAR(255),
