@@ -47,6 +47,13 @@ router.post("/signup", async (req, res) => {
       [username, email, hashedPassword]
     );
 
+    // Return JWT Token as cookie
+    const token = jwt.sign({ userId: result.insertId }, process.env.JWT_SECRET);
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "strict",
+    });
+
     res.status(201).json({
       userId: result.insertId,
       message: "User created successfully",
@@ -78,6 +85,13 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // Return JWT Token as cookie
+    const token = jwt.sign({ userId: result.insertId }, process.env.JWT_SECRET);
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "strict",
+    });
+    
     res.json({
       message: "Login successful",
       userId: user.user_id,
