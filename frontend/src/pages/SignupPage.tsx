@@ -35,7 +35,7 @@ const SignupPage = () => {
     console.log(JSON.stringify({ name, email, children, password }));
 
     try {
-      const response = await fetch("http://localhost:8000/api/auth/signup", {
+      const response = await fetch("http://localhost:8000/api/users/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
