@@ -65,7 +65,7 @@ CREATE TABLE Child_Performance (
     current_mastery VARCHAR(255),
     date_recorded DATE,
     FOREIGN KEY (child_id) REFERENCES Children(child_id),
-    FOREIGN KEY (topic_id) REFERENCES Topics(topic_id)
+    FOREIGN KEY (topic_id) REFERENCES Topics(topic_id),
     UNIQUE (child_id, topic_id) 
 );
 
