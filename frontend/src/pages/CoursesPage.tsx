@@ -12,8 +12,8 @@ const levels = ["Easy", "Medium", "Hard"]
 
 const CoursesPage = () => {
     const navigate = useNavigate();
-    const [chosenTopic, setTopic] = useState(null);
-    const [difficulty, setDifficulty] = useState(null);
+    const [chosenTopic, setTopic] = useState<string | null>(null);
+    const [difficulty, setDifficulty] = useState<string | null>(null);
 
     const handleStartPractice = () => {
         if (chosenTopic && difficulty) {
@@ -50,18 +50,18 @@ const CoursesPage = () => {
                     <h3 className="text-lg">Difficulty Level</h3>
                     <div className="flex gap-10">
                     {levels.map((level) => (
-                        <button key={level} className={`w-22 py-3 px-2 rounded-lg text-white text-center transition-all ${
+                        <button key={level} className={`w-20 py-3 px-2 rounded-lg text-white text-center transition-all ${
                             difficulty === level 
                             ? level === "Easy" 
-                                ? "bg-green-300" 
+                                ? "bg-green-700" 
                                 : level === "Medium" 
-                                ? "bg-orange-300" 
-                                : "bg-red-300"
+                                ? "bg-orange-600" 
+                                : "bg-red-800"
                             : level === "Easy" 
-                            ? "bg-green-300 hover:bg-green-800"
+                            ? "bg-green-400 hover:bg-green-700"
                             : level === "Medium" 
-                            ? "bg-orange-300 hover:bg-orange-500"
-                            : "bg-red-300 hover:bg-red-800"
+                            ? "bg-orange-400 hover:bg-orange-600"
+                            : "bg-red-400 hover:bg-red-800"
                         }`}
                         onClick = {() => setDifficulty(level)}>
                         {level}
