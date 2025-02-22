@@ -35,7 +35,7 @@ const CoursesPage = () => {
                 Recommended for you: Word Ladders — Medium
             </p>
 
-            <div className="bg-gray-50 shadow-md p-10 mt-12 rounded-lg w-[600px] h-[300px] flex flex-col justify-between">
+            <div className="bg-gray-100 p-10 mt-12 rounded-lg w-[600px] h-[300px] flex flex-col justify-between">
                 <div className="grid grid-cols-2 gap-4">
                 {topics.map((topic) => (
                     <button key={topic} className={`py-3 px-2 rounded-lg text-white text-center transition-all ${
