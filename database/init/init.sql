@@ -20,6 +20,9 @@ CREATE TABLE Children (
     child_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     user_id INTEGER,
     child_name VARCHAR(255),
+    age INTEGER CHECK (age BETWEEN 1 AND 100),
+    -- TODO: Add Education Level later
+    -- level VARCHAR(255),
     date_created TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(user_id)
 );
