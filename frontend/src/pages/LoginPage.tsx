@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const LoginPage = () => {
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -6,7 +8,7 @@ const LoginPage = () => {
     const password = formData.get("password") as string;
     console.log(email, password);
     try {
-      const response = await fetch("http://localhost:8000/api/auth/login", {
+      const response = await fetch("http://localhost:8000/api/users/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -57,12 +59,12 @@ const LoginPage = () => {
                       <label htmlFor="password" className="block text-sm mb-2">
                         Password
                       </label>
-                      <a
+                      <Link
                         className=" text-sm text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium mb-2"
-                        href="/forgot-password"
+                        to="/forgot-password"
                       >
                         Forgot password?
-                      </a>
+                      </Link>
                     </div>
                     <div className="relative">
                       <input
@@ -117,12 +119,12 @@ const LoginPage = () => {
                   <div className="flex flex-col items-center">
                     <p className="mt-2 text-sm text-gray-600">
                       Don't have an account yet?{" "} 
-                      <a
+                      <Link
                         className="text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
-                        href="/signup"
+                        to="/signup"
                       >
                         Sign up
-                      </a>
+                      </Link>
                     </p>
                   </div>
                 </div>
