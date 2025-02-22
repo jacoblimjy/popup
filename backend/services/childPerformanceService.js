@@ -1,6 +1,7 @@
 const db = require("../db");
 
 const createChildPerformance = async (childPerformance) => {
+  const { child_id, topic_id, accuracy_score, estimated_proficiency, questions_attempted, time_spent, difficulty_level, current_mastery } = childPerformance;
 
   // Check if a performance record already exists for the given child_id and topic_id
   const [existingPerformance] = await db.execute(
@@ -20,17 +21,27 @@ const createChildPerformance = async (childPerformance) => {
 };
 
 const updateChildPerformance = async (up_id, updates) => {
-    const fields = Object.keys(updates).map(key => `${key} = ?`).join(", ");
-    const values = Object.values(updates);
-    values.push(up_id);
-  
-    const query = `UPDATE Child_Performance SET ${fields} WHERE up_id = ?`;
-    await db.execute(query, values);
-  };
+  const [existingPerformance] = await db.execute(
+    "SELECT * FROM Child_Performance WHERE up_id = ?",
+    [up_id]
+  );
+
+  if (existingPerformance.length === 0) {
+    throw new Error("Performance record not found");
+  }
+
+  const fields = Object.keys(updates).map(key => `${key} = ?`).join(", ");
+  const values = Object.values(updates);
+  values.push(up_id);
+
+  const query = `UPDATE Child_Performance SET ${fields} WHERE up_id = ?`;
+  await db.execute(query, values);
+};
 
 const getChildPerformanceByChildIdAndTopicId = async (child_id, topic_id = null) => {
   let query = "SELECT * FROM Child_Performance WHERE child_id = ?";
   const params = [child_id];
+  
 
   if (topic_id !== null) {
     query += " AND topic_id = ?";
@@ -42,6 +53,15 @@ const getChildPerformanceByChildIdAndTopicId = async (child_id, topic_id = null)
 };
 
 const deleteChildPerformanceByUpId = async (up_id) => {
+  const [existingPerformance] = await db.execute(
+    "SELECT * FROM Child_Performance WHERE up_id = ?",
+    [up_id]
+  );
+
+  if (existingPerformance.length === 0) {
+    throw new Error("Performance record not found");
+  }
+  
   await db.execute("DELETE FROM Child_Performance WHERE up_id = ?", [up_id]);
 };
 

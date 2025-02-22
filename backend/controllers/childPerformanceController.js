@@ -52,7 +52,14 @@ const updateChildPerformance = async (req, res) => {
 
 const getChildPerformanceByChildIdAndTopicId = async (req, res) => {
   try {
-    const { child_id, topic_id } = req.params;
+    const { child_id, topic_id } = req.query;
+
+    // Call ChildService to check if child exists
+    // const child = await childService.getChildById(child_id);
+    // if (!child) {
+    //   throw new Error("Child does not exist");
+    // }
+
     const performances = await childPerformanceService.getChildPerformanceByChildIdAndTopicId(child_id, topic_id);
     res.json(performances);
   } catch (error) {
@@ -67,6 +74,7 @@ const getChildPerformanceByChildIdAndTopicId = async (req, res) => {
 const deleteChildPerformanceByUpId = async (req, res) => {
   try {
     const { up_id } = req.params;
+
     await childPerformanceService.deleteChildPerformanceByUpId(up_id);
     res.json({
       message: "Child performance deleted successfully",
