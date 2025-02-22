@@ -1,6 +1,7 @@
+const { parse } = require("vue/compiler-sfc");
 const db = require("../db");
 
-const createChild = async (userId, childName, age, level) => {
+const createChild = async (userId, childName, age, education_level = 1) => {
   const [existingChildren] = await db.execute(
     "SELECT * FROM Children WHERE user_id = ? AND child_name = ?",
     [userId, childName]
@@ -11,8 +12,8 @@ const createChild = async (userId, childName, age, level) => {
   }
 
   const [result] = await db.execute(
-    "INSERT INTO Children (user_id, child_name, age, level, date_created) VALUES (?, ?, ?, ?, NOW())",
-    [userId, childName, age, level]
+    "INSERT INTO Children (user_id, child_name, age, education_level, date_created) VALUES (?, ?, ?, ?, NOW())",
+    [userId, childName, age, education_level]
   );
 
   return result.insertId;
@@ -37,17 +38,17 @@ const createChildrenBatch = async (userId, children) => {
     // If all children are valid, insert them
     const createdChildren = [];
     for (const child of children) {
-      const { childName, age, level = 1 } = child; // Default level to 1 if not provided
-      const childId = await createChild(userId, childName, age, level);
-      createdChildren.push({ childId, childName, age, level });
+      const { childName, age, education_level = 1 } = child; // Default education_level to 1 if not provided
+      const childId = await createChild(userId, childName, age, education_level);
+      createdChildren.push({ childId, childName, age, education_level });
     }
     return createdChildren;
   };
 
-const updateChild = async (childId, childName, age, level) => {
+const updateChild = async (childId, childName, age, education_level) => {
   await db.execute(
-    "UPDATE Children SET child_name = ?, age = ?, level = ? WHERE child_id = ?",
-    [childName, age, level, childId]
+    "UPDATE Children SET child_name = ?, age = ?, education_level = ? WHERE child_id = ?",
+    [childName, age, education_level, childId]
   );
 };
 
@@ -65,14 +66,13 @@ const getChildById = async (childId) => {
 };
 
 const getChildrenByUserId = async (userId, limit = 10, offset = 0) => {
-  const [children] = await db.execute(
-    "SELECT * FROM Children WHERE user_id = ? LIMIT ? OFFSET ?",
-    [userId, limit, offset]
-  );
-
-  return children;
-};
-
+    console.log(userId, limit, offset);
+    const query = `SELECT * FROM Children WHERE user_id = ? LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
+    const [children] = await db.execute(query, [userId]);
+  
+    return children;
+  };
+  
 const deleteChild = async (childId) => {
   await db.execute("DELETE FROM Children WHERE child_id = ?", [childId]);
 };
