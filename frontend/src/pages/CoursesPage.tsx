@@ -17,7 +17,7 @@ const CoursesPage = () => {
 
     const handleStartPractice = () => {
         if (chosenTopic && difficulty) {
-            navigate(`/courses/${chosenTopic}/${difficulty}`);
+            navigate(`/courses/${chosenTopic}/${difficulty}/`);
         }
     };
 
@@ -52,12 +52,16 @@ const CoursesPage = () => {
                     {levels.map((level) => (
                         <button key={level} className={`w-22 py-3 px-2 rounded-lg text-white text-center transition-all ${
                             difficulty === level 
-                            ? level === "Easy" ? "bg-green-300" 
-                                : level === "Medium" ? "bg-orange-300" 
+                            ? level === "Easy" 
+                                ? "bg-green-300" 
+                                : level === "Medium" 
+                                ? "bg-orange-300" 
                                 : "bg-red-300"
-                            : level === "Easy" ? "bg-green-300 hover:bg-green-800"
-                                : level === "Medium" ? "bg-orange-300 hover:bg-orange-500"
-                                : "bg-red-300 hover:bg-red-800"
+                            : level === "Easy" 
+                            ? "bg-green-300 hover:bg-green-800"
+                            : level === "Medium" 
+                            ? "bg-orange-300 hover:bg-orange-500"
+                            : "bg-red-300 hover:bg-red-800"
                         }`}
                         onClick = {() => setDifficulty(level)}>
                         {level}
@@ -66,6 +70,12 @@ const CoursesPage = () => {
                     </div>
                 </div>
             </div>
+
+            <button
+                onClick={handleStartPractice}
+                className="mt-12 py-3 px-6 bg-purple-500 hover:bg-purple-400 text-white rounded-lg"
+                disabled={!chosenTopic || !difficulty}> Start Practice
+            </button>
         </div>
   )
 }
