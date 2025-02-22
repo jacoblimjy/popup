@@ -105,6 +105,7 @@ const deleteChildPerformanceByChildId = async (req, res) => {
 module.exports = {
   createChildPerformance,
   updateChildPerformance,
-  getChildPerformanceByChildId,
-  deleteChildPerformance,
+  getChildPerformanceByChildIdAndTopicId,
+  deleteChildPerformanceByUpId,
+  deleteChildPerformanceByChildId,
 };
