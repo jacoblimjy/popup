@@ -4,7 +4,8 @@ const childPerformanceController = require("../controllers/childPerformanceContr
 
 router.post("/", childPerformanceController.createChildPerformance);
 router.put("/:up_id", childPerformanceController.updateChildPerformance);
-router.get("/:child_id", childPerformanceController.getChildPerformanceByChildId);
-router.delete("/:up_id", childPerformanceController.deleteChildPerformance);
+router.get("/:child_id/:topic_id", childPerformanceController.getChildPerformanceByChildIdAndTopicId);
+router.delete("/:up_id", childPerformanceController.deleteChildPerformanceByUpId);
+router.delete("/child/:child_id", childPerformanceController.deleteChildPerformanceByChildId);
 
 module.exports = router;

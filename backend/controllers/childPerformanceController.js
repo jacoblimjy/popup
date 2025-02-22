@@ -1,8 +1,16 @@
 const childPerformanceService = require("../services/childPerformanceService");
 
+
 const createChildPerformance = async (req, res) => {
   try {
     const childPerformance = req.body;
+
+    // Call ChildService to check if child exists
+    // const child = await childService.getChildById(child_id);
+    // if (!child) {
+    //   throw new Error("Child does not exist");
+    // }
+
     const up_id = await childPerformanceService.createChildPerformance(childPerformance);
     res.status(201).json({
       up_id,
@@ -21,6 +29,13 @@ const updateChildPerformance = async (req, res) => {
   try {
     const updates = req.body;
     const { up_id } = req.params;
+
+    // Call ChildService to check if child exists
+    // const child = await childService.getChildById(child_id);
+    // if (!child) {
+    //   throw new Error("Child does not exist");
+    // }
+    
     await childPerformanceService.updateChildPerformance(up_id, updates);
     res.json({
       message: "Child performance updated successfully",
@@ -34,10 +49,11 @@ const updateChildPerformance = async (req, res) => {
   }
 };
 
-const getChildPerformanceByChildId = async (req, res) => {
+
+const getChildPerformanceByChildIdAndTopicId = async (req, res) => {
   try {
-    const { child_id } = req.params;
-    const performances = await childPerformanceService.getChildPerformanceByChildId(child_id);
+    const { child_id, topic_id } = req.params;
+    const performances = await childPerformanceService.getChildPerformanceByChildIdAndTopicId(child_id, topic_id);
     res.json(performances);
   } catch (error) {
     console.error(error);
@@ -48,10 +64,10 @@ const getChildPerformanceByChildId = async (req, res) => {
   }
 };
 
-const deleteChildPerformance = async (req, res) => {
+const deleteChildPerformanceByUpId = async (req, res) => {
   try {
     const { up_id } = req.params;
-    await childPerformanceService.deleteChildPerformance(up_id);
+    await childPerformanceService.deleteChildPerformanceByUpId(up_id);
     res.json({
       message: "Child performance deleted successfully",
     });
@@ -63,6 +79,28 @@ const deleteChildPerformance = async (req, res) => {
     });
   }
 };
+
+const deleteChildPerformanceByChildId = async (req, res) => {
+  try {
+    // Check if Child exists
+    // const child = await childService.getChildById(child_id);
+    // if (!child) {
+    //   throw new Error("Child does not exist");
+    // }
+
+    const { child_id } = req.params;
+    await childPerformanceService.deleteChildPerformanceByChildId(child_id);
+    res.json({
+      message: "Child performance deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+}
 
 module.exports = {
   createChildPerformance,
