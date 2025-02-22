@@ -8,13 +8,16 @@ const topics = [
     "Anagram in a Sentence",
 ];
 
+const levels = ["Easy", "Medium", "Hard"]
+
 const CoursesPage = () => {
     const navigate = useNavigate();
     const [chosenTopic, setTopic] = useState(null);
+    const [difficulty, setDifficulty] = useState(null);
 
     const handleStartPractice = () => {
-        if (chosenTopic) {
-            navigate(`/courses/${chosenTopic}`);
+        if (chosenTopic && difficulty) {
+            navigate(`/courses/${chosenTopic}/${difficulty}`);
         }
     };
 
@@ -37,10 +40,30 @@ const CoursesPage = () => {
                 {topics.map((topic) => (
                     <button key={topic} className={`py-3 px-2 rounded-lg text-white text-center transition-all ${
                         chosenTopic === topic ? "bg-yellow-600" : "bg-yellow-400 hover:bg-yellow-600"}`}
-                        onClick={() => setTopic(chosenTopic)}>
+                        onClick={() => setTopic(topic)}>
                     {topic}
                     </button>
                 ))}
+                </div>
+
+                <div className="mt-6 flex items-center gap-8 justify-center">
+                    <h3 className="text-lg">Difficulty Level</h3>
+                    <div className="flex gap-10">
+                    {levels.map((level) => (
+                        <button key={level} className={`w-22 py-3 px-2 rounded-lg text-white text-center transition-all ${
+                            difficulty === level 
+                            ? level === "Easy" ? "bg-green-300" 
+                                : level === "Medium" ? "bg-orange-300" 
+                                : "bg-red-300"
+                            : level === "Easy" ? "bg-green-300 hover:bg-green-800"
+                                : level === "Medium" ? "bg-orange-300 hover:bg-orange-500"
+                                : "bg-red-300 hover:bg-red-800"
+                        }`}
+                        onClick = {() => setDifficulty(level)}>
+                        {level}
+                        </button>
+                    ))}
+                    </div>
                 </div>
             </div>
         </div>
