@@ -20,6 +20,8 @@ CREATE TABLE Children (
     child_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     user_id INTEGER,
     child_name VARCHAR(255),
+    age INTEGER CHECK (age BETWEEN 1 AND 100),
+    education_level INTEGER DEFAULT 1,
     date_created TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(user_id)
 );
@@ -37,7 +39,7 @@ CREATE TABLE Difficulty_Levels (
 );
 
 CREATE TABLE Questions (
-    question_id INTEGER PRIMARY KEY,
+    question_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     question_text TEXT,
     answer_format VARCHAR(255),
     correct_answer TEXT,
@@ -85,3 +87,16 @@ CREATE TABLE LLM_Calls (
     tokens_used INTEGER,
     date_called TIMESTAMP
 );
+
+INSERT INTO Topics (topic_id, topic_name, topic_description) VALUES
+(1, 'Use a Rule to Make a Word', 'Questions where students apply specific rules to create words'),
+(2, 'Complete a Word Pair', 'Questions involving completing pairs of related words'),
+(3, 'Word Ladders', 'Questions where students transform one word into another one letter at a time'),
+(4, 'Anagram in a sentence', 'Questions involving finding anagrams within sentences');
+
+INSERT INTO Difficulty_Levels (difficulty_id, label, numeric_level) VALUES
+(1, 'Easy', 1),
+(2, 'Medium', 2),
+(3, 'Hard', 3);
+
+INSERT INTO Roles (role_id, role_name) VALUES (1, 'parent');
