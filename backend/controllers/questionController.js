@@ -8,7 +8,6 @@ const createQuestion = async (req, res) => {
       message: "Question created successfully",
     });
   } catch (error) {
-    console.error("Error creating question:", error);
     res.status(400).json({
       message: "Failed to create question",
       error: error.message,
@@ -16,10 +15,28 @@ const createQuestion = async (req, res) => {
   }
 };
 
+const createQuestionsBulk = async (req, res) => {
+  try {
+    if (!Array.isArray(req.body.questions)) {
+      return res
+        .status(400)
+        .json({ message: "Questions must be provided as an array" });
+    }
+
+    const result = await questionService.createQuestionsBulk(
+      req.body.questions
+    );
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json({
+      message: "Failed to process questions",
+      error: error.message,
+    });
+  }
+};
+
 const getQuestions = async (req, res) => {
   try {
-    console.log("Query parameters:", req.query);
-
     const limit = Math.max(1, Math.min(100, parseInt(req.query.limit) || 10));
     const offset = Math.max(0, parseInt(req.query.offset) || 0);
 
@@ -33,8 +50,6 @@ const getQuestions = async (req, res) => {
       filters.difficulty_id = parseInt(req.query.difficulty_id);
     }
 
-    console.log("Processed parameters:", { filters, limit, offset });
-
     const questions = await questionService.getQuestions(
       filters,
       limit,
@@ -42,7 +57,6 @@ const getQuestions = async (req, res) => {
     );
     res.json(questions);
   } catch (error) {
-    console.error("Error fetching questions:", error);
     res.status(400).json({
       message: "Failed to fetch questions",
       error: error.message,
@@ -61,7 +75,6 @@ const getQuestionById = async (req, res) => {
     const question = await questionService.getQuestionById(parseInt(id));
     res.json(question);
   } catch (error) {
-    console.error("Error fetching question:", error);
     if (error.message === "Question not found") {
       res.status(404).json({ message: error.message });
     } else {
@@ -99,14 +112,12 @@ const updateQuestion = async (req, res) => {
     }
 
     await questionService.updateQuestion(parseInt(id), req.body);
-
     const updatedQuestion = await questionService.getQuestionById(parseInt(id));
     res.json({
       message: "Question updated successfully",
       question: updatedQuestion,
     });
   } catch (error) {
-    console.error("Error updating question:", error);
     if (error.message === "Question not found") {
       res.status(404).json({ message: error.message });
     } else {
@@ -129,7 +140,6 @@ const deleteQuestion = async (req, res) => {
     await questionService.deleteQuestion(parseInt(id));
     res.json({ message: "Question deleted successfully" });
   } catch (error) {
-    console.error("Error deleting question:", error);
     if (error.message === "Question not found") {
       res.status(404).json({ message: error.message });
     } else {
@@ -143,6 +153,7 @@ const deleteQuestion = async (req, res) => {
 
 module.exports = {
   createQuestion,
+  createQuestionsBulk,
   getQuestions,
   getQuestionById,
   updateQuestion,

@@ -41,8 +41,46 @@ const createQuestion = async (question) => {
 
     return result.insertId;
   } catch (error) {
-    console.error("Database error:", error);
     throw error;
+  }
+};
+
+const createQuestionsBulk = async (questions) => {
+  const createdQuestions = [];
+  const errors = [];
+
+  for (let i = 0; i < questions.length; i++) {
+    try {
+      const questionId = await createQuestion(questions[i]);
+      createdQuestions.push({
+        index: i,
+        questionId,
+        status: "success",
+      });
+    } catch (error) {
+      errors.push({
+        index: i,
+        question: questions[i],
+        error: error.message,
+      });
+    }
+  }
+
+  return {
+    successful: createdQuestions,
+    failed: errors,
+    totalProcessed: questions.length,
+    successCount: createdQuestions.length,
+    failureCount: errors.length,
+  };
+};
+
+const parseDistractors = (distractor) => {
+  if (!distractor) return [];
+  try {
+    return JSON.parse(distractor);
+  } catch (error) {
+    return [];
   }
 };
 
@@ -71,26 +109,11 @@ const getQuestions = async (filters = {}, limit = 10, offset = 0) => {
 
     const [questions] = await db.execute(query, params);
 
-    return questions.map((question) => {
-      let parsedDistractors = [];
-      try {
-        const cleanJson = question.distractors.replace(/^\uFEFF/, "");
-        parsedDistractors = JSON.parse(cleanJson);
-      } catch (error) {
-        console.error(
-          `Failed to parse distractors for question ${question.question_id}:`,
-          error
-        );
-        parsedDistractors = question.distractors || [];
-      }
-
-      return {
-        ...question,
-        distractors: parsedDistractors,
-      };
-    });
+    return questions.map((question) => ({
+      ...question,
+      distractors: parseDistractors(question.distractors),
+    }));
   } catch (error) {
-    console.error("Database error:", error);
     throw error;
   }
 };
@@ -107,21 +130,9 @@ const getQuestionById = async (questionId) => {
     }
 
     const question = questions[0];
-
-    try {
-      const cleanJson = question.distractors.replace(/^\uFEFF/, "");
-      question.distractors = JSON.parse(cleanJson);
-    } catch (error) {
-      console.error(
-        `Failed to parse distractors for question ${question.question_id}:`,
-        error
-      );
-      question.distractors = question.distractors || [];
-    }
-
+    question.distractors = parseDistractors(question.distractors);
     return question;
   } catch (error) {
-    console.error("Database error:", error);
     throw error;
   }
 };
@@ -180,7 +191,6 @@ const updateQuestion = async (questionId, questionData) => {
 
     return true;
   } catch (error) {
-    console.error("Database error:", error);
     throw error;
   }
 };
@@ -202,13 +212,13 @@ const deleteQuestion = async (questionId) => {
 
     return true;
   } catch (error) {
-    console.error("Database error:", error);
     throw error;
   }
 };
 
 module.exports = {
   createQuestion,
+  createQuestionsBulk,
   getQuestions,
   getQuestionById,
   updateQuestion,
