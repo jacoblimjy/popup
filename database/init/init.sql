@@ -20,8 +20,8 @@ CREATE TABLE Children (
     child_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     user_id INTEGER,
     child_name VARCHAR(255),
-    age INTEGER,
-    education_level INTEGER,
+    age INTEGER CHECK (age BETWEEN 1 AND 100),
+    education_level INTEGER DEFAULT 1,
     date_created TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(user_id)
 );
@@ -39,7 +39,7 @@ CREATE TABLE Difficulty_Levels (
 );
 
 CREATE TABLE Questions (
-    question_id INTEGER PRIMARY KEY,
+    question_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     question_text TEXT,
     answer_format VARCHAR(255),
     correct_answer TEXT,
@@ -119,8 +119,8 @@ INSERT INTO Topics (topic_id, topic_name, topic_description) VALUES
 (3, 'Anagram in a Sentence', 'Find anagrams within sentences.'),
 (4, 'Word Ladders', 'Solve word ladders by changing one letter at a time.');
 
--- Seed Difficulty_Levels table
-INSERT INTO Difficulty_Levels (difficulty_id, label, numeric_level) VALUES 
+
+INSERT INTO Difficulty_Levels (difficulty_id, label, numeric_level) VALUES
 (1, 'Easy', 1),
 (2, 'Medium', 2),
 (3, 'Hard', 3);

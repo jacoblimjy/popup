@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const childPerformanceRoutes = require('./routes/childPerformanceRoutes');
+const childrenRoutes = require("./routes/childrenRoutes");
+const questionRoutes = require("./routes/questionRoutes");
 
 const app = express();
 
@@ -16,6 +18,8 @@ app.use(express.json());
 
 app.use("/api/users", userRoutes);
 app.use('/api/child_performance', childPerformanceRoutes);
+app.use("/api/children", childrenRoutes);
+app.use("/api/questions", questionRoutes);
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {

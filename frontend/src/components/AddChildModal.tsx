@@ -4,7 +4,7 @@ import { useState } from "react";
 interface AddChildModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddChild: (child: { name: string; age: number}) => void;
+  onAddChild: (child: { childName: string; age: number}) => void;
 }
 
 const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
@@ -13,7 +13,7 @@ const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
 
   const handleAddChild = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onAddChild({ name, age: parseInt(age) });
+    onAddChild({ childName: name, age: parseInt(age) });
     resetFields();
     onClose();
   };
