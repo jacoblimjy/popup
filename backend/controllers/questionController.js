@@ -33,7 +33,7 @@ const getQuestions = async (req, res) => {
       filters.difficulty_id = parseInt(req.query.difficulty_id);
     }
 
-    console.log("Processed parameters:", { filters, limit, offset }); // Debug log
+    console.log("Processed parameters:", { filters, limit, offset });
 
     const questions = await questionService.getQuestions(
       filters,
@@ -50,7 +50,77 @@ const getQuestions = async (req, res) => {
   }
 };
 
+const getQuestionById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ message: "Invalid question ID" });
+    }
+
+    const question = await questionService.getQuestionById(parseInt(id));
+    res.json(question);
+  } catch (error) {
+    console.error("Error fetching question:", error);
+    if (error.message === "Question not found") {
+      res.status(404).json({ message: error.message });
+    } else {
+      res.status(400).json({
+        message: "Failed to fetch question",
+        error: error.message,
+      });
+    }
+  }
+};
+
+const updateQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ message: "Invalid question ID" });
+    }
+
+    const requiredFields = [
+      "question_text",
+      "answer_format",
+      "correct_answer",
+      "distractors",
+      "topic_id",
+      "difficulty_id",
+    ];
+    const missingFields = requiredFields.filter((field) => !req.body[field]);
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        message: "Missing required fields",
+        missingFields,
+      });
+    }
+
+    await questionService.updateQuestion(parseInt(id), req.body);
+
+    const updatedQuestion = await questionService.getQuestionById(parseInt(id));
+    res.json({
+      message: "Question updated successfully",
+      question: updatedQuestion,
+    });
+  } catch (error) {
+    console.error("Error updating question:", error);
+    if (error.message === "Question not found") {
+      res.status(404).json({ message: error.message });
+    } else {
+      res.status(400).json({
+        message: "Failed to update question",
+        error: error.message,
+      });
+    }
+  }
+};
+
 module.exports = {
   createQuestion,
   getQuestions,
+  getQuestionById,
+  updateQuestion,
 };

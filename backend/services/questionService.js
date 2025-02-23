@@ -81,7 +81,6 @@ const getQuestions = async (filters = {}, limit = 10, offset = 0) => {
           `Failed to parse distractors for question ${question.question_id}:`,
           error
         );
-
         parsedDistractors = question.distractors || [];
       }
 
@@ -96,7 +95,99 @@ const getQuestions = async (filters = {}, limit = 10, offset = 0) => {
   }
 };
 
+const getQuestionById = async (questionId) => {
+  try {
+    const [questions] = await db.execute(
+      "SELECT * FROM Questions WHERE question_id = ?",
+      [questionId]
+    );
+
+    if (questions.length === 0) {
+      throw new Error("Question not found");
+    }
+
+    const question = questions[0];
+
+    try {
+      const cleanJson = question.distractors.replace(/^\uFEFF/, "");
+      question.distractors = JSON.parse(cleanJson);
+    } catch (error) {
+      console.error(
+        `Failed to parse distractors for question ${question.question_id}:`,
+        error
+      );
+      question.distractors = question.distractors || [];
+    }
+
+    return question;
+  } catch (error) {
+    console.error("Database error:", error);
+    throw error;
+  }
+};
+
+const updateQuestion = async (questionId, questionData) => {
+  try {
+    const [existingQuestion] = await db.execute(
+      "SELECT question_id FROM Questions WHERE question_id = ?",
+      [questionId]
+    );
+
+    if (existingQuestion.length === 0) {
+      throw new Error("Question not found");
+    }
+
+    const {
+      question_text,
+      answer_format,
+      correct_answer,
+      distractors,
+      topic_id,
+      difficulty_id,
+      is_llm_generated,
+    } = questionData;
+
+    const distractorsJson = Array.isArray(distractors)
+      ? JSON.stringify(distractors)
+      : JSON.stringify([distractors]);
+
+    const [result] = await db.execute(
+      `UPDATE Questions SET 
+        question_text = ?,
+        answer_format = ?,
+        correct_answer = ?,
+        distractors = ?,
+        topic_id = ?,
+        difficulty_id = ?,
+        is_llm_generated = ?,
+        last_modified = NOW()
+      WHERE question_id = ?`,
+      [
+        question_text,
+        answer_format,
+        correct_answer,
+        distractorsJson,
+        topic_id,
+        difficulty_id,
+        is_llm_generated,
+        questionId,
+      ]
+    );
+
+    if (result.affectedRows === 0) {
+      throw new Error("Failed to update question");
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Database error:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   createQuestion,
   getQuestions,
+  getQuestionById,
+  updateQuestion,
 };

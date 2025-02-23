@@ -6,4 +6,6 @@ router.post("/", questionController.createQuestion);
 
 router.get("/", questionController.getQuestions);
 
+router.put("/:id", questionController.updateQuestion);
+
 module.exports = router;
