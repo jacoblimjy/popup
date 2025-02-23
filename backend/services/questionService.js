@@ -185,9 +185,32 @@ const updateQuestion = async (questionId, questionData) => {
   }
 };
 
+const deleteQuestion = async (questionId) => {
+  try {
+    const [existingQuestion] = await db.execute(
+      "SELECT question_id FROM Questions WHERE question_id = ?",
+      [questionId]
+    );
+
+    if (existingQuestion.length === 0) {
+      throw new Error("Question not found");
+    }
+
+    await db.execute("DELETE FROM Questions WHERE question_id = ?", [
+      questionId,
+    ]);
+
+    return true;
+  } catch (error) {
+    console.error("Database error:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   createQuestion,
   getQuestions,
   getQuestionById,
   updateQuestion,
+  deleteQuestion,
 };

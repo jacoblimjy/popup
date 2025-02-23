@@ -8,4 +8,6 @@ router.get("/", questionController.getQuestions);
 
 router.put("/:id", questionController.updateQuestion);
 
+router.delete("/:id", questionController.deleteQuestion);
+
 module.exports = router;

@@ -118,9 +118,33 @@ const updateQuestion = async (req, res) => {
   }
 };
 
+const deleteQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ message: "Invalid question ID" });
+    }
+
+    await questionService.deleteQuestion(parseInt(id));
+    res.json({ message: "Question deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting question:", error);
+    if (error.message === "Question not found") {
+      res.status(404).json({ message: error.message });
+    } else {
+      res.status(400).json({
+        message: "Failed to delete question",
+        error: error.message,
+      });
+    }
+  }
+};
+
 module.exports = {
   createQuestion,
   getQuestions,
   getQuestionById,
   updateQuestion,
+  deleteQuestion,
 };
