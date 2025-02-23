@@ -1,4 +1,10 @@
-const express = require('express');
+const express = require("express");
+const cors = require("cors");
+const userRoutes = require("./routes/userRoutes");
+const childPerformanceRoutes = require('./routes/childPerformanceRoutes');
+const childrenRoutes = require("./routes/childrenRoutes");
+const questionRoutes = require("./routes/questionRoutes");
+
 const app = express();
 
 const loggerMiddleware = (req, res, next) => {
@@ -7,10 +13,15 @@ const loggerMiddleware = (req, res, next) => {
 };
 
 app.use(loggerMiddleware);
+app.use(cors());
+app.use(express.json());
 
-const userRoutes = require("./routes/userRoutes");
-app.use("/users", userRoutes);
+app.use("/api/users", userRoutes);
+app.use('/api/child_performance', childPerformanceRoutes);
+app.use("/api/children", childrenRoutes);
+app.use("/api/questions", questionRoutes);
 
-app.listen(8000, () => {
-  console.log('Server is running on port 8000');
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
