@@ -22,7 +22,7 @@ const CoursesPage = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-white p-6">
+        <div className="flex flex-grow flex-col items-center justify-center bg-white p-6">
             <h1 className="text-4xl font-bold text-center">
                 Choose your Topic and Difficulty
             </h1>

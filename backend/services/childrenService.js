@@ -1,4 +1,3 @@
-const { parse } = require("vue/compiler-sfc");
 const db = require("../db");
 
 const createChild = async (userId, childName, age, education_level = 1) => {
