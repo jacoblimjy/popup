@@ -6,6 +6,8 @@ import Navbar from './components/Navbar'
 import ProfilePage from './pages/ProfilePage'
 import HistoryPage from './pages/HistoryPage'
 import SignupPage from './pages/SignupPage'
+import CoursesPage from './pages/CoursesPage'
+
 function App() {
 
   return (
@@ -18,6 +20,7 @@ function App() {
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/history" element={<HistoryPage/>} />
       <Route path="/signup" element={<SignupPage/>} />
+      <Route path="/courses" element={<CoursesPage/>} />
     </Routes>
     </>
   )
