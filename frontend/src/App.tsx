@@ -9,6 +9,8 @@ import SignupPage from './pages/SignupPage'
 function App() {
 
   return (
+    <>
+    <Navbar />
     <Routes>
       <Route path="/" element={<LandingPage/>} />
       <Route path="/login" element={<LoginPage/>} />
@@ -17,6 +19,7 @@ function App() {
       <Route path="/history" element={<HistoryPage/>} />
       <Route path="/signup" element={<SignupPage/>} />
     </Routes>
+    </>
   )
 }
 

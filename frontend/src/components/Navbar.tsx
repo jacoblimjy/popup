@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ChevronDown, User, LogOut, Users } from "lucide-react";
 
 const Navbar: React.FC = () => {
+	const location = useLocation();
 	const [isChildrenMenuOpen, setIsChildrenMenuOpen] = useState(false);
 	const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 	const childrenMenuRef = useRef<HTMLDivElement | null>(null);
@@ -36,9 +37,12 @@ const Navbar: React.FC = () => {
 		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, []);
 
+	if (location.pathname === "/login" || location.pathname === "/signup") {
+		return null;
+	}
+
 	return (
 		<nav className="bg-white border-b border-gray-200 shadow-sm">
-			<div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-gray-200 to-transparent"></div>
 			<div className="max-w-[1440px] mx-auto px-4">
 				<div className="flex items-center justify-between h-16">
 					{/* Left Section - Logo & Navigation (More Left-Aligned) */}

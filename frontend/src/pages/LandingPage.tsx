@@ -4,11 +4,11 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   const handleStartNewPractice = () => {
-    navigate("/practice");
+    navigate("/courses");
   };
 
   return (
-    <div className="flex h-full items-center py-16">
+    <div className="flex flex-grow items-center py-16">
       <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-4 md:gap-8 xl:gap-2 md:items-center">
           <div>

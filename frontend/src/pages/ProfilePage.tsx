@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Navbar from "../components/Navbar"; // Import your existing Navbar component
 
 const ProfilePage = () => {
 	const [fullName, setFullName] = useState("Jessica McQueen");
@@ -17,7 +16,6 @@ const ProfilePage = () => {
 
 	return (
 		<>
-			<Navbar /> {/* Include Navbar at the top */}
 			<div className="bg-gray-50 min-h-screen">
 				<div className="max-w-2xl mx-auto px-6 pt-12">
 					<h1 className="text-3xl font-semibold text-gray-900 mb-6">
