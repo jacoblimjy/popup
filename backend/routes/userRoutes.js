@@ -3,6 +3,10 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const db = require("../db");
+const { createChildrenBatch } = require("../services/childrenService");
+
+// TODO: Refactor into Controllers and Services
+// TODO: Add error handling
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
@@ -19,7 +23,7 @@ const authenticateToken = (req, res, next) => {
 
 router.post("/signup", async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, children, password } = req.body;
 
     const [existingUsers] = await db.execute(
       "SELECT * FROM Users WHERE email = ?",
@@ -47,6 +51,10 @@ router.post("/signup", async (req, res) => {
       [username, email, hashedPassword]
     );
 
+    if (children.length > 0) {
+      console.log([result.insertId, children]);
+      await createChildrenBatch(result.insertId, children);
+    }
     // TODO: Add secret key to .env file
     // Return JWT Token as cookie
     // const token = jwt.sign({ userId: result.insertId }, process.env.JWT_SECRET);
