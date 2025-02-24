@@ -42,7 +42,7 @@ const HistoryPage = () => {
     navigate("/review/" + attemptId);
   };
   return (
-    <div className="h-full flex flex-col items-center p-6">
+    <div className="flex flex-col items-center p-6">
       <div className="flex flex-col items-center gap-3 border border-gray-200 rounded-lg p-8 w-xl">
         <div className="size-14 rounded-full ring-2 ring-white bg-[#f1c40e] text-center text-white flex items-center justify-center">
           <p className="text-lg">{name.charAt(0)}</p>

@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
+    "@heroicons/react": "^2.2.0",
+    "lucide-react": "^0.475.0",
     "@tailwindcss/vite": "^4.0.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
