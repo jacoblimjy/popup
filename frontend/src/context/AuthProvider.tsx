@@ -1,14 +1,6 @@
-import { createContext, useState, ReactNode, useEffect } from 'react';
-import { User } from '../types/UserTypes';
-
-interface AuthContextType {
-  isAuthenticated: boolean;
-  login: (user : User) => void;
-  logout: () => void;
-  user: User | null;
-}
-
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { ReactNode, useEffect, useState } from "react";
+import { User } from "../types/UserTypes";
+import { AuthContext } from "./AuthContext";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -28,6 +20,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => { 
     setIsAuthenticated(false)
     setUser(null);
+    localStorage.removeItem('user');
   };
 
   return (

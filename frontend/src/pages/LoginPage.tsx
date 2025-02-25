@@ -3,10 +3,12 @@ import { Bounce, toast } from "react-toastify";
 import UserApi from "../api/UserApi";
 import { User } from "../types/UserTypes";
 import { useAuth } from "../hooks/useAuth";
+import { useChildrenList } from "../hooks/useChildrenList";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { getChildrenList } = useChildrenList();
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,6 +28,7 @@ const LoginPage = () => {
       localStorage.setItem('user', JSON.stringify(user));
       
       login(user);
+      getChildrenList();
       navigate("/");
     } catch (error) {
       toast.error('Login Failed!', {

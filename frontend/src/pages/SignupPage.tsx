@@ -126,7 +126,7 @@ const SignupPage = () => {
                           <div key={index}>
                             <div className="flex gap-x-4 justify-between">
                               <div className="flex flex-col">
-                                <p className="text-sm font-medium">{child.childName}</p>
+                                <p className="text-sm font-medium">{child.child_name}</p>
                                 <p className="text-xs">{child.age} Years Old (Level: {child.education_level})</p>
                               </div>
                               <button onClick={() => handleRemoveChild(index)} type="button" className="p-2 h-min items-center gap-x-2 text-xs rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none">

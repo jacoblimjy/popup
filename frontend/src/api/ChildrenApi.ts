@@ -1,8 +1,9 @@
-import { Child } from "../types/UserTypes";
+import { Child, DetailedChild } from "../types/UserTypes";
+import { getUserId } from "../utils";
 const BASE_URL = "http://localhost:8000/api/children";
-const userId = localStorage.getItem("userId");
 
 const createChild = async (child : Child) => {
+  const userId = getUserId();
   const req_body = {
     userId: userId,
     ...child
@@ -22,13 +23,13 @@ const createChild = async (child : Child) => {
   return response.json();
 }
 
-const updateChild = async (child : Child) => {
+const updateChild = async (child : DetailedChild) => {
   const req_body = {
-    childName: child.childName,
+    child_name: child.child_name,
     age: child.age,
     education_level: child.education_level
   }
-  const response = await fetch(BASE_URL + `/${child.childId}`, {
+  const response = await fetch(BASE_URL + `/${child.child_id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -59,6 +60,7 @@ const getChildById = async (childId : string) => {
 }
 
 const getChildrenByUserId = async () => {
+  const userId = getUserId();
   const response = await fetch(BASE_URL + `/?user_id=${userId}`, {
     method: "GET",
     headers: {

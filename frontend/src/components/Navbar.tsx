@@ -3,23 +3,18 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ChevronDown, User, LogOut, Users } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { toast } from "react-toastify";
+import { useChildrenList } from "../hooks/useChildrenList";
+import { DetailedChild } from "../types/UserTypes";
 
 const Navbar: React.FC = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
-	const { isAuthenticated, user, logout } = useAuth();
+	const { isAuthenticated, logout } = useAuth();
+	const { activeChild, childrenList, setActiveChild } = useChildrenList();
 	const [isChildrenMenuOpen, setIsChildrenMenuOpen] = useState(false);
 	const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 	const childrenMenuRef = useRef<HTMLDivElement | null>(null);
 	const userMenuRef = useRef<HTMLDivElement | null>(null);
-
-	const userDetail = {
-		name: "Jane",
-		children: [
-			{ name: "Jane", age: 10 },
-			{ name: "James", age: 11 },
-		],
-	};
 
 	// Close menus when clicking outside
 	useEffect(() => {
@@ -41,6 +36,12 @@ const Navbar: React.FC = () => {
 		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, []);
 
+	const handleSwitchChild = (child: DetailedChild) => {
+		setActiveChild(child);
+		setIsChildrenMenuOpen(false);
+		navigate("/")
+	}
+
 	const handleLogout = () => {
 		logout();
 		navigate("/", { replace: true });
@@ -48,7 +49,7 @@ const Navbar: React.FC = () => {
 		setIsUserMenuOpen(false);
 		toast.success("Logged out successfully!", {
 			position: "top-right",
-			autoClose: 5000,
+			autoClose: 1000,
 			hideProgressBar: false,
 			closeOnClick: true,
 			pauseOnHover: true,
@@ -56,7 +57,6 @@ const Navbar: React.FC = () => {
 			progress: undefined,
 			theme: "light",
 		});
-
 
 	}
 
@@ -106,28 +106,40 @@ const Navbar: React.FC = () => {
 						<div className="flex items-center space-x-3 ml-auto pr-6"> {/* Right Section - User Profile (Shifted Right) */}
 							{/* Children Dropdown */}
 							<div className="relative" ref={childrenMenuRef}>
-								<button
-									onClick={() => setIsChildrenMenuOpen(!isChildrenMenuOpen)}
-									className="flex items-center space-x-2 bg-gray-100 rounded-full px-4 py-1.5 hover:bg-gray-200 transition"
-								>
-									<div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-gray-800 font-bold">
-										{user?.username.charAt(0).toUpperCase() ?? "U"}
-									</div>
-									<span className="text-gray-900 font-medium">{user?.username}</span>
-									<ChevronDown className="w-4 h-4 text-gray-500" />
-								</button>
+								{
+									(!childrenList || childrenList.length >= 1) ?
+										<button
+											onClick={() => setIsChildrenMenuOpen(!isChildrenMenuOpen)}
+											className="flex items-center space-x-2 bg-gray-100 rounded-full px-4 py-1.5 hover:bg-gray-200 transition"
+										>
+											<div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-gray-800 font-bold">
+												{activeChild?.child_name.charAt(0).toUpperCase()}
+											</div>
+											<span className="text-gray-900 font-medium">{activeChild?.child_name}</span>
+											{(childrenList && childrenList.length > 1) && <ChevronDown className="w-4 h-4 text-gray-500" />}
+										</button>
+										:
+										<button
+											onClick={() => navigate("/manage-children")}
+											className="flex items-center space-x-2 bg-yellow-400 rounded-full px-4 py-1.5 hover:bg-yellow-200 transition"
+										>
+											<span className="text-white font-medium">Add Child</span>
+											{(childrenList && childrenList.length > 1) && <ChevronDown className="w-4 h-4 text-gray-500" />}
+										</button>
+								}
 
 								{isChildrenMenuOpen && (
 									<div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 border border-gray-200 z-20">
 										<div className="px-4 py-2 text-sm text-gray-500 font-semibold">
 											Switch Children
 										</div>
-										{userDetail.children.map((child, index) => (
+										{(childrenList && childrenList?.length > 0) && childrenList.filter((child) => child.child_id !== activeChild?.child_id).map((child, index) => (
 											<button
 												key={index}
 												className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition"
+												onClick={() => handleSwitchChild(child)}
 											>
-												<p className="text-gray-900 font-medium">{child.name}</p>
+												<p className="text-gray-900 font-medium">{child.child_name}</p>
 												<p className="text-xs text-gray-500">Age {child.age}</p>
 											</button>
 										))}

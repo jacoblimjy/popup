@@ -4,8 +4,8 @@ const childrenService = require("../services/childrenService");
 const createChild = async (req, res) => {
   try {
     // TODO: Check if theres bad request if education_level is missing
-    const { userId, childName, age, education_level } = req.body;
-    const childId = await childrenService.createChild(userId, childName, age, education_level);
+    const { userId, child_name, age, education_level } = req.body;
+    const childId = await childrenService.createChild(userId, child_name, age, education_level);
     res.status(201).json({ childId, message: "Child created successfully" });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -26,9 +26,9 @@ const createChildrenBatch = async (req, res) => {
 // Either that or we just update all fields in the frontend
 const updateChild = async (req, res) => {
   try {
-    const { childName, age, education_level } = req.body;
+    const { child_name, age, education_level } = req.body;
     const { id } = req.params;
-    await childrenService.updateChild(id, childName, age, education_level);
+    await childrenService.updateChild(id, child_name, age, education_level);
     res.json({ message: "Child updated successfully" });
   } catch (error) {
     res.status(400).json({ message: error.message });

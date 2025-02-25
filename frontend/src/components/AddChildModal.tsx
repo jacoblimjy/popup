@@ -15,7 +15,7 @@ const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
 
   const handleAddChild = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onAddChild({childId: null, childName: name, age: parseInt(age), education_level: parseInt(educationLevel) });
+    onAddChild({child_name: name, age: parseInt(age), education_level: parseInt(educationLevel) });
     resetFields();
     onClose();
   };
@@ -23,6 +23,7 @@ const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
   const resetFields = () => {
     setName('');
     setAge('');
+    setEducationLevel('');
   }
 
   if (!isOpen) return null;
