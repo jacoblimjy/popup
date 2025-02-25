@@ -1,7 +1,8 @@
 export interface Child {
+  childId : number | null;
   childName: string;
   age: number;
-  educationLevel: number;
+  education_level: number;
 }
 
 export interface User {
