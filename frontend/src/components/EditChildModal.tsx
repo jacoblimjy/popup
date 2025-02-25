@@ -5,28 +5,42 @@ import {
 	DialogPanel,
 	DialogTitle,
 } from "@headlessui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-interface AddChildModalProps {
+interface EditChildModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onAddChild: (child: { childName: string; age: number }) => void;
+	onEditChild: (updatedChild: {
+		id: number;
+		childName: string;
+		age: number;
+	}) => void;
+	child: { id: number; childName: string; age: number }; // Ensure `childName` is used instead of `name`
 }
 
-const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
-	const [name, setName] = useState("");
-	const [age, setAge] = useState("");
 
-	const handleAddChild = (e: React.FormEvent<HTMLFormElement>) => {
+
+const EditChildModal = ({
+	isOpen,
+	onClose,
+	onEditChild,
+	child,
+}: EditChildModalProps) => {
+	const [name, setName] = useState(child.childName);
+	const [age, setAge] = useState(child.age.toString());
+
+	// Ensuring the name and age are correctly prefilled when child changes
+	useEffect(() => {
+		if (child) {
+			setName(child.childName);
+			setAge(child.age.toString());
+		}
+	}, [child]);
+
+	const handleEditChild = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		onAddChild({ childName: name, age: parseInt(age) });
-		resetFields();
+		onEditChild({ id: child.id, childName: name, age: parseInt(age) });
 		onClose();
-	};
-
-	const resetFields = () => {
-		setName("");
-		setAge("");
 	};
 
 	if (!isOpen) return null;
@@ -47,13 +61,13 @@ const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
 					>
 						{/* Modal Title */}
 						<DialogTitle as="h3" className="text-base/7 font-medium text-black">
-							Add Child
+							Edit Child
 						</DialogTitle>
 						<hr className="border-gray-300 mb-4" />
 
 						{/* Form */}
-						<form onSubmit={handleAddChild}>
-							{/* Name Input */}
+						<form onSubmit={handleEditChild}>
+							{/* Name */}
 							<div>
 								<label className="block text-sm mb-2">Name</label>
 								<div className="relative">
@@ -70,7 +84,7 @@ const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
 								</div>
 							</div>
 
-							{/* Age Input */}
+							{/* Age */}
 							<div className="mt-4">
 								<label className="block text-sm mb-2">Age</label>
 								<div className="relative">
@@ -101,7 +115,7 @@ const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
 									className="inline-flex items-center gap-2 rounded-md bg-blue-600 py-1.5 px-3 text-sm/6 font-semibold text-white shadow-inner shadow-white/10 focus:outline-none data-[hover]:bg-blue-700 data-[focus]:outline-1 data-[focus]:outline-white data-[open]:bg-gray-700"
 									type="submit"
 								>
-									Confirm
+									Save
 								</Button>
 							</div>
 						</form>
@@ -112,4 +126,4 @@ const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
 	);
 };
 
-export default AddChildModal;
+export default EditChildModal;

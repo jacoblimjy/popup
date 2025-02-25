@@ -7,6 +7,7 @@ import ProfilePage from './pages/ProfilePage'
 import HistoryPage from './pages/HistoryPage'
 import SignupPage from './pages/SignupPage'
 import CoursesPage from './pages/CoursesPage'
+import ManageChildrenPage from './pages/ManageChildrenPage'
 
 function App() {
 
@@ -21,6 +22,7 @@ function App() {
       <Route path="/history" element={<HistoryPage/>} />
       <Route path="/signup" element={<SignupPage/>} />
       <Route path="/courses" element={<CoursesPage/>} />
+      <Route path="/manage-children" element={<ManageChildrenPage/>} />
     </Routes>
     </>
   )
