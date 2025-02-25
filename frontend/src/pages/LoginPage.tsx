@@ -1,9 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
 import UserApi from "../api/UserApi";
+import { User } from "../types/UserTypes";
+import { useAuth } from "../hooks/useAuth";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
+
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -13,6 +17,15 @@ const LoginPage = () => {
     try {
       const response = await UserApi.login(email, password);
       console.log(response);
+      
+      const user : User = {
+        userId: response.userId,
+        username: response.username,
+        email: response.email,
+      }
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      login(user);
       navigate("/");
     } catch (error) {
       toast.error('Login Failed!', {

@@ -8,11 +8,12 @@ import HistoryPage from './pages/HistoryPage'
 import SignupPage from './pages/SignupPage'
 import CoursesPage from './pages/CoursesPage'
 import { ToastContainer } from 'react-toastify'
+import { AuthProvider } from './context/AuthContext'
 
 function App() {
 
   return (
-    <>
+    <AuthProvider>
       <Navbar />
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -24,7 +25,7 @@ function App() {
         <Route path="/courses" element={<CoursesPage />} />
       </Routes>
       <ToastContainer limit={3} />
-    </>
+    </AuthProvider>
   )
 }
 
