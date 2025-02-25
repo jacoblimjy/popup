@@ -1,10 +1,11 @@
 import { Button, Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react"
 import { useState } from "react";
+import { Child } from "../types/UserTypes";
 
 interface AddChildModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddChild: (child: { childName: string; age: number}) => void;
+  onAddChild: (child: Child) => void;
 }
 
 const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
@@ -13,7 +14,7 @@ const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
 
   const handleAddChild = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onAddChild({ childName: name, age: parseInt(age) });
+    onAddChild({ childName: name, age: parseInt(age), educationLevel: 0 });
     resetFields();
     onClose();
   };

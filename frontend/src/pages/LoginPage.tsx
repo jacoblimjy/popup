@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Bounce, toast, ToastContainer } from "react-toastify";
+import { Bounce, toast } from "react-toastify";
+import UserApi from "../api/UserApi";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -10,33 +11,22 @@ const LoginPage = () => {
     const password = formData.get("password") as string;
     console.log(email, password);
     try {
-      const response = await fetch("http://localhost:8000/api/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-        navigate('/');
-      } else {
-        toast.error('Login Failed!', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
-          });
-        console.error("Login failed");
-      }
+      const response = await UserApi.login(email, password);
+      console.log(response);
+      navigate("/");
     } catch (error) {
-      console.error("Login failed", error);
+      toast.error('Login Failed!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+      console.error(error);
     }
   };
 
@@ -132,7 +122,7 @@ const LoginPage = () => {
                   </button>
                   <div className="flex flex-col items-center">
                     <p className="mt-2 text-sm text-gray-600">
-                      Don't have an account yet?{" "} 
+                      Don't have an account yet?{" "}
                       <Link
                         className="text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
                         to="/signup"

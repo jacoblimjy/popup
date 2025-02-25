@@ -1,11 +1,9 @@
 import { FormEvent, useState } from "react";
 import AddChildModal from "../components/AddChildModal";
 import { Link } from "react-router-dom";
-
-interface Child {
-  childName: string;
-  age: number;
-}
+import UserApi from "../api/UserApi";
+import { Child } from "../types/UserTypes";
+import { Bounce, toast } from "react-toastify";
 
 const SignupPage = () => {
   const [username, setUsername] = useState("");
@@ -35,20 +33,21 @@ const SignupPage = () => {
     console.log(JSON.stringify({ username, email, children, password }));
 
     try {
-      const response = await fetch("http://localhost:8000/api/users/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, email, children, password }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-      } else {
-        console.error("Sign up failed");
-      }
+      const response = await UserApi.signup(username, email, children, password);
+      console.log(response);
+
     } catch (error) {
+      toast.error('Sign Up Failed!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
       console.error("Sign up failed", error);
     }
   };
