@@ -11,10 +11,11 @@ interface AddChildModalProps {
 const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
+  const [educationLevel, setEducationLevel] = useState('');
 
   const handleAddChild = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onAddChild({ childName: name, age: parseInt(age), educationLevel: 0 });
+    onAddChild({ childName: name, age: parseInt(age), educationLevel: parseInt(educationLevel) });
     resetFields();
     onClose();
   };
@@ -71,6 +72,24 @@ const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
                     autoComplete="age"
                     value={age}
                     onChange={(e) => setAge(e.target.value)}
+                    className="py-3 px-4 block w-full rounded-md bg-white text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm"
+                  />
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="block text-sm mb-2">
+                  Education Level
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    name="educationLevel"
+                    min={1}
+                    max={100}
+                    required
+                    autoComplete="educationLevel"
+                    value={educationLevel}
+                    onChange={(e) => setEducationLevel(e.target.value)}
                     className="py-3 px-4 block w-full rounded-md bg-white text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm"
                   />
                 </div>
