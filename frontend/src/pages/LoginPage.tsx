@@ -1,6 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Bounce, toast, ToastContainer } from "react-toastify";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -18,7 +20,19 @@ const LoginPage = () => {
       if (response.ok) {
         const data = await response.json();
         console.log(data);
+        navigate('/');
       } else {
+        toast.error('Login Failed!', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+          });
         console.error("Login failed");
       }
     } catch (error) {
