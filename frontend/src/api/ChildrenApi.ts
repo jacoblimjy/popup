@@ -8,7 +8,7 @@ const createChild = async (child : Child) => {
     userId: userId,
     ...child
   }
-  const response = await fetch(BASE_URL + "/create", {
+  const response = await fetch(BASE_URL + "/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

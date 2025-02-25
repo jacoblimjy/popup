@@ -6,19 +6,14 @@ import {
 	DialogTitle,
 } from "@headlessui/react";
 import { useState, useEffect } from "react";
+import { DetailedChild } from "../types/UserTypes";
 
 interface EditChildModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onEditChild: (updatedChild: {
-		id: number;
-		childName: string;
-		age: number;
-	}) => void;
-	child: { id: number; childName: string; age: number }; // Ensure `childName` is used instead of `name`
+	onEditChild: (updatedChild: DetailedChild) => void;
+	child: DetailedChild;
 }
-
-
 
 const EditChildModal = ({
 	isOpen,
@@ -26,20 +21,25 @@ const EditChildModal = ({
 	onEditChild,
 	child,
 }: EditChildModalProps) => {
-	const [name, setName] = useState(child.childName);
+	const [name, setName] = useState(child.child_name);
 	const [age, setAge] = useState(child.age.toString());
 
 	// Ensuring the name and age are correctly prefilled when child changes
 	useEffect(() => {
 		if (child) {
-			setName(child.childName);
+			setName(child.child_name);
 			setAge(child.age.toString());
 		}
 	}, [child]);
 
 	const handleEditChild = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		onEditChild({ id: child.id, childName: name, age: parseInt(age) });
+		const updatedChild: DetailedChild = {
+			...child,
+			child_name: name,
+			age: parseInt(age),
+		};
+		onEditChild(updatedChild);
 		onClose();
 	};
 

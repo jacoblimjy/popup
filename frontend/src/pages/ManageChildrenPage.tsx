@@ -2,57 +2,46 @@ import React, { useState } from "react";
 import { Edit, Trash2 } from "lucide-react";
 import AddChildModal from "../components/AddChildModal";
 import EditChildModal from "../components/EditChildModal";
-
-interface Child {
-	id: number;
-	name: string;
-	age: number;
-	joined: string;
-}
+import { useChildrenList } from "../hooks/useChildrenList";
+import { Child, DetailedChild } from "../types/UserTypes";
+import ChildrenApi from "../api/ChildrenApi";
+import { formatDate } from "../utils";
 
 const ManageChildrenPage: React.FC = () => {
-	const [children, setChildren] = useState<Child[]>([
-		{ id: 1, name: "Jane", age: 10, joined: "December 2021" },
-		{ id: 2, name: "James", age: 11, joined: "December 2021" },
-	]);
-
+	const { childrenList, getChildrenList } = useChildrenList();
+	const [currentChild, setCurrentChild] = useState<DetailedChild | null>(null);
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-	const [currentChild, setCurrentChild] = useState<Child | null>(null);
 
 	// Add Child Function
-	const addChild = (child: { childName: string; age: number }) => {
-		const newChild: Child = {
-			id: Date.now(),
-			name: child.childName,
-			age: child.age,
-			joined: new Date().toLocaleString("default", {
-				month: "long",
-				year: "numeric",
-			}),
-		};
-		setChildren([...children, newChild]);
+	const handleAddChild = async (child: Child) => {
+		try {
+			await ChildrenApi.createChild(child);
+			await getChildrenList();
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
 	// Edit Child Function
-	const editChild = (updatedChild: {
-		id: number;
-		childName: string;
-		age: number;
-	}) => {
-		setChildren(
-			children.map((child) =>
-				child.id === updatedChild.id
-					? { ...child, name: updatedChild.childName, age: updatedChild.age }
-					: child
-			)
-		);
-		setIsEditModalOpen(false);
+	const handleEditChild = async (updatedChild: DetailedChild) => {
+		try {
+			await ChildrenApi.updateChild(updatedChild);
+			await getChildrenList();
+			setIsEditModalOpen(false);
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
 	// Delete Child Function
-	const deleteChild = (id: number) => {
-		setChildren(children.filter((child) => child.id !== id));
+	const deleteChild = async (id: number) => {
+		try {
+			await ChildrenApi.deleteChild(id);
+			await getChildrenList();
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
 	return (
@@ -73,20 +62,22 @@ const ManageChildrenPage: React.FC = () => {
 
 				{/* Child Cards */}
 				<div className="space-y-4">
-					{children.map((child) => (
+					{childrenList && childrenList.length > 0 ? childrenList.map((child) => (
 						<div
-							key={child.id}
+							key={child.child_id}
 							className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between border border-gray-200"
 						>
 							{/* Left Section (Avatar + Details) */}
 							<div className="flex items-center space-x-4">
-								<div className="w-10 h-10 bg-black rounded-full"></div>
+								<div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-gray-800 font-bold">
+									{child.child_name.charAt(0).toUpperCase()}
+								</div>
 								<div>
 									<p className="text-lg font-semibold text-gray-900">
-										{child.name}
+										{child.child_name}
 									</p>
 									<p className="text-sm text-gray-500">Age {child.age}</p>
-									<p className="text-xs text-gray-400">Joined {child.joined}</p>
+									<p className="text-xs text-gray-400">Joined {formatDate(child.date_created)}</p>
 								</div>
 							</div>
 
@@ -103,13 +94,15 @@ const ManageChildrenPage: React.FC = () => {
 								</button>
 								<button
 									className="p-2 rounded-lg hover:bg-gray-100 transition"
-									onClick={() => deleteChild(child.id)}
+									onClick={() => deleteChild(child.child_id)}
 								>
 									<Trash2 className="w-5 h-5 text-red-500" />
 								</button>
 							</div>
 						</div>
-					))}
+					)) :
+						<p>No child added yet</p>
+					}
 				</div>
 			</div>
 
@@ -117,19 +110,15 @@ const ManageChildrenPage: React.FC = () => {
 			<AddChildModal
 				isOpen={isAddModalOpen}
 				onClose={() => setIsAddModalOpen(false)}
-				onAddChild={addChild}
+				onAddChild={handleAddChild}
 			/>
 
 			{isEditModalOpen && currentChild && (
 				<EditChildModal
 					isOpen={isEditModalOpen}
 					onClose={() => setIsEditModalOpen(false)}
-					onEditChild={editChild}
-					child={{
-						id: currentChild.id,
-						childName: currentChild.name, // Ensure correct property mapping
-						age: currentChild.age,
-					}}
+					onEditChild={handleEditChild}
+					child={currentChild}
 				/>
 			)}
 		</div>

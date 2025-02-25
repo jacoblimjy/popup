@@ -111,6 +111,7 @@ const Navbar: React.FC = () => {
 										<button
 											onClick={() => setIsChildrenMenuOpen(!isChildrenMenuOpen)}
 											className="flex items-center space-x-2 bg-gray-100 rounded-full px-4 py-1.5 hover:bg-gray-200 transition"
+											disabled={childrenList?.length === 1}
 										>
 											<div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-gray-800 font-bold">
 												{activeChild?.child_name.charAt(0).toUpperCase()}
