@@ -32,7 +32,7 @@ const updateAttemptedQuestion = async (id, updates) => {
 };
 
 const getAttemptedQuestionsByFilters = async (filters, page = 1, limit = 10) => {
-  const { child_id, topic, date, difficulty, set_id } = filters;
+  const { child_id, date, set_id } = filters;
   const offset = (page - 1) * limit;
   let query = "SELECT * FROM Attempted_Questions WHERE 1=1";
   const params = [];
@@ -41,24 +41,17 @@ const getAttemptedQuestionsByFilters = async (filters, page = 1, limit = 10) => 
     query += " AND child_id = ?";
     params.push(child_id);
   }
-  if (topic) {
-    query += " AND topic_id = ?";
-    params.push(topic);
-  }
   if (date) {
+    // TODO: Fix time stamp issue
     query += " AND DATE(attempt_timestamp) = ?";
     params.push(date);
-  }
-  if (difficulty) {
-    query += " AND difficulty_id = ?";
-    params.push(difficulty);
   }
   if (set_id) {
     query += " AND set_id = ?";
     params.push(set_id);
   }
 
-  query += `ORDER BY attempt_timestamp DESC LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
+  query += ` ORDER BY attempt_timestamp DESC LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
 
   const [attemptedQuestions] = await db.execute(query, params);
   return attemptedQuestions;
