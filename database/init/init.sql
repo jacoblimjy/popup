@@ -69,6 +69,19 @@ CREATE TABLE Child_Performance (
     UNIQUE (child_id, topic_id) 
 );
 
+CREATE TABLE Attempted_Sets (
+    set_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    child_id INTEGER NOT NULL,
+    topic_id INTEGER NOT NULL,
+    total_questions INTEGER NOT NULL, 
+    correct_answers INTEGER NOT NULL DEFAULT 0, 
+    score DECIMAL(5,2) DEFAULT 0.00, 
+    attempt_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    time_spent INTEGER, -- in seconds
+    FOREIGN KEY (child_id) REFERENCES Children(child_id) ON DELETE CASCADE, -- if child is deleted, delete all their attempted sets
+    FOREIGN KEY (topic_id) REFERENCES Topics(topic_id)
+);
+
 CREATE TABLE Attempted_Questions (
     aq_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     child_id INTEGER,
@@ -81,19 +94,6 @@ CREATE TABLE Attempted_Questions (
     FOREIGN KEY (child_id) REFERENCES Children(child_id) ON DELETE CASCADE, -- if child is deleted, delete all their attempted questions
     FOREIGN KEY (question_id) REFERENCES Questions(question_id),
     FOREIGN KEY (set_id) REFERENCES Attempted_Sets(set_id) ON DELETE CASCADE -- if set is deleted, delete all its attempted questions
-);
-
-CREATE TABLE Attempted_Sets (
-    set_id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    child_id INTEGER NOT NULL,
-    topic_id INTEGER NOT NULL,
-    total_questions INTEGER NOT NULL, 
-    correct_answers INTEGER NOT NULL DEFAULT 0, 
-    score DECIMAL(5,2) DEFAULT 0.00, 
-    attempt_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    time_spent INTEGER, -- in seconds
-    FOREIGN KEY (child_id) REFERENCES Children(child_id) ON DELETE CASCADE, -- if child is deleted, delete all their attempted sets
-    FOREIGN KEY (topic_id) REFERENCES Topics(topic_id)
 );
 
 CREATE TABLE LLM_Calls (
@@ -153,7 +153,7 @@ INSERT INTO Questions (question_text, answer_format, correct_answer, distractors
 INSERT INTO Child_Performance (child_id, topic_id, accuracy_score, estimated_proficiency, questions_attempted, time_spent, difficulty_level, current_mastery, date_recorded) VALUES 
 (1, 1, 85.5, 90.0, 10, 120, 1, 'Intermediate', '2025-02-22'),
 (2, 2, 78.0, 85.0, 8, 100, 2, 'Beginner', '2025-02-22'),
-(3, 3, 92.0, 95.0, 12, 140, 3, 'Advanced', '2025-02-22')
+(3, 3, 92.0, 95.0, 12, 140, 3, 'Advanced', '2025-02-22');
 
 -- Seed Attempted_Sets table
 INSERT INTO Attempted_Sets (child_id, topic_id, total_questions, correct_answers, score, time_spent) VALUES 
@@ -197,4 +197,4 @@ INSERT INTO Attempted_Questions (child_id, set_id, question_id, child_answer, is
 (3, 3, 3, 'music', FALSE, NOW(), 90),
 (3, 3, 4, 'COT', TRUE, NOW(), 100),
 (3, 3, 1, '4', TRUE, NOW(), 110),
-(3, 3, 2, 'Pepper', TRUE, NOW(), 120),
+(3, 3, 2, 'Pepper', TRUE, NOW(), 120);
