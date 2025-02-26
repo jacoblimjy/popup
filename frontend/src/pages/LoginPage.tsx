@@ -1,6 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Bounce, toast } from "react-toastify";
+import UserApi from "../api/UserApi";
+import { User } from "../types/UserTypes";
+import { useAuth } from "../hooks/useAuth";
+import { useChildrenList } from "../hooks/useChildrenList";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const { getChildrenList } = useChildrenList();
+
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -8,21 +17,32 @@ const LoginPage = () => {
     const password = formData.get("password") as string;
     console.log(email, password);
     try {
-      const response = await fetch("http://localhost:8000/api/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-      } else {
-        console.error("Login failed");
+      const response = await UserApi.login(email, password);
+      console.log(response);
+      
+      const user : User = {
+        userId: response.userId,
+        username: response.username,
+        email: response.email,
       }
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      login(user);
+      getChildrenList();
+      navigate("/");
     } catch (error) {
-      console.error("Login failed", error);
+      toast.error('Login Failed!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+      console.error(error);
     }
   };
 
@@ -118,7 +138,7 @@ const LoginPage = () => {
                   </button>
                   <div className="flex flex-col items-center">
                     <p className="mt-2 text-sm text-gray-600">
-                      Don't have an account yet?{" "} 
+                      Don't have an account yet?{" "}
                       <Link
                         className="text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium"
                         to="/signup"

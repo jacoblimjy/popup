@@ -1,9 +1,9 @@
 const db = require("../db");
 
-const createChild = async (userId, childName, age, education_level = 1) => {
+const createChild = async (userId, child_name, age, education_level = 1) => {
   const [existingChildren] = await db.execute(
     "SELECT * FROM Children WHERE user_id = ? AND child_name = ?",
-    [userId, childName]
+    [userId, child_name]
   );
 
   if (existingChildren.length > 0) {
@@ -12,7 +12,7 @@ const createChild = async (userId, childName, age, education_level = 1) => {
 
   const [result] = await db.execute(
     "INSERT INTO Children (user_id, child_name, age, education_level, date_created) VALUES (?, ?, ?, ?, NOW())",
-    [userId, childName, age, education_level]
+    [userId, child_name, age, education_level]
   );
 
   return result.insertId;
@@ -20,7 +20,7 @@ const createChild = async (userId, childName, age, education_level = 1) => {
 
 const createChildrenBatch = async (userId, children) => {
     // Create a list of children names
-    const childNames = children.map(child => child.childName);
+    const childNames = children.map(child => child.child_name);
   
     // Validate all children names in a single query
     const placeholders = childNames.map(() => '?').join(',');
@@ -37,17 +37,17 @@ const createChildrenBatch = async (userId, children) => {
     // If all children are valid, insert them
     const createdChildren = [];
     for (const child of children) {
-      const { childName, age, education_level = 1 } = child; // Default education_level to 1 if not provided
-      const childId = await createChild(userId, childName, age, education_level);
-      createdChildren.push({ childId, childName, age, education_level });
+      const { child_name, age, education_level = 1 } = child; // Default education_level to 1 if not provided
+      const childId = await createChild(userId, child_name, age, education_level);
+      createdChildren.push({ childId, child_name, age, education_level });
     }
     return createdChildren;
   };
 
-const updateChild = async (childId, childName, age, education_level) => {
+const updateChild = async (childId, child_name, age, education_level) => {
   await db.execute(
     "UPDATE Children SET child_name = ?, age = ?, education_level = ? WHERE child_id = ?",
-    [childName, age, education_level, childId]
+    [child_name, age, education_level, childId]
   );
 };
 

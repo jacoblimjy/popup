@@ -6,28 +6,31 @@ import {
 	DialogTitle,
 } from "@headlessui/react";
 import { useState } from "react";
+import { Child } from "../types/UserTypes";
 
 interface AddChildModalProps {
-	isOpen: boolean;
-	onClose: () => void;
-	onAddChild: (child: { childName: string; age: number }) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  onAddChild: (child: Child) => void;
 }
 
 const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
-	const [name, setName] = useState("");
-	const [age, setAge] = useState("");
+  const [name, setName] = useState('');
+  const [age, setAge] = useState('');
+  const [educationLevel, setEducationLevel] = useState('');
 
-	const handleAddChild = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		onAddChild({ childName: name, age: parseInt(age) });
-		resetFields();
-		onClose();
-	};
+  const handleAddChild = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onAddChild({child_name: name, age: parseInt(age), education_level: parseInt(educationLevel) });
+    resetFields();
+    onClose();
+  };
 
-	const resetFields = () => {
-		setName("");
-		setAge("");
-	};
+  const resetFields = () => {
+    setName('');
+    setAge('');
+    setEducationLevel('');
+  }
 
 	if (!isOpen) return null;
 
@@ -83,6 +86,24 @@ const AddChildModal = ({ isOpen, onClose, onAddChild }: AddChildModalProps) => {
 										autoComplete="age"
 										value={age}
 										onChange={(e) => setAge(e.target.value)}
+										className="py-3 px-4 block w-full rounded-md bg-white text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm"
+									/>
+								</div>
+							</div>
+
+              {/* Education Level Input */}
+							<div className="mt-4">
+								<label className="block text-sm mb-2">Education Level</label>
+								<div className="relative">
+									<input
+										type="number"
+										name="educationLevel"
+										min={1}
+										max={20}
+										required
+										autoComplete="educationLevel"
+										value={educationLevel}
+										onChange={(e) => setEducationLevel(e.target.value)}
 										className="py-3 px-4 block w-full rounded-md bg-white text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm"
 									/>
 								</div>

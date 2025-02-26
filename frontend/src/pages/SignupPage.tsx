@@ -1,13 +1,13 @@
 import { FormEvent, useState } from "react";
 import AddChildModal from "../components/AddChildModal";
-import { Link } from "react-router-dom";
-
-interface Child {
-  childName: string;
-  age: number;
-}
+import { Link, useNavigate } from "react-router-dom";
+import UserApi from "../api/UserApi";
+import { Child } from "../types/UserTypes";
+import { Bounce, toast } from "react-toastify";
 
 const SignupPage = () => {
+  const navigate = useNavigate();
+
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [children, setChildren] = useState<Child[]>([]);
@@ -35,20 +35,21 @@ const SignupPage = () => {
     console.log(JSON.stringify({ username, email, children, password }));
 
     try {
-      const response = await fetch("http://localhost:8000/api/users/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, email, children, password }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-      } else {
-        console.error("Sign up failed");
-      }
+      const response = await UserApi.signup(username, email, children, password);
+      console.log(response);
+      navigate('/login');
     } catch (error) {
+      toast.error('Sign Up Failed!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
       console.error("Sign up failed", error);
     }
   };
@@ -125,8 +126,8 @@ const SignupPage = () => {
                           <div key={index}>
                             <div className="flex gap-x-4 justify-between">
                               <div className="flex flex-col">
-                                <p className="text-sm">{child.childName}</p>
-                                <p className="text-xs">Age: {child.age}</p>
+                                <p className="text-sm font-medium">{child.child_name}</p>
+                                <p className="text-xs">{child.age} Years Old (Level: {child.education_level})</p>
                               </div>
                               <button onClick={() => handleRemoveChild(index)} type="button" className="p-2 h-min items-center gap-x-2 text-xs rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none">
                                 Remove
