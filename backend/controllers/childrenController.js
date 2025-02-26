@@ -47,17 +47,14 @@ const getChildById = async (req, res) => {
 
 const getChildrenByUserId = async (req, res) => {
     try {
-      const { user_id } = req.query;
-      const limit = req.query.limit ? parseInt(req.query.limit) : 10;
-      const offset = req.query.offset ? parseInt(req.query.offset) : 0;
-  
-      console.log(user_id, limit, offset);
-
+      const { user_id, page = 1, limit = 10 } = req.query;
+      
+      const offset = (page - 1) * limit;
       if (isNaN(limit) || isNaN(offset)) {
         return res.status(400).json({ message: "Invalid limit or offset value" });
       }
   
-      const children = await childrenService.getChildrenByUserId(parseInt(user_id), limit, offset);
+      const children = await childrenService.getChildrenByUserId(parseInt(user_id), page, limit);
       res.json(children);
     } catch (error) {
       res.status(400).json({ message: error.message });
