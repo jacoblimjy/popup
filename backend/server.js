@@ -5,6 +5,7 @@ const childPerformanceRoutes = require('./routes/childPerformanceRoutes');
 const childrenRoutes = require("./routes/childrenRoutes");
 const questionRoutes = require("./routes/questionRoutes");
 const attemptedSetRoutes = require("./routes/attemptedSetRoutes");
+const attemptedQuestionRoutes = require("./routes/attemptedQuestionRoutes");
 
 const app = express();
 
@@ -22,6 +23,8 @@ app.use('/api/child_performances', childPerformanceRoutes);
 app.use("/api/children", childrenRoutes);
 app.use("/api/questions", questionRoutes);
 app.use("/api/attempted_sets", attemptedSetRoutes);
+app.use("/api/attempted_questions", attemptedQuestionRoutes);
+
 
 
 const PORT = process.env.PORT || 8000;
