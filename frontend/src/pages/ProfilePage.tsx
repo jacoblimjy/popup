@@ -1,24 +1,60 @@
+/**
+ * ProfilePage.tsx
+ */
 import React, { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import UserApi from "../api/UserApi";
 
-const ProfilePage = () => {
-	const [fullName, setFullName] = useState("Jessica McQueen");
-	const [password, setPassword] = useState("password");
+const ProfilePage: React.FC = () => {
+	const { user, login } = useAuth(); // from your AuthContext
+	// Pre-fill fields from the user object
+	const [fullName, setFullName] = useState(user ? user.username : "");
+	// For security, don't show the real password. Let them type a new one if desired.
+	const [password, setPassword] = useState("");
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
+	const [isSaving, setIsSaving] = useState(false);
 
 	const handleSaveChanges = () => {
 		setShowConfirmModal(true);
 	};
 
-	const confirmSave = () => {
-		setShowConfirmModal(false);
-		alert("Profile updated successfully! ✅");
+	const confirmSave = async () => {
+		setIsSaving(true);
+		try {
+			if (!user) {
+				throw new Error("No user logged in!");
+			}
+			// Call the API
+			const updatedUser = await UserApi.updateProfile(
+				user.userId, // user ID
+				fullName, // new username
+				user.email, // keep the same email for now
+				password // new password if typed
+			);
+
+			// If the backend returns updated user data,
+			// update the AuthContext with new username, etc.
+			login({
+				userId: user.userId,
+				username: updatedUser.username,
+				email: updatedUser.email,
+			});
+
+			setShowConfirmModal(false);
+			alert("Profile updated successfully! ✅");
+		} catch (error) {
+			console.error("Error updating profile:", error);
+			alert("Failed to update profile. Please try again.");
+		} finally {
+			setIsSaving(false);
+		}
 	};
 
 	return (
 		<>
 			<div className="bg-gray-50 min-h-screen">
 				<div className="max-w-2xl mx-auto px-6 pt-12">
-					{/* Header Section (Aligned like ManageChildrenPage) */}
+					{/* Header Section */}
 					<div className="flex justify-between items-center mb-6">
 						<h1 className="text-3xl font-semibold text-gray-900">
 							Profile (Parent)
@@ -46,7 +82,7 @@ const ProfilePage = () => {
 							</label>
 							<input
 								type="email"
-								value="jessica@gmail.com"
+								value={user ? user.email : ""}
 								disabled
 								className="w-full px-4 py-2 border border-gray-300 bg-gray-100 rounded-md text-gray-500 cursor-not-allowed"
 							/>
@@ -61,6 +97,7 @@ const ProfilePage = () => {
 								type="password"
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
+								placeholder="Enter new password"
 								className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-200"
 							/>
 						</div>
@@ -78,7 +115,7 @@ const ProfilePage = () => {
 				</div>
 			</div>
 
-			{/* Confirmation Modal (No Dark Background, Matches ManageChildrenPage) */}
+			{/* Confirmation Modal */}
 			{showConfirmModal && (
 				<div className="fixed inset-0 flex items-center justify-center">
 					<div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200 w-96">
@@ -98,8 +135,9 @@ const ProfilePage = () => {
 							<button
 								onClick={confirmSave}
 								className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+								disabled={isSaving}
 							>
-								Confirm
+								{isSaving ? "Saving..." : "Confirm"}
 							</button>
 						</div>
 					</div>

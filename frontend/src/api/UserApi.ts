@@ -32,9 +32,30 @@ const signup = async (username: string, email: string, children: Child[], passwo
   }
 
   return response.json();
-}
+};
+
+const updateProfile = async (
+	userId: number,
+	username: string,
+	email: string,
+	password?: string
+) => {
+	// We do a PUT /api/users/:id
+	const url = `${BASE_URL}/${userId}`;
+	const response = await fetch(url, {
+		method: "PUT",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ username, email, password }),
+	});
+
+	if (!response.ok) {
+		throw new Error("Profile update failed: " + response.statusText);
+	}
+	return response.json();
+};
 
 export default {
-  login,
-  signup
+	login,
+	signup,
+	updateProfile, // <-- make sure to export it
 };
