@@ -4,8 +4,13 @@ export interface Attempt {
   score: number;
 }
 
-export interface AttemptedSet extends Attempt {
+export interface AttemptedSetRequest extends Attempt {
   child_id: number;
   topic_id: number;
   time_spent: number,
+}
+
+export interface AttemptedSetResponse extends AttemptedSetRequest {
+  set_id: number;
+  attempt_timestamp: string;
 }

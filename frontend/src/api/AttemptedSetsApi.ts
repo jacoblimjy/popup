@@ -1,7 +1,7 @@
-import { Attempt, AttemptedSet } from "../types/AttemptTypes";
+import { Attempt, AttemptedSetRequest, AttemptedSetResponse } from "../types/AttemptTypes";
 const BASE_URL = "http://localhost:8000/api/attempted_sets";
 
-const createAttemptedSet = async (attemptedSet : AttemptedSet) => {
+const createAttemptedSet = async (attemptedSet : AttemptedSetRequest) => {
   const req_body = {
     ...attemptedSet
   }
@@ -41,7 +41,7 @@ const updateAttemptedSet = async (updated_attempt : Attempt, set_id: number) => 
   return response.json();
 }
 
-const getAttemptedSets = async (child_id : number, page_id: number = 1) => {
+const getAttemptedSets = async (child_id : number, page_id: number = 1) : Promise<AttemptedSetResponse[]> => {
   const response = await fetch(BASE_URL + `?child_id=${child_id}&page=${page_id}`, {
     method: "GET",
     headers: {
