@@ -289,7 +289,7 @@ const AdminInterface: React.FC = () => {
 						{/* Question Types */}
 						<div>
 							<h3 className="text-base font-medium mb-2 text-gray-700">
-								Question Types
+								Topics
 							</h3>
 							<div className="space-y-2">
 								{[
