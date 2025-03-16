@@ -1,53 +1,65 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useChildrenList } from "../hooks/useChildrenList";
+import { AttemptedSetResponse } from "../types/AttemptTypes";
+import AttemptedSetsApi from "../api/AttemptedSetsApi";
+import { formatDetailedDate } from "../utils";
+import Loader from "../components/Loader";
 
 const HistoryPage = () => {
   const navigate = useNavigate();
+  const { activeChild } = useChildrenList();
+  const [page, setPage] = useState(1);
+  const [attempts, setAttempts] = useState<AttemptedSetResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const name = "Jane";
+  // TODO: Remove after topic_name added to api
+  const topics: { [key: number]: string } = {
+    1: 'Use a Rule to Make a Word',
+    2: 'Complete a Word Pair',
+    3: 'Anagram in a Sentence',
+    4: 'Word Ladders'
+  };
+
+  useEffect(() => {
+    console.log("History Page");
+    fetchAttemptedSets();
+
+  }, [activeChild]);
+
+  const fetchAttemptedSets = async () => {
+    if (activeChild) {
+      setIsLoading(true);
+      const response: AttemptedSetResponse[] = await AttemptedSetsApi.getAttemptedSets(activeChild.child_id as number, page);
+
+      const formattedResponse = response.map((attempt) => ({
+        ...attempt,
+        attempt_timestamp: formatDetailedDate(attempt.attempt_timestamp),
+      }));
+      setAttempts([...attempts, ...formattedResponse]);
+      setPage(page + 1);
+      setIsLoading(false);
+    }
+  }
+
   const statistics = {
     attempted: 50,
     completed: 48,
     averageScore: 98.8,
   };
 
-  const attempts = [
-    {
-      id: 1,
-      difficulty: "Hard",
-      topic: "Use a Rule to Make a Word",
-      attemptedOn: "5th Feb 2025",
-      score: 92,
-      total_score: 100,
-    },
-    {
-      id: 2,
-      difficulty: "Medium",
-      topic: "Use a Rule to Make a Word",
-      attemptedOn: "5th Feb 2025",
-      score: 93,
-      total_score: 100,
-    },
-    {
-      id: 3,
-      difficulty: "Easy",
-      topic: "Use a Rule to Make a Word",
-      attemptedOn: "6th Feb 2025",
-      score: 94,
-      total_score: 100,
-    },
-  ];
-
   const handleReviewAttempt = (attemptId: number) => {
     console.log(`Reviewing attempt ${attemptId}`);
     navigate("/review/" + attemptId);
   };
   return (
-    <div className="flex flex-col items-center p-6">
+    <div className="relative flex flex-col items-center p-6 h-full">
+      <Loader loading={isLoading} />
       <div className="flex flex-col items-center gap-3 border border-gray-200 rounded-lg p-8 w-xl">
         <div className="size-14 rounded-full ring-2 ring-white bg-[#f1c40e] text-center text-white flex items-center justify-center">
-          <p className="text-lg">{name.charAt(0)}</p>
+          <p className="text-lg">{activeChild?.child_name.charAt(0)}</p>
         </div>
-        <p className="text-base text-center">{name}</p>
+        <p className="text-base text-center">{activeChild?.child_name}</p>
         <hr className="border-gray-300 w-full" />
         <div className="flex gap-3 w-3/4 justify-around items-center">
           <div className="flex flex-col">
@@ -69,30 +81,32 @@ const HistoryPage = () => {
       <div className="flex flex-col gap-3 mt-6 w-4/5">
         <h3 className="font-semibold">Attempt History</h3>
 
-        {attempts.map((attempt, index) => (
+        {attempts.length > 0 ? attempts.map((attempt, index) => (
           <div key={index} className="flex flex-col gap-3">
-            <p>Attempt #{attempt.id}</p>
+            <p>Attempt #{index + 1}</p>
             <div className="flex justify-between">
               <div className="flex flex-col gap-1 text-sm text-gray-500">
-                <p>Difficulty: {attempt.difficulty}</p>
-                <p>Topic: {attempt.topic}</p>
-                <p>Attempted On: {attempt.attemptedOn}</p>
+                <p>Difficulty: Hard</p>
+                <p>Topic: {topics[attempt.topic_id]}</p>
+                <p>Attempted On: {attempt.attempt_timestamp}</p>
               </div>
               <div className="flex flex-col gap-1">
                 <p>
-                  Score: {attempt.score}/{attempt.total_score}
+                  Score: {attempt.correct_answers}/{attempt.total_questions}
                 </p>
-                <button 
-                  onClick={() => handleReviewAttempt(attempt.id)}
+                <button
+                  onClick={() => handleReviewAttempt(attempt.set_id)}
                   className="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
                 >
                   Review
                 </button>
               </div>
             </div>
-            {index != attempts.length - 1 && <hr className="border-gray-200 w-4/5 m-auto"/>}
+            {index != attempts.length - 1 && <hr className="border-gray-200 w-4/5 m-auto" />}
           </div>
-        ))}
+        )) :
+          <p>No attempts yet</p>
+        }
       </div>
     </div>
   );

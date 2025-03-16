@@ -114,9 +114,9 @@ INSERT INTO Roles (role_id, role_name) VALUES (1, 'parent');
 
 -- Seed Users table
 INSERT INTO Users (username, email, password_hash, role_id, date_created) VALUES 
-('parent1', 'parent1@example.com', '$2b$10$7QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8', 1, NOW()),
-('parent2', 'parent2@example.com', '$2b$10$7QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8', 1, NOW()),
-('parent3', 'parent3@example.com', '$2b$10$7QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8', 1, NOW());
+('parent1', 'parent1@example.com', '$2b$10$Q0Rzdg9l12CLWo/sxX22UOek3LDq.fqoMsnY0UC.9UVQBMupNkNRa', 1, NOW()),
+('parent2', 'parent2@example.com', '$2b$10$Q0Rzdg9l12CLWo/sxX22UOek3LDq.fqoMsnY0UC.9UVQBMupNkNRa', 1, NOW()),
+('parent3', 'parent3@example.com', '$2b$10$Q0Rzdg9l12CLWo/sxX22UOek3LDq.fqoMsnY0UC.9UVQBMupNkNRa', 1, NOW());
 
 -- Seed Children table
 INSERT INTO Children (user_id, child_name, age, education_level, date_created) VALUES 
