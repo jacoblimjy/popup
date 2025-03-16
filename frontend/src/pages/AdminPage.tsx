@@ -314,7 +314,7 @@ const AdminInterface: React.FC = () => {
 							</div>
 							{questionTypes.length === 0 && (
 								<p className="text-red-600 text-xs mt-1">
-									Please select at least one question type
+									Please select at least one topic
 								</p>
 							)}
 						</div>
