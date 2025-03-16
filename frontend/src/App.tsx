@@ -11,6 +11,7 @@ import { ToastContainer } from 'react-toastify'
 import { AuthProvider } from './context/AuthProvider'
 import { ChildrenProvider } from './context/ChildrenProvider'
 import ManageChildrenPage from './pages/ManageChildrenPage'
+import AdminPage from './pages/AdminPage'
 
 function App() {
 
@@ -27,6 +28,7 @@ function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/manage-children" element={<ManageChildrenPage/>} />
+          <Route path="/admin" element={<AdminPage/>} />
         </Routes>
         <ToastContainer limit={3} />
       </ChildrenProvider>
