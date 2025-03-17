@@ -168,7 +168,6 @@ const getPendingQuestionById = async (pendingQuestionId) => {
     }
 
     const question = questions[0];
-    question.distractors = parseDistractors(question.distractors);
     return question;
   } catch (error) {
     throw error;
