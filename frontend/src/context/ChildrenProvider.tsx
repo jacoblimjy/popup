@@ -18,9 +18,11 @@ export const ChildrenProvider = ({ children }: { children: ReactNode }) => {
       setChildrenList(response);
       if (activeChild === null) {
         setActiveChild(response[0]);
+      } else {
+        setActiveChild(response.find((child : DetailedChild) => child.child_id === activeChild?.child_id));
       }
-    } catch {
-      console.log("Failed to get children list");
+    } catch(e) {
+      console.log("Failed to get children list",e);
     }
   }
 

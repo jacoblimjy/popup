@@ -26,6 +26,7 @@ const LoginPage = () => {
         email: response.email,
       }
       localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('token', response.token);
       
       login(user);
       getChildrenList();
