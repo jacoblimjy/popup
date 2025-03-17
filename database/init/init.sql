@@ -46,6 +46,7 @@ CREATE TABLE Questions (
     distractors JSON,
     topic_id INTEGER,
     difficulty_id INTEGER,
+    explanation TEXT,
     date_created TIMESTAMP,
     last_modified TIMESTAMP,
     is_llm_generated BOOLEAN,
@@ -61,6 +62,7 @@ CREATE TABLE Pending_Questions (
     distractors JSON,
     topic_id INTEGER,
     difficulty_id INTEGER,
+    explanation TEXT,
     date_created TIMESTAMP,
     last_modified TIMESTAMP,
     is_llm_generated BOOLEAN,
@@ -157,18 +159,18 @@ INSERT INTO Difficulty_Levels (difficulty_id, label, numeric_level) VALUES
 
 
 -- Seed Questions table
-INSERT INTO Questions (question_text, answer_format, correct_answer, distractors, topic_id, difficulty_id, date_created, last_modified, is_llm_generated) VALUES
-('What is 2 + 2?', 'text', '4', '["3", "5", "6"]', 1, 1, NOW(), NOW(), FALSE),
-('Complete the pair: Salt and ?', 'text', 'Pepper', '["Sugar", "Spice", "Honey"]', 2, 1, NOW(), NOW(), FALSE),
-('Find the anagram in the sentence: "Listen to the silent music."', 'text', 'silent', '["listen", "music", "to"]', 3, 2, NOW(), NOW(), FALSE),
-('Solve the word ladder: CAT -> COT -> ?', 'text', 'COT', '["DOG", "BAT", "RAT"]', 4, 3, NOW(), NOW(), FALSE);
+INSERT INTO Questions (question_text, answer_format, correct_answer, distractors, topic_id, difficulty_id, explanation, date_created, last_modified, is_llm_generated) VALUES
+('What is 2 + 2?', 'text', '4', '["3", "5", "6"]', 1, 1,"explanation", NOW(), NOW(), FALSE),
+('Complete the pair: Salt and ?', 'text', 'Pepper', '["Sugar", "Spice", "Honey"]', 2, 1, "explanation 1", NOW(), NOW(), FALSE),
+('Find the anagram in the sentence: "Listen to the silent music."', 'text', 'silent', '["listen", "music", "to"]', 3, 2, "explanation 2", NOW(), NOW(), FALSE),
+('Solve the word ladder: CAT -> COT -> ?', 'text', 'COT', '["DOG", "BAT", "RAT"]', 4, 3, "explanation 3", NOW(), NOW(), FALSE);
 
 -- Seed Pending_Questions table
-INSERT INTO Pending_Questions (question_text, answer_format, correct_answer, distractors, topic_id, difficulty_id, date_created, last_modified, is_llm_generated) VALUES
-('What is 2 + 3?', 'text', '5', '["3", "4", "6"]', 1, 1, NOW(), NOW(), FALSE),
-('Complete the pair: Bread and ?', 'text', 'Butter', '["Jam", "Cheese", "Honey"]', 2, 1, NOW(), NOW(), FALSE),
-('Find the anagram in the sentence: "The cat sat on the mat."', 'text', 'cat', '["the", "sat", "on"]', 3, 2, NOW(), NOW(), FALSE),
-('Solve the word ladder: CAT -> BAT -> ?', 'text', 'BAT', '["DOG", "RAT", "HAT"]', 4, 3, NOW(), NOW(), FALSE);
+INSERT INTO Pending_Questions (question_text, answer_format, correct_answer, distractors, topic_id, difficulty_id, explanation, date_created, last_modified, is_llm_generated) VALUES
+('What is 2 + 2?', 'text', '4', '["3", "5", "6"]', 1, 1,"explanation", NOW(), NOW(), FALSE),
+('Complete the pair: Salt and ?', 'text', 'Pepper', '["Sugar", "Spice", "Honey"]', 2, 1, "explanation 1", NOW(), NOW(), FALSE),
+('Find the anagram in the sentence: "Listen to the silent music."', 'text', 'silent', '["listen", "music", "to"]', 3, 2, "explanation 2", NOW(), NOW(), FALSE),
+('Solve the word ladder: CAT -> COT -> ?', 'text', 'COT', '["DOG", "BAT", "RAT"]', 4, 3, "explanation 3", NOW(), NOW(), FALSE);
 
 
 -- Seed Child_Performance table

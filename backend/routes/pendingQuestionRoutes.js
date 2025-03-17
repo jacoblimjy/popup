@@ -12,7 +12,7 @@ router.get("/", pendingQuestionController.getPendingQuestions);
 
 router.get("/:id", pendingQuestionController.getPendingQuestionById);
 
-router.put("/:id", pendingQuestionController.updatePendignQuestion);
+router.put("/:id", pendingQuestionController.updatePendingQuestion);
 
 router.delete("/:id", pendingQuestionController.deletePendingQuestion);
 

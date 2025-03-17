@@ -9,6 +9,7 @@ const createQuestion = async (question) => {
       distractors,
       topic_id,
       difficulty_id,
+      explanation,
       is_llm_generated = false,
     } = question;
 
@@ -21,13 +22,14 @@ const createQuestion = async (question) => {
         question_text,
         answer_format,
         correct_answer,
-        distractors,
+        distractorsJson,
         topic_id,
         difficulty_id,
+        explanation,
         is_llm_generated,
         date_created,
         last_modified
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         question_text,
         answer_format,
@@ -35,6 +37,7 @@ const createQuestion = async (question) => {
         distractorsJson,
         topic_id,
         difficulty_id,
+        explanation,
         is_llm_generated,
       ]
     );
@@ -75,14 +78,15 @@ const createQuestionsBulk = async (questions) => {
   };
 };
 
-const parseDistractors = (distractor) => {
-  if (!distractor) return [];
-  try {
-    return JSON.parse(distractor);
-  } catch (error) {
-    return [];
-  }
-};
+// Parsing is not required because the distractors are already in Object type when retrieved from db 
+// const parseDistractors = (distractor) => {
+//   if (!distractor) return [];
+//   try {
+//     return JSON.parse(distractor);
+//   } catch (error) {
+//     return [];
+//   }
+// };
 
 const getQuestions = async (filters = {}, limit = 10, offset = 0) => {
   try {
@@ -111,7 +115,6 @@ const getQuestions = async (filters = {}, limit = 10, offset = 0) => {
 
     return questions.map((question) => ({
       ...question,
-      distractors: parseDistractors(question.distractors),
     }));
   } catch (error) {
     throw error;
@@ -155,6 +158,7 @@ const updateQuestion = async (questionId, questionData) => {
       distractors,
       topic_id,
       difficulty_id,
+      explanation,
       is_llm_generated,
     } = questionData;
 
@@ -170,6 +174,7 @@ const updateQuestion = async (questionId, questionData) => {
         distractors = ?,
         topic_id = ?,
         difficulty_id = ?,
+        explanation,
         is_llm_generated = ?,
         last_modified = NOW()
       WHERE question_id = ?`,
@@ -180,6 +185,7 @@ const updateQuestion = async (questionId, questionData) => {
         distractorsJson,
         topic_id,
         difficulty_id,
+        explanation,
         is_llm_generated,
         questionId,
       ]

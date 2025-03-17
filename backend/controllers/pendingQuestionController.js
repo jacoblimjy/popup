@@ -127,6 +127,7 @@ const updatePendingQuestion = async (req, res) => {
       "distractors",
       "topic_id",
       "difficulty_id",
+      "explanation"
     ];
     const missingFields = requiredFields.filter((field) => !req.body[field]);
 

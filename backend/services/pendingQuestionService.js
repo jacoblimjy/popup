@@ -10,6 +10,7 @@ const createPendingQuestion = async (question) => {
       distractors,
       topic_id,
       difficulty_id,
+      explanation,
       is_llm_generated = false,
     } = question;
 
@@ -25,10 +26,11 @@ const createPendingQuestion = async (question) => {
         distractors,
         topic_id,
         difficulty_id,
+        explanation,
         is_llm_generated,
         date_created,
         last_modified
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         question_text,
         answer_format,
@@ -36,6 +38,7 @@ const createPendingQuestion = async (question) => {
         distractorsJson,
         topic_id,
         difficulty_id,
+        explanation,
         is_llm_generated,
       ]
     );
@@ -78,24 +81,25 @@ const createPendingQuestionsBulk = async (questions) => {
 
 const convertPendingQuestionToQuestion = async (pendingQuestionId) => {
   try {
-    const [existingPendingQuestion] = await db.execute(
-      "SELECT pending_question_id FROM Pending_Questions WHERE pending_question_id = ?",
+    const [result] = await db.execute(
+      "SELECT * FROM Pending_Questions WHERE pending_question_id = ?",
       [pendingQuestionId]
     );
 
-    if (existingPendingQuestion.length === 0) {
+    if (result.length === 0) {
       throw new Error("Pending Question not found");
     }
-    
+    const existingPendingQuestion = result[0];
     // Create a new question using the questionService
     const questionData = {
-      question_text: pendingQuestion.question_text,
-      answer_format: pendingQuestion.answer_format,
-      correct_answer: pendingQuestion.correct_answer,
-      distractors: pendingQuestion.distractors,
-      topic_id: pendingQuestion.topic_id,
-      difficulty_id: pendingQuestion.difficulty_id,
-      is_llm_generated: pendingQuestion.is_llm_generated,
+      question_text: existingPendingQuestion.question_text,
+      answer_format: existingPendingQuestion.answer_format,
+      correct_answer: existingPendingQuestion.correct_answer,
+      distractors: existingPendingQuestion.distractors,
+      topic_id: existingPendingQuestion.topic_id,
+      difficulty_id: existingPendingQuestion.difficulty_id,
+      explanation: existingPendingQuestion.explanation,
+      is_llm_generated: existingPendingQuestion.is_llm_generated,
     };
 
     const questionId = await questionService.createQuestion(questionData);
@@ -109,14 +113,15 @@ const convertPendingQuestionToQuestion = async (pendingQuestionId) => {
   }
 };
 
-const parseDistractors = (distractor) => {
-  if (!distractor) return [];
-  try {
-    return JSON.parse(distractor);
-  } catch (error) {
-    return [];
-  }
-};
+// Parsing is not required because it is already type Object when retrieved from db
+// const parseDistractors = (distractor) => {
+//   if (!distractor) return [];
+//   try {
+//     return JSON.parse(distractor);
+//   } catch (error) {
+//     return [];
+//   }
+// };
 
 const getPendingQuestions = async (filters = {}, limit = 10, offset = 0) => {
   try {
@@ -145,7 +150,6 @@ const getPendingQuestions = async (filters = {}, limit = 10, offset = 0) => {
 
     return questions.map((question) => ({
       ...question,
-      distractors: parseDistractors(question.distractors),
     }));
   } catch (error) {
     throw error;
@@ -171,6 +175,7 @@ const getPendingQuestionById = async (pendingQuestionId) => {
   }
 };
 
+// TODO: Change to allow updating of only certain fields
 const updatePendingQuestion = async (pendingQuestionId, questionData) => {
   try {
     const [existingPendingQuestion] = await db.execute(
@@ -189,7 +194,7 @@ const updatePendingQuestion = async (pendingQuestionId, questionData) => {
       distractors,
       topic_id,
       difficulty_id,
-      is_llm_generated,
+      explanation,
     } = questionData;
 
     const distractorsJson = Array.isArray(distractors)
@@ -204,7 +209,7 @@ const updatePendingQuestion = async (pendingQuestionId, questionData) => {
         distractors = ?,
         topic_id = ?,
         difficulty_id = ?,
-        is_llm_generated = ?,
+        explanation = ?,
         last_modified = NOW()
       WHERE pending_question_id = ?`,
       [
@@ -214,7 +219,7 @@ const updatePendingQuestion = async (pendingQuestionId, questionData) => {
         distractorsJson,
         topic_id,
         difficulty_id,
-        is_llm_generated,
+        explanation,
         pendingQuestionId,
       ]
     );
