@@ -6,5 +6,5 @@ export interface Question {
   options: string[];
   topic_id: number;
   difficulty_id: number;
-  is_selected: boolean;
+  selectedOption: string | null;
 }

@@ -30,7 +30,7 @@ function App() {
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/manage-children" element={<ManageChildrenPage/>} />
           <Route path="/admin" element={<AdminPage/>} />
-          <Route path="/practice/:topic/:difficulty" element={<QuestionsPage/>} />
+          <Route path="/practice/:topic_id/:difficulty_id" element={<QuestionsPage/>} />
         </Routes>
         <ToastContainer limit={3} />
       </ChildrenProvider>
