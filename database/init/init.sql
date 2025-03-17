@@ -53,6 +53,21 @@ CREATE TABLE Questions (
     FOREIGN KEY (difficulty_id) REFERENCES Difficulty_Levels(difficulty_id)
 );
 
+CREATE TABLE Pending_Questions (
+    pending_question_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    question_text TEXT,
+    answer_format VARCHAR(255),
+    correct_answer TEXT,
+    distractors JSON,
+    topic_id INTEGER,
+    difficulty_id INTEGER,
+    date_created TIMESTAMP,
+    last_modified TIMESTAMP,
+    is_llm_generated BOOLEAN,
+    FOREIGN KEY (topic_id) REFERENCES Topics(topic_id),
+    FOREIGN KEY (difficulty_id) REFERENCES Difficulty_Levels(difficulty_id)
+);
+
 CREATE TABLE Child_Performance (
     up_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     child_id INTEGER,
@@ -147,6 +162,13 @@ INSERT INTO Questions (question_text, answer_format, correct_answer, distractors
 ('Complete the pair: Salt and ?', 'text', 'Pepper', '["Sugar", "Spice", "Honey"]', 2, 1, NOW(), NOW(), FALSE),
 ('Find the anagram in the sentence: "Listen to the silent music."', 'text', 'silent', '["listen", "music", "to"]', 3, 2, NOW(), NOW(), FALSE),
 ('Solve the word ladder: CAT -> COT -> ?', 'text', 'COT', '["DOG", "BAT", "RAT"]', 4, 3, NOW(), NOW(), FALSE);
+
+-- Seed Pending_Questions table
+INSERT INTO Pending_Questions (question_text, answer_format, correct_answer, distractors, topic_id, difficulty_id, date_created, last_modified, is_llm_generated) VALUES
+('What is 2 + 3?', 'text', '5', '["3", "4", "6"]', 1, 1, NOW(), NOW(), FALSE),
+('Complete the pair: Bread and ?', 'text', 'Butter', '["Jam", "Cheese", "Honey"]', 2, 1, NOW(), NOW(), FALSE),
+('Find the anagram in the sentence: "The cat sat on the mat."', 'text', 'cat', '["the", "sat", "on"]', 3, 2, NOW(), NOW(), FALSE),
+('Solve the word ladder: CAT -> BAT -> ?', 'text', 'BAT', '["DOG", "RAT", "HAT"]', 4, 3, NOW(), NOW(), FALSE);
 
 
 -- Seed Child_Performance table
