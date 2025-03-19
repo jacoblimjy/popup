@@ -8,6 +8,7 @@ const childrenRoutes = require("./routes/childrenRoutes");
 const questionRoutes = require("./routes/questionRoutes");
 const attemptedSetRoutes = require("./routes/attemptedSetRoutes");
 const attemptedQuestionRoutes = require("./routes/attemptedQuestionRoutes");
+const llmRoutes = require("./routes/llmRoutes");
 
 if (!process.env.JWT_SECRET) {
   console.error(
@@ -34,6 +35,7 @@ app.use("/api/children", childrenRoutes);
 app.use("/api/questions", questionRoutes);
 app.use("/api/attempted_sets", attemptedSetRoutes);
 app.use("/api/attempted_questions", attemptedQuestionRoutes);
+app.use("/api/llm", llmRoutes)
 
 
 
