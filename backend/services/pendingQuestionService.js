@@ -1,6 +1,7 @@
 const db = require("../db");
+const questionService = require("./questionService");
 
-const createQuestion = async (question) => {
+const createPendingQuestion = async (question) => {
   try {
     const {
       question_text,
@@ -18,11 +19,11 @@ const createQuestion = async (question) => {
       : JSON.stringify([distractors]);
 
     const [result] = await db.execute(
-      `INSERT INTO Questions (
+      `INSERT INTO Pending_Questions (
         question_text,
         answer_format,
         correct_answer,
-        distractorsJson,
+        distractors,
         topic_id,
         difficulty_id,
         explanation,
@@ -48,16 +49,16 @@ const createQuestion = async (question) => {
   }
 };
 
-const createQuestionsBulk = async (questions) => {
-  const createdQuestions = [];
+const createPendingQuestionsBulk = async (questions) => {
+  const createdPendingQuestions = [];
   const errors = [];
 
   for (let i = 0; i < questions.length; i++) {
     try {
-      const questionId = await createQuestion(questions[i]);
-      createdQuestions.push({
+      const pendingQuestionId = await createPendingQuestion(questions[i]);
+      createdPendingQuestions.push({
         index: i,
-        questionId,
+        pendingQuestionId,
         status: "success",
       });
     } catch (error) {
@@ -70,15 +71,49 @@ const createQuestionsBulk = async (questions) => {
   }
 
   return {
-    successful: createdQuestions,
+    successful: createdPendingQuestions,
     failed: errors,
     totalProcessed: questions.length,
-    successCount: createdQuestions.length,
+    successCount: createdPendingQuestions.length,
     failureCount: errors.length,
   };
 };
 
-// Parsing is not required because the distractors are already in Object type when retrieved from db 
+const convertPendingQuestionToQuestion = async (pendingQuestionId) => {
+  try {
+    const [result] = await db.execute(
+      "SELECT * FROM Pending_Questions WHERE pending_question_id = ?",
+      [pendingQuestionId]
+    );
+
+    if (result.length === 0) {
+      throw new Error("Pending Question not found");
+    }
+    const existingPendingQuestion = result[0];
+    // Create a new question using the questionService
+    const questionData = {
+      question_text: existingPendingQuestion.question_text,
+      answer_format: existingPendingQuestion.answer_format,
+      correct_answer: existingPendingQuestion.correct_answer,
+      distractors: existingPendingQuestion.distractors,
+      topic_id: existingPendingQuestion.topic_id,
+      difficulty_id: existingPendingQuestion.difficulty_id,
+      explanation: existingPendingQuestion.explanation,
+      is_llm_generated: existingPendingQuestion.is_llm_generated,
+    };
+
+    const questionId = await questionService.createQuestion(questionData);
+
+    // Delete the pending question
+    await deletePendingQuestion(pendingQuestionId);
+
+    return questionId;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Parsing is not required because it is already type Object when retrieved from db
 // const parseDistractors = (distractor) => {
 //   if (!distractor) return [];
 //   try {
@@ -88,10 +123,10 @@ const createQuestionsBulk = async (questions) => {
 //   }
 // };
 
-const getQuestions = async (filters = {}, limit = 10, offset = 0) => {
+const getPendingQuestions = async (filters = {}, limit = 10, offset = 0) => {
   try {
     const { topic_id, difficulty_id } = filters;
-    let query = "SELECT * FROM Questions";
+    let query = "SELECT * FROM Pending_Questions";
     const whereConditions = [];
     const params = [];
 
@@ -121,15 +156,15 @@ const getQuestions = async (filters = {}, limit = 10, offset = 0) => {
   }
 };
 
-const getQuestionById = async (questionId) => {
+const getPendingQuestionById = async (pendingQuestionId) => {
   try {
     const [questions] = await db.execute(
-      "SELECT * FROM Questions WHERE question_id = ?",
-      [questionId]
+      "SELECT * FROM Pending_Questions WHERE pending_question_id = ?",
+      [pendingQuestionId]
     );
 
     if (questions.length === 0) {
-      throw new Error("Question not found");
+      throw new Error("Pending Question not found");
     }
 
     const question = questions[0];
@@ -139,15 +174,16 @@ const getQuestionById = async (questionId) => {
   }
 };
 
-const updateQuestion = async (questionId, questionData) => {
+// TODO: Change to allow updating of only certain fields
+const updatePendingQuestion = async (pendingQuestionId, questionData) => {
   try {
-    const [existingQuestion] = await db.execute(
-      "SELECT question_id FROM Questions WHERE question_id = ?",
-      [questionId]
+    const [existingPendingQuestion] = await db.execute(
+      "SELECT pending_question_id FROM Pending_Questions WHERE pending_question_id = ?",
+      [pendingQuestionId]
     );
 
-    if (existingQuestion.length === 0) {
-      throw new Error("Question not found");
+    if (existingPendingQuestion.length === 0) {
+      throw new Error("Pending Question not found");
     }
 
     const {
@@ -158,7 +194,6 @@ const updateQuestion = async (questionId, questionData) => {
       topic_id,
       difficulty_id,
       explanation,
-      is_llm_generated,
     } = questionData;
 
     const distractorsJson = Array.isArray(distractors)
@@ -166,17 +201,16 @@ const updateQuestion = async (questionId, questionData) => {
       : JSON.stringify([distractors]);
 
     const [result] = await db.execute(
-      `UPDATE Questions SET 
+      `UPDATE Pending_Questions SET 
         question_text = ?,
         answer_format = ?,
         correct_answer = ?,
         distractors = ?,
         topic_id = ?,
         difficulty_id = ?,
-        explanation,
-        is_llm_generated = ?,
+        explanation = ?,
         last_modified = NOW()
-      WHERE question_id = ?`,
+      WHERE pending_question_id = ?`,
       [
         question_text,
         answer_format,
@@ -185,13 +219,12 @@ const updateQuestion = async (questionId, questionData) => {
         topic_id,
         difficulty_id,
         explanation,
-        is_llm_generated,
-        questionId,
+        pendingQuestionId,
       ]
     );
 
     if (result.affectedRows === 0) {
-      throw new Error("Failed to update question");
+      throw new Error("Failed to update pending question");
     }
 
     return true;
@@ -200,19 +233,19 @@ const updateQuestion = async (questionId, questionData) => {
   }
 };
 
-const deleteQuestion = async (questionId) => {
+const deletePendingQuestion = async (pendingQuestionId) => {
   try {
-    const [existingQuestion] = await db.execute(
-      "SELECT question_id FROM Questions WHERE question_id = ?",
-      [questionId]
+    const [existingPendingQuestion] = await db.execute(
+      "SELECT pending_question_id FROM Pending_Questions WHERE pending_question_id = ?",
+      [pendingQuestionId]
     );
 
-    if (existingQuestion.length === 0) {
-      throw new Error("Question not found");
+    if (existingPendingQuestion.length === 0) {
+      throw new Error("Pending Question not found");
     }
 
-    await db.execute("DELETE FROM Questions WHERE question_id = ?", [
-      questionId,
+    await db.execute("DELETE FROM Pending_Questions WHERE pending_question_id = ?", [
+      pendingQuestionId,
     ]);
 
     return true;
@@ -222,10 +255,11 @@ const deleteQuestion = async (questionId) => {
 };
 
 module.exports = {
-  createQuestion,
-  createQuestionsBulk,
-  getQuestions,
-  getQuestionById,
-  updateQuestion,
-  deleteQuestion,
+  createPendingQuestion,
+  createPendingQuestionsBulk,
+  convertPendingQuestionToQuestion,
+  getPendingQuestions,
+  getPendingQuestionById,
+  updatePendingQuestion,
+  deletePendingQuestion,
 };
