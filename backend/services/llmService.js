@@ -1,4 +1,3 @@
-// services/llmService.js
 const axios = require("axios");
 const db = require("../db");
 const yaml = require("js-yaml");
@@ -7,8 +6,23 @@ const path = require("path");
 const pendingQuestionService = require("./pendingQuestionService");
 const { WordNet } = require("natural");
 
+const TOPIC_MAPPINGS = {
+  1: "rule", // Use a Rule to Make a Word
+  2: "word_pair", // Complete a Word Pair
+  3: "anagram", // Anagram in a Sentence
+  4: "word_ladders", // Word Ladders
+};
+
+const DIFFICULTY_MAPPINGS = {
+  1: "easy",
+  2: "medium",
+  3: "hard",
+};
+
 /**
- * Generates and saves questions using LLM based on topic, difficulty and count
+ * Main function to generate questions
+ * This function will use either the OpenAI API or mock data based on the OPENAI_API_KEY environment variable
+ *
  * @param {number} topic_id - The database ID of the topic
  * @param {number} difficulty_id - The database ID of the difficulty level
  * @param {number} num_questions - Number of questions to generate
@@ -34,16 +48,43 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
       `Generating ${questionCount} ${difficultyInfo.label} questions for topic: ${topicInfo.topic_name}`
     );
 
-    // 3. Get the appropriate prompt template
-    const prompt = await buildPrompt(
-      topicInfo.topic_name,
-      difficultyInfo.label
+    // 3. Get the topic and difficulty keys for the YAML prompt
+    const topicKey = TOPIC_MAPPINGS[topic_id];
+    const difficultyKey = DIFFICULTY_MAPPINGS[difficulty_id];
+
+    if (!topicKey) {
+      throw new Error(
+        `No prompt mapping found for topic_id: ${topic_id}. Please add it to TOPIC_MAPPINGS.`
+      );
+    }
+
+    if (!difficultyKey) {
+      throw new Error(
+        `No prompt mapping found for difficulty_id: ${difficulty_id}. Please add it to DIFFICULTY_MAPPINGS.`
+      );
+    }
+
+    console.log(
+      `Using prompt template: topic=${topicKey}, difficulty=${difficultyKey}`
     );
 
-    // 4. Call LLM API to generate questions
-    const rawQuestions = await callLLMApi(prompt, questionCount);
+    // 4. Get the appropriate prompt template
+    const prompt = await getPromptFromYaml(topicKey, difficultyKey);
 
-    // 5. Validate and process questions
+    // 5. Generate questions (either with API or mock data)
+    let rawQuestions;
+
+    // Check if we have an API key for OpenAI
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (apiKey && apiKey.length > 0) {
+      console.log("Using OpenAI API for question generation");
+      rawQuestions = await generateQuestionsWithOpenAI(prompt, questionCount);
+    } else {
+      console.log("Using mock data for question generation");
+      rawQuestions = await generateQuestionsMock(topicKey, questionCount);
+    }
+
+    // 6. Validate and process questions
     const processedQuestions = await processAndValidateQuestions(
       rawQuestions,
       topic_id,
@@ -54,7 +95,7 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
       throw new Error("No valid questions could be generated");
     }
 
-    // 6. Save to pending questions collection
+    // 7. Save to pending questions collection
     const result = await pendingQuestionService.createPendingQuestionsBulk(
       processedQuestions
     );
@@ -74,127 +115,78 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
 }
 
 /**
- * Build a prompt for the LLM based on topic and difficulty
+ * Function to generate questions using the OpenAI API
+ * Requires a valid API key to be set in the OPENAI_API_KEY environment variable
+ *
+ * @param {string} prompt - The prompt to send to the API
+ * @param {number} numQuestions - Number of questions to generate
+ * @returns {Array} - Array of generated question objects
  */
-async function buildPrompt(topicName, difficultyLabel) {
+async function generateQuestionsWithOpenAI(prompt, numQuestions) {
   try {
-    // Convert to expected format for prompt lookup
-    const topic = topicName.toLowerCase().replace(/\s+/g, "_");
-    const difficulty = difficultyLabel.toLowerCase();
+    console.log("Calling OpenAI API...");
 
-    // Load prompts from YAML file
-    const promptsFilePath = path.join(
-      __dirname,
-      "..",
-      "llm_prompts",
-      "prompts.yaml"
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-4", // Use the appropriate model (gpt-4, gpt-3.5-turbo, etc.)
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a helpful assistant that generates educational questions.",
+          },
+          {
+            role: "user",
+            content:
+              prompt +
+              `\n\nGenerate exactly ${numQuestions} questions in JSON format.`,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
     );
-    const promptsData = yaml.load(fs.readFileSync(promptsFilePath, "utf8"));
 
-    if (!promptsData || !Array.isArray(promptsData.prompts)) {
-      throw new Error("Invalid prompts data format");
+    const content = response.data.choices[0]?.message?.content || "{}";
+    try {
+      const parsedContent = JSON.parse(content);
+      return parsedContent.questions || [];
+    } catch (parseError) {
+      console.error("Error parsing OpenAI response:", parseError);
+      throw new Error("Invalid JSON response from OpenAI API");
     }
-
-    // Find matching prompt template
-    const promptTemplate = promptsData.prompts.find(
-      (p) => p.topic === topic && p.difficulty === difficulty
-    );
-
-    if (!promptTemplate) {
-      // Fallback to a general template if specific one not found
-      console.warn(
-        `No specific prompt found for ${topic}/${difficulty}, using general template`
-      );
-      return createGeneralPrompt(topicName, difficultyLabel);
-    }
-
-    // Combine the prompt components
-    return `${promptTemplate.system_message}
-
-${promptTemplate.few_shot_examples}
-
-${promptTemplate.assignment}`;
   } catch (error) {
-    console.error("Error building prompt:", error);
-    throw new Error(`Failed to build prompt: ${error.message}`);
+    console.error("OpenAI API error:", error);
+    throw new Error(
+      `Failed to call OpenAI API: ${
+        error.response?.data?.error?.message || error.message
+      }`
+    );
   }
 }
 
 /**
- * Creates a general-purpose prompt when a specific one is not available
+ * Function to generate mock questions for testing
+ * Used when OPENAI_API_KEY is not set
+ *
+ * @param {string} topicKey - The topic key from the mapping
+ * @param {number} numQuestions - Number of questions to generate
+ * @returns {Array} - Array of mock question objects
  */
-function createGeneralPrompt(topicName, difficultyLabel) {
-  return `
-You are an educational question generator specializing in ${topicName} questions.
+async function generateQuestionsMock(topicKey, numQuestions) {
+  console.log(`Using mock data for question generation (topic: ${topicKey})`);
 
-Create ${difficultyLabel} difficulty questions with the following structure:
-1. Clear question text
-2. One correct answer
-3. 3-4 plausible distractor options that are clearly incorrect
-4. A brief explanation of why the correct answer is correct
-
-Format your response as a JSON array of question objects with these properties:
-- question_text: The question being asked
-- answer_format: "multiple_choice"
-- correct_answer: The correct answer
-- distractors: An array of incorrect answers
-- explanation: Why the correct answer is correct
-
-Use age-appropriate language and concepts suitable for ${difficultyLabel} difficulty.
-  `;
-}
-
-/**
- * Call the LLM API to generate questions
- */
-async function callLLMApi(prompt, numQuestions) {
-  try {
-    // For production use with OpenAI:
-    if (process.env.OPENAI_API_KEY) {
-      console.log("Calling OpenAI API...");
-
-      const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          model: "gpt-4",
-          messages: [
-            {
-              role: "system",
-              content:
-                "You are a helpful assistant that generates educational questions.",
-            },
-            {
-              role: "user",
-              content:
-                prompt +
-                `\n\nGenerate exactly ${numQuestions} questions in JSON format.`,
-            },
-          ],
-          temperature: 0.7,
-          max_tokens: 3000,
-          response_format: { type: "json_object" },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const content = response.data.choices[0]?.message?.content || "{}";
-      try {
-        const parsedContent = JSON.parse(content);
-        return parsedContent.questions || [];
-      } catch (parseError) {
-        console.error("Error parsing LLM response:", parseError);
-        throw new Error("Invalid JSON response from LLM");
-      }
-    }
-
-    // Mock response for development/testing
-    console.log("Using mock LLM response (no API key configured)");
-    return [
+  // Sample questions for different topics
+  const mockQuestions = {
+    rule: [
       {
         question_text:
           "The words in the second set follow the same pattern as the first set. What word completes the second set? cat (cot) dog       pen (?) rat",
@@ -213,14 +205,170 @@ async function callLLMApi(prompt, numQuestions) {
           "Take the first letter of the first word and the last two letters of the second word. f + it = fit, and b + in = bin",
         distractors: ["but", "bat", "bot", "bus"],
       },
-    ];
-  } catch (error) {
-    console.error("LLM API error:", error);
+      {
+        question_text:
+          "The words in the second set follow the same pattern as the first set. What word completes the second set? red (rim) man       top (?) sit",
+        answer_format: "multiple_choice",
+        correct_answer: "tit",
+        explanation:
+          "Take the first letter of the first word and the last two letters of the second word. r + im = rim, and t + it = tit",
+        distractors: ["tip", "tap", "tom", "ten"],
+      },
+    ],
+    word_pair: [
+      {
+        question_text: "Complete the pair: Hot is to Cold as Happy is to _____",
+        answer_format: "multiple_choice",
+        correct_answer: "Sad",
+        explanation:
+          "Hot and Cold are opposites, so Happy and Sad are also opposites",
+        distractors: ["Warm", "Joy", "Excited", "Smile"],
+      },
+      {
+        question_text: "Complete the pair: Car is to Road as Train is to _____",
+        answer_format: "multiple_choice",
+        correct_answer: "Track",
+        explanation: "Cars travel on roads, and trains travel on tracks",
+        distractors: ["Station", "Conductor", "Engine", "Wheel"],
+      },
+    ],
+    anagram: [
+      {
+        question_text:
+          "Find the anagram in this sentence: The teacher told students to remain silent during the test.",
+        answer_format: "multiple_choice",
+        correct_answer: "silent",
+        explanation:
+          "'silent' and 'listen' are anagrams - they contain the exact same letters but in a different order",
+        distractors: ["teacher", "students", "remain", "during"],
+      },
+      {
+        question_text:
+          "Find the anagram in this sentence: Please listen to the story about the dusty items in the study.",
+        answer_format: "multiple_choice",
+        correct_answer: "listen",
+        explanation:
+          "'listen' and 'silent' are anagrams - they contain the exact same letters but in a different order",
+        distractors: ["please", "story", "dusty", "items"],
+      },
+    ],
+    word_ladders: [
+      {
+        question_text:
+          "Complete this word ladder from COLD to WARM: COLD → CORD → CARD → _____ → WARM",
+        answer_format: "multiple_choice",
+        correct_answer: "WARD",
+        explanation:
+          "In a word ladder, you change one letter at a time to make a new word. CARD → WARD (change C to W)",
+        distractors: ["WARP", "WART", "WORD", "WORM"],
+      },
+      {
+        question_text:
+          "Complete this word ladder from PLAY to WORK: PLAY → CLAY → _____ → CORK → WORK",
+        answer_format: "multiple_choice",
+        correct_answer: "CLARK",
+        explanation:
+          "In a word ladder, you change one letter at a time to make a new word. CLAY → CLARK (change Y to R and add K)",
+        distractors: ["CLAP", "CLAW", "CLAM", "CRAY"],
+      },
+    ],
+  };
+
+  // Select the appropriate questions based on topic key
+  const availableQuestions = mockQuestions[topicKey];
+
+  // If no mock questions are available for this topic, throw an error
+  if (!availableQuestions || availableQuestions.length === 0) {
     throw new Error(
-      `Failed to call LLM API: ${
-        error.response?.data?.error?.message || error.message
-      }`
+      `No mock questions available for topic: ${topicKey}. Please add mock questions for this topic.`
     );
+  }
+
+  // Return requested number of questions (repeating if necessary)
+  const result = [];
+  for (let i = 0; i < numQuestions; i++) {
+    result.push(availableQuestions[i % availableQuestions.length]);
+  }
+
+  return result;
+}
+
+/**
+ * Get prompt from YAML file based on topic and difficulty
+ * @param {string} topicKey - Topic key (e.g., "rule", "word_pair")
+ * @param {string} difficultyKey - Difficulty key (e.g., "easy", "medium")
+ * @returns {string} - Complete prompt text
+ * @throws {Error} - If prompt is not found in YAML file
+ */
+async function getPromptFromYaml(topicKey, difficultyKey) {
+  try {
+    // Load prompts from YAML file
+    const promptsFilePath = path.join(
+      __dirname,
+      "..",
+      "llm_prompts",
+      "prompts.yaml"
+    );
+
+    // Try to read and parse the YAML file
+    let promptsData;
+    try {
+      const fileContents = fs.readFileSync(promptsFilePath, "utf8");
+      promptsData = yaml.load(fileContents);
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        throw new Error(
+          `prompts.yaml file not found at path: ${promptsFilePath}`
+        );
+      } else {
+        throw new Error(`Error loading prompts.yaml: ${error.message}`);
+      }
+    }
+
+    // Validate the YAML structure
+    if (!promptsData || !Array.isArray(promptsData.prompts)) {
+      throw new Error("Invalid prompts.yaml format: 'prompts' array not found");
+    }
+
+    // Find matching prompt template
+    const promptTemplate = promptsData.prompts.find(
+      (p) => p.topic === topicKey && p.difficulty === difficultyKey
+    );
+
+    // Throw error if no matching prompt is found
+    if (!promptTemplate) {
+      throw new Error(
+        `No prompt template found in prompts.yaml for topic="${topicKey}" and difficulty="${difficultyKey}". ` +
+          `Please add this combination to the prompts.yaml file.`
+      );
+    }
+
+    // Validate the prompt template has all required sections
+    if (!promptTemplate.system_message) {
+      throw new Error(
+        `Prompt template for ${topicKey}/${difficultyKey} is missing 'system_message'`
+      );
+    }
+    if (!promptTemplate.few_shot_examples) {
+      throw new Error(
+        `Prompt template for ${topicKey}/${difficultyKey} is missing 'few_shot_examples'`
+      );
+    }
+    if (!promptTemplate.assignment) {
+      throw new Error(
+        `Prompt template for ${topicKey}/${difficultyKey} is missing 'assignment'`
+      );
+    }
+
+    // Combine the prompt components
+    return `${promptTemplate.system_message}
+
+${promptTemplate.few_shot_examples}
+
+${promptTemplate.assignment}`;
+  } catch (error) {
+    console.error("Error loading prompt from YAML:", error);
+    throw error; // Re-throw to be handled by the caller
   }
 }
 
@@ -299,24 +447,18 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
   return validQuestions;
 }
 
-/**
- * Get topic information by ID
- */
 async function getTopicInfo(topic_id) {
   const [rows] = await db.execute("SELECT * FROM Topics WHERE topic_id = ?", [
     topic_id,
   ]);
 
   if (rows.length === 0) {
-    throw new Error(`Topic with ID ${topic_id} not found`);
+    throw new Error(`Topic with ID ${topic_id} not found in database`);
   }
 
   return rows[0];
 }
 
-/**
- * Get difficulty level information by ID
- */
 async function getDifficultyInfo(difficulty_id) {
   const [rows] = await db.execute(
     "SELECT * FROM Difficulty_Levels WHERE difficulty_id = ?",
@@ -324,15 +466,14 @@ async function getDifficultyInfo(difficulty_id) {
   );
 
   if (rows.length === 0) {
-    throw new Error(`Difficulty level with ID ${difficulty_id} not found`);
+    throw new Error(
+      `Difficulty level with ID ${difficulty_id} not found in database`
+    );
   }
 
   return rows[0];
 }
 
-/**
- * Get topic by name
- */
 async function getTopicByName(topicName) {
   const [rows] = await db.execute("SELECT * FROM Topics WHERE topic_name = ?", [
     topicName,
@@ -345,9 +486,6 @@ async function getTopicByName(topicName) {
   return rows[0];
 }
 
-/**
- * Get difficulty level by label
- */
 async function getDifficultyByLabel(difficultyLabel) {
   const [rows] = await db.execute(
     "SELECT * FROM Difficulty_Levels WHERE label = ?",
@@ -363,6 +501,8 @@ async function getDifficultyByLabel(difficultyLabel) {
 
 module.exports = {
   generateQuestions,
+  generateQuestionsWithOpenAI,
+  generateQuestionsMock,
   getTopicByName,
   getDifficultyByLabel,
 };
