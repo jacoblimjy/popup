@@ -31,8 +31,8 @@ const formatDetailedDate = (date: string) : string => {
 const topics = {
   1: "Use a Rule to Make a Word",
   2: "Complete a Word Pair",
-  3: "Word Ladders",
-  4: "Anagram in a Sentence",
+  3: "Anagram in a Sentence",
+  4: "Word Ladders",
 };
 
 const difficulty_levels = {

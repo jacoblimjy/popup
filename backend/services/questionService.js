@@ -75,15 +75,6 @@ const createQuestionsBulk = async (questions) => {
   };
 };
 
-const parseDistractors = (distractor) => {
-  if (!distractor) return [];
-  try {
-    return JSON.parse(distractor);
-  } catch (error) {
-    return [];
-  }
-};
-
 const getQuestions = async (filters = {}, limit = 10, offset = 0) => {
   try {
     const { topic_id, difficulty_id } = filters;
@@ -109,10 +100,8 @@ const getQuestions = async (filters = {}, limit = 10, offset = 0) => {
 
     const [questions] = await db.execute(query, params);
 
-    return questions.map((question) => ({
-      ...question,
-      distractors: parseDistractors(question.distractors),
-    }));
+    return questions;
+
   } catch (error) {
     throw error;
   }
@@ -130,7 +119,6 @@ const getQuestionById = async (questionId) => {
     }
 
     const question = questions[0];
-    question.distractors = parseDistractors(question.distractors);
     return question;
   } catch (error) {
     throw error;

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom"
-import { Question } from "../types/QuestionTypes";
+import { Question, QuestionApiResponse } from "../types/QuestionTypes";
 import Loader from "../components/Loader";
 import wallpaper from "../assets/wallpaper.jpg";
 import { ArrowLeft } from "lucide-react";
+import QuestionApi from "../api/QuestionApi";
 
 const QuestionsPage = () => {
   const navigate = useNavigate();
@@ -18,48 +19,19 @@ const QuestionsPage = () => {
   }, [])
 
   const getQuestions = async () => {
+    if (!topic_id || !difficulty_id) {
+      console.error("Missing topic_id or difficulty_id");
+      return;
+    }
+    
     console.log(`Call getQuestions API with topic_id: ${topic_id} and difficulty_id: ${difficulty_id}`)
     setIsLoading(true);
-    setTimeout(() => {
-      const apiResponse = [
-        {
-          question_id: 1,
-          question_text: "What is the capital of France?",
-          answer_format: "text",
-          correct_answer: "Paris",
-          distractors: ["London", "Berlin", "Madrid"],
-          topic_id: 1,
-          difficulty_id: parseInt(difficulty_id || "1"),
-          date_created: new Date().toISOString(),
-          last_modified: new Date().toISOString(),
-          is_llm_generated: false,
-        },
-        {
-          question_id: 2,
-          question_text: "What is 2 + 2?",
-          answer_format: "text",
-          correct_answer: "4",
-          distractors: ["3", "5", "6"],
-          topic_id: 1,
-          difficulty_id: parseInt(difficulty_id || "1"),
-          date_created: new Date().toISOString(),
-          last_modified: new Date().toISOString(),
-          is_llm_generated: false,
-        },
-        {
-          question_id: 3,
-          question_text: "What is the largest planet in our solar system?",
-          answer_format: "text",
-          correct_answer: "Jupiter",
-          distractors: ["Earth", "Mars", "Saturn"],
-          topic_id: 1,
-          difficulty_id: parseInt(difficulty_id || "1"),
-          date_created: new Date().toISOString(),
-          last_modified: new Date().toISOString(),
-          is_llm_generated: false,
-        },
-      ];
-      const questions = apiResponse.map((question) => {
+
+    // timeout to simulate fetching data
+    setTimeout(async () => {
+      const apiResponse = await QuestionApi.getPracticeQuestions(topic_id, difficulty_id);
+
+      const questions = apiResponse.map((question : QuestionApiResponse) => {
         return {
           question_id: question.question_id,
           question_text: question.question_text,
@@ -75,7 +47,7 @@ const QuestionsPage = () => {
       setQuestionList(questions);
       setCurrentQuestionIndex(0);
       setIsLoading(false);
-    }, 3000);
+    }, 1000);
   }
 
   const insertAnswerAtRandomIndex = (options: string[], correctAnswer: string) => {
@@ -106,6 +78,8 @@ const QuestionsPage = () => {
     const updatedQuestionList = [...questionList];
     updatedQuestionList[currentQuestionIndex].selectedOption = selectedOption;
     setQuestionList(updatedQuestionList);
+
+    console.log(updatedQuestionList);
     // TODO: Call submit api
   }
 
