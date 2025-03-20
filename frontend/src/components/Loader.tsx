@@ -8,7 +8,7 @@ const Loader = ({ loading }: LoaderProps) => {
   if (!loading) return null;
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center z-10">
+    <div className="absolute inset-0 flex items-center justify-center z-20">
       <MoonLoader
         size={50}
         color="#b8860b"

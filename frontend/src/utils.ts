@@ -28,8 +28,23 @@ const formatDetailedDate = (date: string) : string => {
   return `${day}${daySuffix(day)} ${month} ${year}`;
 }
 
+const topics = {
+  1: "Use a Rule to Make a Word",
+  2: "Complete a Word Pair",
+  3: "Word Ladders",
+  4: "Anagram in a Sentence",
+};
+
+const difficulty_levels = {
+  1: "Easy",
+  2: "Medium",
+  3: "Hard"
+};
+
 export {
   getUserId,
   formatDate,
-  formatDetailedDate
+  formatDetailedDate,
+  topics,
+  difficulty_levels,
 }
