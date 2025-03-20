@@ -7,6 +7,7 @@ export interface Question {
   topic_id: number;
   difficulty_id: number;
   selectedOption: string | null;
+  time_taken: number;
 }
 
 export interface QuestionApiResponse {
