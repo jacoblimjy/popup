@@ -41,6 +41,16 @@ const difficulty_levels = {
   3: "Hard"
 };
 
+let handleSessionTimeout: (() => void) | null = null;
+
+export const setSessionTimeoutHandler = (handler: () => void) => {
+  handleSessionTimeout = handler;
+};
+
+export const getSessionTimeoutHandler = () => {
+  return handleSessionTimeout;
+};
+
 export {
   getUserId,
   formatDate,

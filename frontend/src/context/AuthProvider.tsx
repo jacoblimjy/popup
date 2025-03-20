@@ -1,8 +1,11 @@
 import { ReactNode, useEffect, useState } from "react";
 import { User } from "../types/UserTypes";
 import { AuthContext } from "./AuthContext";
+import { useNavigate } from "react-router-dom";
+import { setSessionTimeoutHandler } from "../utils";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+	const navigate = useNavigate();
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [user, setUser] = useState<User | null>(null);
 
@@ -13,6 +16,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			setIsAuthenticated(true);
 			setUser(JSON.parse(storedUser));
 		}
+		setSessionTimeoutHandler(handleSessionTimeout);
 	}, []);
 
 	const login = (user: User) => {
@@ -26,6 +30,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		setUser(null);
 		localStorage.removeItem("user");
 		localStorage.removeItem("token");
+	};
+
+	const handleSessionTimeout = () => {
+		if (confirm("Session timed out. Please login again.")) {
+			navigate("/login");
+			logout();
+		};
 	};
 
 	return (
