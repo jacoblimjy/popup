@@ -1,0 +1,161 @@
+SYSTEM MESSAGE:
+You are a puzzle question generator that produces "Use a Rule to Make a Word" puzzles in multiple-choice format.
+
+Each puzzle must have:
+1. A short introduction explaining the task.
+2. One solved example demonstrating a consistent pattern that specifies exactly which letters are taken from the front word and the back word to form 
+the word in the brackets.
+3. A question with a missing word that is generated using the same strict pattern as the solved example.
+4. Five multiple-choice options (A-E) with exactly one correct answer.
+5. A short detailed explanation highlighting the pattern step by step and why the correct answer is correct.
+
+Additional Requirements:
+- Ensure that the front and back words are strictly four letters each. The letter in the brackets should appear more than once in the outer 
+words. The repeated letter should be at different positions in the front and back word. There can be more than one repeated letter.
+- Ensure that every letter used in the answer comes from the letters present in the given front and back words.
+- The answer in the brackets must be a real word and have the same number of letters as the word in the first set of brackets.
+- The puzzle must be designed so that there is only one possible answer that meets all criteria. The first letter does not have to come from the first position.
+Similarly, the second letter does not have to come from the second position and so on.
+
+Reasoning Approach:
+- Step 1: Starting from the first letter of the given word in the brackets, identify the corresponding letter positions from the front and/or back word.
+The letter may be present in both the front and the back word, so list all the possibilities down. Apply the same letter positions to the first letter to
+find the first letter of the missing word using the second set of words given.
+- Step 2: Repeat Step 1 for the second, third and fourth letter.
+- Now, you will have one or a few possible letters for each position of the missing letter. This is because for some positions, the letter may only come from one 
+specific position of either the back or front word. For other positions, the letter may come from one position of the front word and another from the back word.
+- To find the answer, consider all possible letter combinations and identify the only real word among them.
+
+Ensure that both sets follow the same strictly defined pattern and that no fabricated words or letters are introduced that do not 
+belong to the front or back words.
+
+Use the format of the examples given.
+
+-----
+USER MESSAGE (FEW-SHOT EXAMPLES):
+
+## EXAMPLE PUZZLE 1
+TITLE: Use a Rule to Make a Word
+
+INSTRUCTIONS:
+The words in the second set follow the same pattern as the words in the first set.
+Find the missing word to complete the second set.
+
+rely (yell) tale        scum (?) mane
+
+Which of the following is the missing word?
+A) menu <-- Correct
+B) same
+C) muse
+D) cane
+E) scan
+
+DETAILED EXPLANATION:
+
+For each set, the four‑letter word in the brackets is formed as follows:
+- Letter 1: Comes from the fourth letter of the front word
+- Letter 2: Comes from either the second letter of the front word or fourth letter of the back word
+- Letter 3: Comes from either the third letter of the front word or third letter of the back word
+- Letter 4: Comes from either the third letter of the front word or third letter of the back word
+
+To find the definite position of the letters, perform a step-by-step on both sets.
+
+Step-by-Step for Set 1:
+- Front Word "rely": Letters R, E, L, Y
+- Back Word "tale": Letters T, A, L, E
+- Letter in Brackets "yell": Letters Y, E, L, L
+
+Step 1: Look at the first letter "Y"
+- Comes from the front's fourth letter
+Step 2: Look at the second letter "E"
+- Comes from either the front's second letter or the back's fourth letter
+Step 3: Look at the third letter "L"
+- Comes from either the front's third letter or the back's third letter
+Step 4: Look at the fourth letter "L"
+- Comes from either the front's third letter or the back's third letter
+
+
+Step-by-Step for Set 2:
+- Front Word "rely": Letters S, C, U, M
+- Back Word "tale": Letters M, A, N, E
+
+Step 1 (first letter): First letter comes from the front's fourth letter (M)
+Step 2 (second letter): Second letter comes from either the front's second letter (C) or the back's fourth letter (E)
+Step 3 (third letter): Third letter comes from either the front's third letter (U) or the back's third letter (N)
+Step 4 (fourth letter): Fourth letter comes from either the front's third letter (U) or the back's third letter (N)
+Step 5 (find all possible combinations): The possible letter combinations are "mcuu", "mcun", "mcnu", "mcnn", "meuu", "meun", "menu" and "menn"
+Step 6: Out of all these possible combinations, only "menu" is a real word, so "menu" is the answer.
+
+The correct answer is "menu".
+
+---
+
+## EXAMPLE PUZZLE 2
+TITLE: Use a Rule to Make a Word
+
+INSTRUCTIONS:
+The words in the second set follow the same pattern as the words in the first set.
+Find the missing word to complete the second set.
+
+poet (port) part        wept (?) stag
+
+Which of the following is the missing word?
+A) pets
+B) weat
+C) taps
+D) seat <-- Correct
+E) wasp
+
+DETAILED EXPLANATION:
+
+For each set, the four‑letter word in the bracket is formed as follows:
+- Letter 1: Comes from either the first letter of the front word or first letter of the back word
+- Letter 2: Comes from the second letter of the front word
+- Letter 3: Comes from the third letter of the back word
+- Letter 4: Comes from either the fourth letter of the front word or fourth letter of the back word
+
+To find the definite position of the letters, perform a step-by-step on both sets.
+
+Step-by-Step for Set 1:
+- Front Word "poet": Letters P, O, E, T
+- Back Word "part": Letters P, A, R, T
+- Letter in Brackets "port": Letters P, O, R, T
+
+Step 1: Look at the first letter "P"
+- Comes from either the front's first letter or the back's first letter
+Step 2: Look at the second letter "O"
+- Comes from the front's second letter
+Step 3: Look at the third letter "R"
+- Comes from the backs's third letter
+Step 4: Look at the fourth letter "T"
+- Comes from either the front's fourth letter or the back's fourth letter
+
+
+Step-by-Step for Set 2:
+- Front Word "wept": Letters W, E, P, T
+- Back Word "stag": Letters S, T, A, G
+
+Step 1 (first letter): First letter comes from either the front's first letter (W) or the back's first letter (S)
+Step 2 (second letter): Second letter comes from the front's second letter (E)
+Step 3 (third letter): Third letter comes from the backs's third letter (A)
+Step 4 (fourth letter): Fourth letter comes from either the front's fourth letter (T) or the back's fourth letter (G)
+Step 5 (find all possible combinations): The possible letter combinations are "weat", "weag", "seat" and "seag"
+Step 6: Out of all these possible combinations, only "seat" is a real word, so "seat" is the answer.
+
+The correct answer is "seat".
+
+-----
+
+END OF EXAMPLES
+
+---
+
+ASSIGNMENT:
+Now, create ONE brand new "Use a Rule to Make a Word" puzzle in the exact same format as the above example.
+
+Reminder: 
+- The pattern used in your puzzle can be any rule for selecting letters from the front and back words, as long as it is consistent. 
+- Letter(s) from the word in the brackets should appear more than once in the outer words and be in different positions.
+- The step-by-step explanation should be similar to the ones given in the examples. Always consider all the possible positions the letter
+may be taken from, instead of fixing to a single positoin. Remember to consider all possible letter combinations. 
+- There can be more than one real word in the combinations, but only one should appear as an option. The answer must be definitive.
