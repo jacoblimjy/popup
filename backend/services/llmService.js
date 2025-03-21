@@ -129,7 +129,7 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: "gpt-4", // Use the appropriate model (gpt-4, gpt-3.5-turbo, etc.)
+        model: "gpt-4o", // Use the appropriate model (gpt-4, gpt-3.5-turbo, etc.)
         messages: [
           {
             role: "system",
@@ -145,7 +145,44 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
         ],
         temperature: 0.7,
         max_tokens: 3000,
-        response_format: { type: "json_object" },
+        response_format: { 
+          // TODO: We can refactor this schema to another file
+          type: "json_schema",
+          json_schema: {
+            name: "questions",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                questions:
+                {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      question_text: { type: "string" },
+                      answer_format: { 
+                        type: "string",
+                        // Enum values for answer format
+                        // We can edit the prompts yaml later on
+                        enum: ["multiple_choice"]
+                      },
+                      correct_answer: { type: "string" },
+                      explanation: { type: "string" },
+                      distractors: {
+                        type: "array",
+                        items: { type: "string" }
+                      },
+                    },
+                    required: ["question_text", "answer_format", "correct_answer", "explanation", "distractors"],
+                    additionalProperties: false,
+                  },
+                }
+              },
+              required: ["questions"],
+              additionalProperties: false
+            }
+          } },
       },
       {
         headers: {
@@ -156,6 +193,9 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
     );
 
     const content = response.data.choices[0]?.message?.content || "{}";
+
+    console.log(content);
+
     try {
       const parsedContent = JSON.parse(content);
       return parsedContent.questions || [];
