@@ -6,6 +6,7 @@ export interface Question {
   options: string[];
   topic_id: number;
   difficulty_id: number;
+  explanation: string;
   child_answer: string | null;
   time_taken: number;
 }
@@ -16,6 +17,7 @@ export interface QuestionApiResponse {
   answer_format: string;
   correct_answer: string;
   distractors: string[];
+  explanation: string;
   topic_id: number;
   difficulty_id: number;
   date_created: string;

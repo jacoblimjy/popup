@@ -6,7 +6,7 @@ interface QuestionReviewProps {
   question_number: number;
 }
 
-const QuestionReview = ({ question: { question_text, correct_answer, options, child_answer, time_taken }, question_number }: QuestionReviewProps) => {
+const QuestionReview = ({ question: { question_text, correct_answer, options, child_answer, time_taken, explanation }, question_number }: QuestionReviewProps) => {
   return (
     <div className="flex flex-col p-4 gap-4">
       <p className="text-sm font-medium">Question {question_number + 1}</p>
@@ -43,7 +43,7 @@ const QuestionReview = ({ question: { question_text, correct_answer, options, ch
         </div>
         <div className="flex flex-col gap-4 grow-1 rounded-md border border-gray-300 p-4">
           <p className="text-sm font-medium">Explanation of the answer</p>
-          <p className="text-sm text-gray-500">Sample explanation answer</p>
+          <p className="text-sm text-gray-500">{explanation}</p>
         </div>
       </div>
     </div>

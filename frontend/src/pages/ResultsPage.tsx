@@ -12,7 +12,6 @@ const ResultsPage = () => {
   const correct_answers = location.state?.correct_answers as number;
   const score = location.state?.score as number;
 
-  console.log(questions_attempt)
   return (
     <div className="flex flex-col p-10">
       <p className="text-2xl font-semibold">Review</p>

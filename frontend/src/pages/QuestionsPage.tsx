@@ -63,6 +63,7 @@ const QuestionsPage = () => {
             question.distractors,
             question.correct_answer
           ),
+          explanation: question.explanation,
           topic_id: question.topic_id,
           difficulty_id: question.difficulty_id,
           selectedOption: null,
