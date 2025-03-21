@@ -29,7 +29,7 @@ specific position of either the back or front word. For other positions, the let
 Ensure that both sets follow the same strictly defined pattern and that no fabricated words or letters are introduced that do not 
 belong to the front or back words.
 
-Use the format of the examples given.
+Follow the format of the examples given.
 
 -----
 USER MESSAGE (FEW-SHOT EXAMPLES):
@@ -153,9 +153,17 @@ END OF EXAMPLES
 ASSIGNMENT:
 Now, create ONE brand new "Use a Rule to Make a Word" puzzle in the exact same format as the above example.
 
+Give the output in the following json format:
+{
+    "question_text":
+    "correct_answer":
+    "explanation":
+    "distractors":
+}
+
 Reminder: 
 - The pattern used in your puzzle can be any rule for selecting letters from the front and back words, as long as it is consistent. 
 - Letter(s) from the word in the brackets should appear more than once in the outer words and be in different positions.
 - The step-by-step explanation should be similar to the ones given in the examples. Always consider all the possible positions the letter
-may be taken from, instead of fixing to a single positoin. Remember to consider all possible letter combinations. 
+may be taken from, instead of fixing to a single position. Remember to consider all possible letter combinations. 
 - There can be more than one real word in the combinations, but only one should appear as an option. The answer must be definitive.
