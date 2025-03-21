@@ -9,18 +9,22 @@ def jumble_word(word, distractors):
         if jumbled not in distractors and jumbled != word:
             return jumbled
 
-# anagram evaluation - all options and jumbled are rearrangements of the correct answer
+# anagram evaluation 
+# - all options and jumbled are rearrangements of the correct answer
+# - no duplicated words in correct answer, jumbled word and distractors
 def validate_anagrams(jumbled, correct_word, distractor_words):
     all_words = [jumbled, correct_word] + distractor_words
     sorted_correct = sorted(correct_word)
-    print(sorted_correct)
+
+    if len(set(all_words)) != len(all_words):
+        raise ValueError(f"Duplicate words detected")
 
     for word in all_words:
         print(sorted(word))
         if sorted(word) != sorted_correct:
             raise ValueError(f"Invalid anagram found: {word} is not an anagram of {correct_word}")
-
-# output json
+    
+# MAIN FUNCTION: output json
 def process_json(input):
     correct_answer = input["correct_answer"]
     capitalized = correct_answer.split(", ")[1].strip("()")
