@@ -6,7 +6,7 @@ export interface Question {
   options: string[];
   topic_id: number;
   difficulty_id: number;
-  selectedOption: string | null;
+  child_answer: string | null;
   time_taken: number;
 }
 

@@ -41,6 +41,15 @@ const difficulty_levels = {
   3: "Hard"
 };
 
+const getMinutes = (milliseconds: number) => {
+  return `${Math.floor(milliseconds / 60000)}`;
+};
+
+const getSeconds = (milliseconds: number) => {
+  const secs = Math.floor((milliseconds % 60000) / 1000);
+  return secs < 10 ? `0${secs}` : `${secs}`;
+};
+
 let handleSessionTimeout: (() => void) | null = null;
 
 export const setSessionTimeoutHandler = (handler: () => void) => {
@@ -57,4 +66,6 @@ export {
   formatDetailedDate,
   topics,
   difficulty_levels,
+  getMinutes,
+  getSeconds
 }

@@ -1,0 +1,63 @@
+import { Question } from "../types/QuestionTypes";
+import { getMinutes, getSeconds } from "../utils";
+
+interface QuestionReviewProps {
+  question: Question;
+  question_number: number;
+}
+
+const QuestionReview = ({ question: { question_text, correct_answer, options, child_answer, time_taken }, question_number }: QuestionReviewProps) => {
+  console.log(correct_answer, child_answer)
+  const formatTime = (milliseconds: number) => {
+    const hours = Math.floor(milliseconds / 3600000);
+    const minutes = getMinutes(milliseconds % 3600000);
+    const seconds = getSeconds(milliseconds);
+    return `${hours}:${minutes.padStart(2, '0')}:${seconds}`;
+  };
+
+
+
+  return (
+    <div className="flex flex-col p-4 gap-4">
+      <p className="text-sm font-medium">Question {question_number + 1}</p>
+      <p className="text-sm text-gray-500">{question_text}</p>
+      <div className="bg-[#f1c40e] w-fit rounded-md p-2 text-gray-600 text-sm">
+        <p>Time Taken: {formatTime(time_taken)}</p>
+      </div>
+      <div className="flex md:flex-row flex-col w-full gap-8">
+        <div className="flex flex-col gap-2 rounded-md border border-gray-300 md:w-2/5">
+          {options.map((option, index) => (
+            <div
+              key={index}
+              className={`flex gap-2 p-2 ${option === correct_answer
+                  ? 'bg-green-100'
+                  : option === child_answer
+                    ? 'bg-red-100'
+                    : ''
+                } ${index === 0 ? 'rounded-t-md' : ''} ${index === options.length - 1 ? 'rounded-b-md' : ''
+                }`}
+            >
+              <div className={`w-6 h-6 flex items-center justify-center border border-gray-300 rounded-full ${option === correct_answer ? 'bg-green-500' : option === child_answer ? 'bg-red-500' : ''}`}>
+                {option === correct_answer ? (
+                  <span className="text-white">✔</span>
+                ) : option === child_answer ? (
+                  <span className="text-white">✘</span>
+                ) : null}
+              </div>
+              <p className="text-sm flex items-center">{option}</p>
+              {option === correct_answer && correct_answer === child_answer && <p className="flex items-center text-sm text-green-600">You answered correctly</p>}
+              {option === correct_answer && correct_answer !== child_answer && <p className="flex items-center text-sm text-green-600">Correct Answer</p>}
+              {option === child_answer && child_answer !== correct_answer && <p className="flex items-center text-sm text-red-600">Your Answer</p>}
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-col gap-4 grow-1 rounded-md border border-gray-300 p-4">
+          <p className="text-sm font-medium">Explanation of the answer</p>
+          <p className="text-sm text-gray-500">Sample explanation answer</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default QuestionReview

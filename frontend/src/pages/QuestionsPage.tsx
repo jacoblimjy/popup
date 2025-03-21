@@ -5,6 +5,7 @@ import Loader from "../components/Loader";
 import wallpaper from "../assets/wallpaper.jpg";
 import { ArrowLeft } from "lucide-react";
 import QuestionApi from "../api/QuestionApi";
+import { getMinutes, getSeconds } from "../utils";
 
 const QuestionsPage = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const QuestionsPage = () => {
   const [questionList, setQuestionList] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<string>("");
+  const [childAnswer, setChildAnswer] = useState<string>("");
   const [elapsedTime, setElapsedTime] = useState(0); // Stopwatch state
 
   useEffect(() => {
@@ -78,41 +79,34 @@ const QuestionsPage = () => {
   };
 
   const handleSelectOption = (option: string) => {
-    if (selectedOption === option) {
-      setSelectedOption("");
+    if (childAnswer === option) {
+      setChildAnswer("");
       return;
     }
-    setSelectedOption(option);
+    setChildAnswer(option);
   };
 
   const handleContinue = () => {
     // Update selected option in the current question
     const updatedQuestionList = [...questionList];
-    updatedQuestionList[currentQuestionIndex].selectedOption = selectedOption;
+    updatedQuestionList[currentQuestionIndex].child_answer = childAnswer;
     updatedQuestionList[currentQuestionIndex].time_taken = elapsedTime;
     setQuestionList(updatedQuestionList);
     setCurrentQuestionIndex(currentQuestionIndex + 1);
-    setSelectedOption("");
+    setChildAnswer("");
     setElapsedTime(0); // Reset stopwatch for the next question
   };
 
   const handleSubmit = () => {
     const updatedQuestionList = [...questionList];
-    updatedQuestionList[currentQuestionIndex].selectedOption = selectedOption;
+    updatedQuestionList[currentQuestionIndex].child_answer = childAnswer;
     updatedQuestionList[currentQuestionIndex].time_taken = elapsedTime;
     setQuestionList(updatedQuestionList);
 
     console.log(updatedQuestionList);
     // TODO: Call submit API
-  };
 
-  const getMinutes = (milliseconds: number) => {
-    return `${Math.floor(milliseconds / 60000)}`;
-  };
-  
-  const getSeconds = (milliseconds: number) => {
-    const secs = Math.floor((milliseconds % 60000) / 1000);
-    return secs < 10 ? `0${secs}` : `${secs}`;
+    navigate("/results", { state: { questions_attempt: updatedQuestionList } });
   };
 
   return (
@@ -160,7 +154,7 @@ const QuestionsPage = () => {
                     <button
                       key={index}
                       onClick={() => handleSelectOption(option)}
-                      className={`${selectedOption === option
+                      className={`${childAnswer === option
                         ? "bg-[#a18402]"
                         : "bg-[#f1c40e]"
                         } text-white py-2 px-4 rounded-lg mt-2 w-full`}
@@ -177,7 +171,7 @@ const QuestionsPage = () => {
                     : handleContinue
                 }
                 className="disabled:bg-purple-300 bg-purple-600 text-white py-2 px-4 rounded-lg mt-20"
-                disabled={selectedOption === ""}
+                disabled={childAnswer === ""}
               >
                 {currentQuestionIndex === questionList.length - 1
                   ? "Submit"
