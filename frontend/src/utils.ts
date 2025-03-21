@@ -50,6 +50,13 @@ const getSeconds = (milliseconds: number) => {
   return secs < 10 ? `0${secs}` : `${secs}`;
 };
 
+const formatTime = (milliseconds: number) => {
+  const hours = Math.floor(milliseconds / 3600000);
+  const minutes = getMinutes(milliseconds % 3600000);
+  const seconds = getSeconds(milliseconds);
+  return `${hours}:${minutes.padStart(2, '0')}:${seconds}`;
+};
+
 let handleSessionTimeout: (() => void) | null = null;
 
 export const setSessionTimeoutHandler = (handler: () => void) => {
@@ -67,5 +74,6 @@ export {
   topics,
   difficulty_levels,
   getMinutes,
-  getSeconds
+  getSeconds,
+  formatTime
 }

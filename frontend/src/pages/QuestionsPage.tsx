@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Question, QuestionApiResponse } from "../types/QuestionTypes";
 import Loader from "../components/Loader";
@@ -6,15 +6,21 @@ import wallpaper from "../assets/wallpaper.jpg";
 import { ArrowLeft } from "lucide-react";
 import QuestionApi from "../api/QuestionApi";
 import { getMinutes, getSeconds } from "../utils";
+import AttemptedSetsApi from "../api/AttemptedSetsApi";
+import { useChildrenList } from "../hooks/useChildrenList";
+
 
 const QuestionsPage = () => {
   const navigate = useNavigate();
+  const { activeChild } = useChildrenList();
   const { topic_id, difficulty_id } = useParams();
   const [questionList, setQuestionList] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [childAnswer, setChildAnswer] = useState<string>("");
   const [elapsedTime, setElapsedTime] = useState(0); // Stopwatch state
+  const [totalElapsedTime, setTotalElapsedTime] = useState(0);
+  const totalStopwatchRef = useRef<number | null>(null); // Ref to store the interval ID
 
   useEffect(() => {
     getQuestions();
@@ -47,7 +53,7 @@ const QuestionsPage = () => {
         difficulty_id
       );
 
-      const questions : Question[] = apiResponse.map((question: QuestionApiResponse) => {
+      const questions: Question[] = apiResponse.map((question: QuestionApiResponse) => {
         return {
           question_id: question.question_id,
           question_text: question.question_text,
@@ -67,8 +73,29 @@ const QuestionsPage = () => {
       setQuestionList(questions);
       setCurrentQuestionIndex(0);
       setElapsedTime(0); // Reset stopwatch
+      setTotalElapsedTime(0); // Reset total time
+      startTotalStopwatch(); // Start total stopwatch after questions are set
       setIsLoading(false);
     }, 1000);
+  };
+
+  const startTotalStopwatch = () => {
+    // Clear any existing interval
+    if (totalStopwatchRef.current) {
+      clearInterval(totalStopwatchRef.current);
+    }
+
+    // Start a new interval
+    totalStopwatchRef.current = setInterval(() => {
+      setTotalElapsedTime((prevTime) => prevTime + 100);
+    }, 100);
+  };
+
+  const stopTotalStopwatch = () => {
+    if (totalStopwatchRef.current) {
+      clearInterval(totalStopwatchRef.current);
+      totalStopwatchRef.current = null;
+    }
   };
 
   const insertAnswerAtRandomIndex = (options: string[], correctAnswer: string) => {
@@ -92,21 +119,42 @@ const QuestionsPage = () => {
     updatedQuestionList[currentQuestionIndex].child_answer = childAnswer;
     updatedQuestionList[currentQuestionIndex].time_taken = elapsedTime;
     setQuestionList(updatedQuestionList);
+
     setCurrentQuestionIndex(currentQuestionIndex + 1);
     setChildAnswer("");
     setElapsedTime(0); // Reset stopwatch for the next question
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const updatedQuestionList = [...questionList];
     updatedQuestionList[currentQuestionIndex].child_answer = childAnswer;
     updatedQuestionList[currentQuestionIndex].time_taken = elapsedTime;
     setQuestionList(updatedQuestionList);
 
-    console.log(updatedQuestionList);
-    // TODO: Call submit API
+    stopTotalStopwatch(); // Stop the total stopwatch on submit
 
-    navigate("/results", { state: { questions_attempt: updatedQuestionList } });
+    console.log(updatedQuestionList);
+
+    // TODO: Call submit API
+    try {
+      const total_questions = questionList.length;
+      const correct_answers = questionList.filter(
+        (question) => question.correct_answer === question.child_answer
+      ).length;
+      const score = (correct_answers / total_questions * 100).toFixed(2);
+      await AttemptedSetsApi.createAttemptedSet({
+        child_id: activeChild!.child_id,
+        topic_id: parseInt(topic_id || ""),
+        total_questions: total_questions,
+        correct_answers: correct_answers,
+        score: parseFloat(score),
+        time_spent: totalElapsedTime,
+
+      });
+      navigate("/results", { state: { questions_attempt: updatedQuestionList, total_time: totalElapsedTime, total_questions: total_questions, correct_answers: correct_answers, score: score } });
+    } catch (error) {
+      console.error("Error submitting answers", error);
+    }
   };
 
   return (

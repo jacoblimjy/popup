@@ -1,12 +1,16 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Question } from "../types/QuestionTypes";
 import QuestionReview from "../components/QuestionReview";
+import { formatTime } from "../utils";
 
 const ResultsPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const questions_attempt = location.state?.questions_attempt as Question[];
-  const score = 7;
-  const total_score = 10;
+  const total_time = location.state?.total_time as number;
+  const total_questions = location.state?.total_questions as number;
+  const correct_answers = location.state?.correct_answers as number;
+  const score = location.state?.score as number;
 
   console.log(questions_attempt)
   return (
@@ -17,21 +21,21 @@ const ResultsPage = () => {
           <div className="flex justify-between">
             <p className="text-md font-medium">Practice 4</p>
             <div className="inline-flex items-center gap-2">
-              <p className="text-md font-medium">Score: {score}/{total_score}</p>
+              <p className="text-md font-medium">Score: {correct_answers}/{total_questions}</p>
               <div className="w-24 bg-gray-200 rounded-full h-2.5">
                 <div
                   className="bg-[#f1c40e] h-2.5 rounded-full"
-                  style={{ width: `${(score / total_score) * 100}%` }}
+                  style={{ width: `${(correct_answers / total_questions) * 100}%` }}
                 ></div>
               </div>
               <p className="text-sm text-gray-400">
-                {((score / total_score) * 100)}%
+                {score}%
               </p>
             </div>
           </div>
           <div className="flex gap-8">
             <p className="text-xs text-gray-400">Attempted on: 12th July 2025 | 12:47pm</p>
-            <p className="text-xs text-gray-400">Time Taken: 0:21:17</p>
+            <p className="text-xs text-gray-400">Time Taken: {formatTime(total_time)}</p>
           </div>
         </div>
         <hr className="w-full text-gray-300" />
@@ -43,9 +47,11 @@ const ResultsPage = () => {
         ))}
       </div>
       <button
-
-        className="disabled:bg-purple-300 bg-[#f1c40e] text-white py-2 px-4 rounded-lg w-fit mx-auto"
-      >Back</button>
+        className="bg-[#f1c40e] text-white py-2 px-4 rounded-lg w-fit mx-auto"
+        onClick={() => navigate("/")}
+      >
+        Close
+      </button>
     </div>
   )
 }

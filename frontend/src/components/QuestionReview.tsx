@@ -1,5 +1,5 @@
 import { Question } from "../types/QuestionTypes";
-import { getMinutes, getSeconds } from "../utils";
+import { formatTime } from "../utils";
 
 interface QuestionReviewProps {
   question: Question;
@@ -7,16 +7,6 @@ interface QuestionReviewProps {
 }
 
 const QuestionReview = ({ question: { question_text, correct_answer, options, child_answer, time_taken }, question_number }: QuestionReviewProps) => {
-  console.log(correct_answer, child_answer)
-  const formatTime = (milliseconds: number) => {
-    const hours = Math.floor(milliseconds / 3600000);
-    const minutes = getMinutes(milliseconds % 3600000);
-    const seconds = getSeconds(milliseconds);
-    return `${hours}:${minutes.padStart(2, '0')}:${seconds}`;
-  };
-
-
-
   return (
     <div className="flex flex-col p-4 gap-4">
       <p className="text-sm font-medium">Question {question_number + 1}</p>
