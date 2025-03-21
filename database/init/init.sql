@@ -127,7 +127,7 @@ CREATE TABLE LLM_Calls (
 -- TODO: Refactor this elsewhere
 
 -- Seed Roles table
-INSERT INTO Roles (role_id, role_name) VALUES (1, 'parent');
+INSERT INTO Roles (role_id, role_name) VALUES (1, 'admin') (2, 'parent') (3, 'other');
 
 -- Seed Users table
 INSERT INTO Users (username, email, password_hash, role_id, date_created) VALUES 

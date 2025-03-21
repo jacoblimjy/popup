@@ -1,19 +1,37 @@
 const express = require("express");
 const router = express.Router();
 const pendingQuestionController = require("../controllers/pendingQuestionController");
+const {
+  authenticateToken,
+  authorizeRole,
+} = require("../middleware/authMiddleware");
 
-router.post("/", pendingQuestionController.createPendingQuestion);
+const adminOnly = [authenticateToken, authorizeRole([1])];
 
-router.post("/bulk", pendingQuestionController.createPendingQuestionsBulk);
+router.post("/", adminOnly, pendingQuestionController.createPendingQuestion);
 
-router.post("/convert/:id", pendingQuestionController.convertPendingQuestionToQuestion);
+router.post(
+  "/bulk",
+  adminOnly,
+  pendingQuestionController.createPendingQuestionsBulk
+);
 
-router.get("/", pendingQuestionController.getPendingQuestions);
+router.post(
+  "/convert/:id",
+  adminOnly,
+  pendingQuestionController.convertPendingQuestionToQuestion
+);
 
-router.get("/:id", pendingQuestionController.getPendingQuestionById);
+router.get("/", adminOnly, pendingQuestionController.getPendingQuestions);
 
-router.put("/:id", pendingQuestionController.updatePendingQuestion);
+router.get("/:id", adminOnly, pendingQuestionController.getPendingQuestionById);
 
-router.delete("/:id", pendingQuestionController.deletePendingQuestion);
+router.put("/:id", adminOnly, pendingQuestionController.updatePendingQuestion);
+
+router.delete(
+  "/:id",
+  adminOnly,
+  pendingQuestionController.deletePendingQuestion
+);
 
 module.exports = router;
