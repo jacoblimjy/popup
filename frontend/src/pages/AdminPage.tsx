@@ -7,7 +7,7 @@ import {
 	FilePlus,
 } from "lucide-react";
 
-/** Dummy Data for Pending Questions */
+// Dummy Data for Pending Questions (now including distractors)
 const DUMMY_QUESTIONS = [
 	{
 		id: 1,
@@ -16,6 +16,7 @@ const DUMMY_QUESTIONS = [
 		question: `If you remove the first letter from a 5-letter word meaning "small stream" and add "EN" at the end, you get a new word meaning "writing instrument". What is the original word?`,
 		answer: "BROOK",
 		explanation: `BROOK (small stream) -> ROOK + EN = ROOKEN (writing instrument)`,
+		distractors: ["RIVER", "STREAM", "BANK", "FLOW"],
 		date: "2023-03-15",
 	},
 	{
@@ -24,21 +25,22 @@ const DUMMY_QUESTIONS = [
 		difficulty: "Easy",
 		question: `GRASS is to GREEN as SKY is to _____`,
 		answer: "BLUE",
-		explanation: `GRASS is GREEN in color. Similarly, SKY is BLUE in color.`,
+		explanation: `Grass is green in colour; similarly, the sky is blue.`,
+		distractors: ["RED", "YELLOW", "PURPLE", "ORANGE"],
 		date: "2023-03-15",
 	},
 	{
 		id: 3,
 		type: "Word Ladders",
 		difficulty: "Easy",
-		question: `Change COLD to WARM in exactly 4 steps, changing only one letter at a time to make a new word at each step.`,
-		answer: `COLD -> ... -> WARM`,
-		explanation: `A typical ladder could be: COLD -> CORD -> WORD -> WORM -> WARM`,
+		question: `Change COLD to WARM in exactly 4 steps, changing one letter at a time.`,
+		answer: `COLD -> CORD -> WORD -> WORM -> WARM`,
+		explanation: `A typical ladder: COLD -> CORD -> WORD -> WORM -> WARM`,
+		distractors: ["BOLD", "FOLD", "WOLD", "COLDY"],
 		date: "2023-03-15",
 	},
 ];
 
-// Action types that require a simple confirm modal
 type ActionType = "generate" | "approve" | "reject";
 
 interface Question {
@@ -48,6 +50,7 @@ interface Question {
 	question: string;
 	answer: string;
 	explanation: string;
+	distractors: string[];
 	date: string;
 }
 
@@ -78,16 +81,18 @@ const AdminInterface: React.FC = () => {
 	const [showEditModal, setShowEditModal] = useState(false);
 	const [showConfirmEditModal, setShowConfirmEditModal] = useState(false);
 
-	// The data we are editing
+	// The data we are editing now includes distractors.
 	const [editData, setEditData] = useState<{
 		id: number;
 		question: string;
 		answer: string;
+		distractors: string[];
 		explanation: string;
 	}>({
 		id: 0,
 		question: "",
 		answer: "",
+		distractors: ["", "", "", ""],
 		explanation: "",
 	});
 
@@ -102,9 +107,8 @@ const AdminInterface: React.FC = () => {
 
 	// ====== GENERATE ======
 	const requestGenerateQuestions = () => {
-		// Quick check to ensure at least one question type
 		if (questionTypes.length === 0) {
-			alert("Please select at least one question type before generating.");
+			alert("Please select at least one topic.");
 			return;
 		}
 		setCurrentAction("generate");
@@ -129,11 +133,11 @@ const AdminInterface: React.FC = () => {
 	const requestEdit = (questionId: number) => {
 		const q = pendingQuestions.find((item) => item.id === questionId);
 		if (!q) return;
-		// Put relevant fields into editData
 		setEditData({
 			id: q.id,
 			question: q.question,
 			answer: q.answer,
+			distractors: q.distractors,
 			explanation: q.explanation,
 		});
 		setShowEditModal(true);
@@ -153,7 +157,6 @@ const AdminInterface: React.FC = () => {
 
 	const confirmAction = async () => {
 		if (!currentAction) return;
-
 		setIsProcessing(true);
 		try {
 			switch (currentAction) {
@@ -163,7 +166,6 @@ const AdminInterface: React.FC = () => {
 						difficulty,
 						numberOfQuestions,
 					});
-					// Simulate an API call
 					await new Promise((res) => setTimeout(res, 500));
 					alert("Questions generated! (Dummy)");
 					break;
@@ -212,7 +214,6 @@ const AdminInterface: React.FC = () => {
 
 	const confirmSaveEdit = async () => {
 		try {
-			// 1) Update in local state
 			setPendingQuestions((prev) =>
 				prev.map((q) =>
 					q.id === editData.id
@@ -220,16 +221,14 @@ const AdminInterface: React.FC = () => {
 								...q,
 								question: editData.question,
 								answer: editData.answer,
+								distractors: editData.distractors,
 								explanation: editData.explanation,
 						  }
 						: q
 				)
 			);
-
-			// 2) Close modals
 			setShowConfirmEditModal(false);
 			setShowEditModal(false);
-
 			alert("Question updated successfully! ✅");
 		} catch (err) {
 			console.error("Failed to edit question", err);
@@ -353,7 +352,6 @@ const AdminInterface: React.FC = () => {
 								className="w-20 border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
 								value={numberOfQuestions}
 								onChange={(e) => {
-									// Clamp the input to [1..5]
 									let newVal = Number(e.target.value);
 									if (newVal < 1) newVal = 1;
 									if (newVal > 5) newVal = 5;
@@ -428,8 +426,12 @@ const AdminInterface: React.FC = () => {
 								<p className="text-sm text-gray-700 font-semibold">
 									Answer: {q.answer}
 								</p>
+								{/* Distractors */}
+								<p className="text-sm text-gray-700 mt-1">
+									Distractors: {q.distractors.join(", ")}
+								</p>
 
-								{/* Collapsible Explanation */}
+								{/* Explanation Collapsible */}
 								<button
 									className="flex items-center text-blue-600 text-sm mt-2 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-200"
 									onClick={() => toggleExplanation(q.id)}
@@ -494,7 +496,6 @@ const AdminInterface: React.FC = () => {
 			{/* === 1) SIMPLE CONFIRM MODAL === */}
 			{showConfirmModal && currentAction && (
 				<div className="fixed inset-0 flex items-center justify-center z-50 bg-transparent">
-					{/* Modal Card */}
 					<div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200 w-96">
 						<h2 className="text-lg font-semibold text-gray-900">
 							{(() => {
@@ -580,6 +581,26 @@ const AdminInterface: React.FC = () => {
 								}
 								className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-200"
 							/>
+						</div>
+
+						{/* DISTRACTORS - Moved Under Answer */}
+						<div className="mt-4">
+							<label className="block text-sm font-medium text-gray-700">
+								Distractors
+							</label>
+							{editData.distractors.map((d, index) => (
+								<input
+									key={index}
+									type="text"
+									value={d}
+									onChange={(e) => {
+										const newDistractors = [...editData.distractors];
+										newDistractors[index] = e.target.value;
+										setEditData({ ...editData, distractors: newDistractors });
+									}}
+									className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-200 mb-2"
+								/>
+							))}
 						</div>
 
 						{/* EXPLANATION */}
