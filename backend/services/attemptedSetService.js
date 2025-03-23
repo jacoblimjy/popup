@@ -46,7 +46,7 @@ const getAttemptedSetsByFilters = async (filters = {}, page = 1, limit = 10) => 
       qs.correct_answer,
       qs.distractors,
       qs.difficulty_id,
-      qs.topic_id,
+      qs.topic_id as question_topic_id,
       qs.explanation
     FROM Attempted_Sets ats
     LEFT JOIN Attempted_Questions aq ON ats.set_id = aq.set_id
