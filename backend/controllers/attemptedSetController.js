@@ -46,26 +46,24 @@ const updateAttemptedSet = async (req, res) => {
   }
 };
 
-const getAttemptedSetsByChildId = async (req, res) => {
+const getAttemptedSetsByFilters = async (req, res) => {
   try {
-    const { child_id, page = 1, limit = 10 } = req.query;
+    const { child_id, topic_id, set_id, difficulty_id } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
 
-    // Check if Child exists, return 404 if not
-    const child = await childrenService.getChildById(child_id);
-    if (child.length < 1) {
-      return res.status(404).json({
-        message: "Child not found",
-      });
-    }
+    const filters = { child_id, topic_id, set_id, difficulty_id };
 
-    const attemptedSets = await attemptedSetService.getAttemptedSetsByChildId(child_id, page, limit);
-    res.json(attemptedSets);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
+    Object.keys(filters).forEach(key => {
+      if (!filters[key]) delete filters[key];
     });
+
+    const attemptedSets = await attemptedSetService.getAttemptedSetsByFilters(filters, page, limit);
+    res.status(200).json(attemptedSets);
+
+  } catch (error) {
+    console.error("Error fetching attempted sets with questions:", error.message);
+    res.status(500).json({ message: "Failed to fetch attempted sets with questions" });
   }
 };
 
@@ -124,7 +122,7 @@ const deleteAttemptedSetsByChildId = async (req, res) => {
 module.exports = {
   createAttemptedSet,
   updateAttemptedSet,
-  getAttemptedSetsByChildId,
+  getAttemptedSetsByFilters,
   deleteAttemptedSetById,
   deleteAttemptedSetsByChildId,
 };
