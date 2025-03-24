@@ -174,15 +174,6 @@ END$$
 
 DELIMITER ;
 
-CREATE TABLE LLM_Calls (
-    llm_call_id INTEGER PRIMARY KEY,
-    prompt_text TEXT,
-    response_text TEXT,
-    tokens_used INTEGER,
-    date_called TIMESTAMP
-);
-
-
 -- Seed Tables for testing, you can comment out if not needed
 -- Its here because I need this to run after init, but docker-compose runs both at the same time, and Im lazy to write a script to run them in order
 -- TODO: Refactor this elsewhere
