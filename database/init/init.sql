@@ -113,6 +113,67 @@ CREATE TABLE Attempted_Questions (
     FOREIGN KEY (set_id) REFERENCES Attempted_Sets(set_id) ON DELETE CASCADE -- if set is deleted, delete all its attempted questions
 );
 
+-- Trigger to update Child_Performance after inserting into Attempted_Questions
+DELIMITER $$
+
+CREATE TRIGGER after_insert_attempted_questions
+AFTER INSERT ON Attempted_Questions
+FOR EACH ROW
+BEGIN
+    DECLARE current_correct_answers INT;
+    DECLARE current_questions_attempted INT;
+    DECLARE current_time_spent INT;
+    DECLARE new_accuracy_score FLOAT;
+
+    -- Check if a record already exists in Child_Performance for the same child_id, topic_id, and difficulty_level
+    IF EXISTS (
+        SELECT 1
+        FROM Child_Performance
+        WHERE child_id = NEW.child_id
+          AND topic_id = (SELECT topic_id FROM Questions WHERE question_id = NEW.question_id)
+          AND difficulty_level = (SELECT difficulty_id FROM Questions WHERE question_id = NEW.question_id)
+    ) THEN
+        -- Incrementally update the metrics
+        UPDATE Child_Performance
+        SET 
+            questions_attempted = questions_attempted + 1,
+            time_spent = time_spent + NEW.time_spent,
+            accuracy_score = ROUND(
+                (accuracy_score * questions_attempted + IF(NEW.is_correct, 100, 0)) / (questions_attempted + 1),
+                2
+            )
+        WHERE child_id = NEW.child_id
+          AND topic_id = (SELECT topic_id FROM Questions WHERE question_id = NEW.question_id)
+          AND difficulty_level = (SELECT difficulty_id FROM Questions WHERE question_id = NEW.question_id);
+    ELSE
+        -- Insert a new record if it doesn't exist
+        INSERT INTO Child_Performance (
+            child_id, 
+            topic_id, 
+            accuracy_score, 
+            estimated_proficiency, 
+            questions_attempted, 
+            time_spent, 
+            difficulty_level, 
+            current_mastery, 
+            date_recorded
+        )
+        VALUES (
+            NEW.child_id,
+            (SELECT topic_id FROM Questions WHERE question_id = NEW.question_id),
+            ROUND(IF(NEW.is_correct, 100, 0), 2), -- Initial accuracy score rounded to 2 decimal places
+            NULL, -- estimated_proficiency can be calculated separately if needed
+            1, -- First question attempted
+            NEW.time_spent, -- Initial time spent
+            (SELECT difficulty_id FROM Questions WHERE question_id = NEW.question_id),
+            NULL, -- current_mastery can be calculated separately if needed
+            CURDATE()
+        );
+    END IF;
+END$$
+
+DELIMITER ;
+
 CREATE TABLE LLM_Calls (
     llm_call_id INTEGER PRIMARY KEY,
     prompt_text TEXT,
@@ -127,7 +188,10 @@ CREATE TABLE LLM_Calls (
 -- TODO: Refactor this elsewhere
 
 -- Seed Roles table
-INSERT INTO Roles (role_id, role_name) VALUES (1, 'admin') (2, 'parent') (3, 'other');
+INSERT INTO Roles (role_id, role_name) VALUES 
+(1, 'admin'),
+(2, 'parent'), 
+(3, 'other');
 
 -- Seed Users table
 INSERT INTO Users (username, email, password_hash, role_id, date_created) VALUES 
@@ -173,11 +237,11 @@ INSERT INTO Pending_Questions (question_text, answer_format, correct_answer, dis
 ('Solve the word ladder: CAT -> COT -> ?', 'text', 'COT', '["DOG", "BAT", "RAT"]', 4, 3, "explanation 3", NOW(), NOW(), FALSE);
 
 
--- Seed Child_Performance table
-INSERT INTO Child_Performance (child_id, topic_id, accuracy_score, estimated_proficiency, questions_attempted, time_spent, difficulty_level, current_mastery, date_recorded) VALUES 
-(1, 1, 85.5, 90.0, 10, 120, 1, 'Intermediate', '2025-02-22'),
-(2, 2, 78.0, 85.0, 8, 100, 2, 'Beginner', '2025-02-22'),
-(3, 3, 92.0, 95.0, 12, 140, 3, 'Advanced', '2025-02-22');
+-- -- Seed Child_Performance table
+-- INSERT INTO Child_Performance (child_id, topic_id, accuracy_score, estimated_proficiency, questions_attempted, time_spent, difficulty_level, current_mastery, date_recorded) VALUES 
+-- (1, 1, 85.5, 90.0, 10, 120, 1, 'Intermediate', '2025-02-22'),
+-- (2, 2, 78.0, 85.0, 8, 100, 2, 'Beginner', '2025-02-22'),
+-- (3, 3, 92.0, 95.0, 12, 140, 3, 'Advanced', '2025-02-22');
 
 -- Seed Attempted_Sets table
 INSERT INTO Attempted_Sets (child_id, topic_id, total_questions, correct_answers, score, time_spent) VALUES 
