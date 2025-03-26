@@ -30,6 +30,34 @@ const formatDetailedDate = (date: string) : string => {
   return `${day}${daySuffix(day)} ${month} ${year}`;
 }
 
+const formatAttemptSetTimestamp = (date: string): string => {
+  console.log(date)
+  const dateObj = new Date(date); // Automatically converts to local time
+
+  const day = dateObj.getDate();
+  const month = dateObj.toLocaleString('en-US', { month: 'long' });
+  const year = dateObj.getFullYear();
+  const hours = dateObj.getHours();
+  const minutes = dateObj.getMinutes();
+  const ampm = hours >= 12 ? 'pm' : 'am';
+
+  const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+
+  const daySuffix = (day: number) => {
+    if (day > 3 && day < 21) return 'th';
+    switch (day % 10) {
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
+    }
+  };
+
+  return `${day}${daySuffix(day)} ${month} ${year} | ${formattedHours}:${formattedMinutes}${ampm}`;
+};
+
+
 const formatAttemptedQuestions = (questions : AttemptedQuestionResponse[]) => {
   const formattedQuestions : AttemptedQuestion[] = questions.map(({distractors, ...rest}) => ({
     ...rest,
@@ -98,4 +126,5 @@ export {
   formatTime,
   insertAnswerAtRandomIndex,
   formatAttemptedQuestions,
+  formatAttemptSetTimestamp,
 }

@@ -149,7 +149,7 @@ const QuestionsPage = () => {
       });
       const response = await AttemptedQuestionsApi.createAttemptedQuestionsBulk(updatedQuestionList, set_id, activeChild!.child_id);
       console.log(response)
-      navigate("/results", { state: { questions_attempt: updatedQuestionList, total_time: totalElapsedTime, total_questions: total_questions, correct_answers: correct_answers, score: score } });
+      navigate(`/results/${set_id}`);
     } catch (error) {
       console.error("Error submitting answers", error);
     }

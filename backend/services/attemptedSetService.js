@@ -35,66 +35,47 @@ const getAttemptedSetsByFilters = async (filters = {}, page = 1, limit = 10) => 
 
   const query = `
     SELECT 
-      ats.*, 
-      aq.aq_id, 
-      aq.question_id, 
-      aq.child_answer, 
-      aq.is_correct, 
-      aq.attempt_timestamp as question_attempt_timestamp, 
-      aq.time_spent as question_time_spent, 
-      qs.question_text,
-      qs.correct_answer,
-      qs.distractors,
-      qs.difficulty_id,
-      qs.topic_id as question_topic_id,
-      qs.explanation
+      ats.set_id,
+      ats.child_id,
+      ats.topic_id,
+      ats.total_questions,
+      ats.correct_answers,
+      ats.score,
+      ats.attempt_timestamp,
+      ats.time_spent,
+      JSON_ARRAYAGG(
+        JSON_OBJECT(
+          'aq_id', aq.aq_id,
+          'question_id', aq.question_id,
+          'child_answer', aq.child_answer,
+          'is_correct', aq.is_correct,
+          'attempt_timestamp', aq.attempt_timestamp,
+          'time_spent', aq.time_spent,
+          'question_text', qs.question_text,
+          'correct_answer', qs.correct_answer,
+          'distractors', qs.distractors,
+          'difficulty_id', qs.difficulty_id,
+          'question_topic_id', qs.topic_id,
+          'explanation', qs.explanation
+        )
+      ) AS attempted_questions
     FROM Attempted_Sets ats
     LEFT JOIN Attempted_Questions aq ON ats.set_id = aq.set_id
     LEFT JOIN Questions qs ON aq.question_id = qs.question_id
     ${conditions ? `WHERE ${conditions}` : ""}
+    GROUP BY ats.set_id
     ORDER BY ats.attempt_timestamp DESC
     LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
-    `;
+  `;
 
   const [rows] = await db.execute(query, params);
 
-  const groupedResults = rows.reduce((acc, row) => {
-    const setId = row.set_id;
-
-    if (!acc[setId]) {
-      acc[setId] = {
-        set_id: row.set_id,
-        child_id: row.child_id,
-        topic_id: row.topic_id,
-        total_questions: row.total_questions,
-        correct_answers: row.correct_answers,
-        score: row.score,
-        attempt_timestamp: row.attempt_timestamp,
-        time_spent: row.time_spent,
-        attempted_questions: [],
-      };
-    }
-
-    if (row.aq_id) {
-      acc[setId].attempted_questions.push({
-        aq_id: row.aq_id,
-        question_id: row.question_id,
-        questions_text: row.question_text,
-        difficulty_id: row.difficulty_id,
-        correct_answer: row.correct_answer,
-        distractors: row.distractors,
-        child_answer: row.child_answer,
-        is_correct: row.is_correct,
-        explanation: row.explanation,
-        attempt_timestamp: row.question_attempt_timestamp,
-        time_spent: row.question_time_spent,
-      });
-    }
-
-    return acc;
-  }, {});
-
-  return Object.values(groupedResults);
+  return rows.map(row => ({
+    ...row,
+    attempted_questions: typeof row.attempted_questions === 'string'
+      ? JSON.parse(row.attempted_questions || '[]')
+      : row.attempted_questions || [],
+  }));
 };
 
 // const getAttemptedSetById = async (set_id) => {

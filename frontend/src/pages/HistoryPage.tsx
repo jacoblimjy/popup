@@ -50,9 +50,9 @@ const HistoryPage = () => {
     averageScore: 98.8,
   };
 
-  const handleReviewAttempt = (attemptId: number) => {
-    console.log(`Reviewing attempt ${attemptId}`);
-    navigate("/review/" + attemptId);
+  const handleReviewAttempt = (setId: number) => {
+    console.log(`Reviewing attempt ${setId}`);
+    navigate(`/results/${setId}?review=true`);
   };
   return (
     <div className="relative flex flex-col items-center p-6 h-full">

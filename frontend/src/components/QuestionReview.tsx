@@ -1,18 +1,18 @@
-import { Question } from "../types/QuestionTypes";
+import { AttemptedQuestion } from "../types/AttemptTypes";
 import { formatTime } from "../utils";
 
 interface QuestionReviewProps {
-  question: Question;
+  question: AttemptedQuestion;
   question_number: number;
 }
 
-const QuestionReview = ({ question: { question_text, correct_answer, options, child_answer, time_taken, explanation }, question_number }: QuestionReviewProps) => {
+const QuestionReview = ({ question: { question_text, correct_answer, options, child_answer, time_spent, explanation }, question_number }: QuestionReviewProps) => {
   return (
     <div className="flex flex-col p-4 gap-4">
       <p className="text-sm font-medium">Question {question_number + 1}</p>
       <p className="text-sm text-gray-500">{question_text}</p>
       <div className="bg-[#f1c40e] w-fit rounded-md p-2 text-gray-600 text-sm">
-        <p>Time Taken: {formatTime(time_taken)}</p>
+        <p>Time Taken: {formatTime(time_spent)}</p>
       </div>
       <div className="flex md:flex-row flex-col w-full gap-8">
         <div className="flex flex-col gap-2 rounded-md border border-gray-300 md:w-2/5">

@@ -39,7 +39,16 @@ const getAttemptedSets = async (child_id : number, page_id: number = 1) : Promis
   });
 }
 
-const deleteAttemptedSetBySetId = async (set_id : number) => {
+const getAttemptedSetBySetId = async (set_id : string) : Promise<GetAttemptedSetResponse> => {
+  return apiClient(BASE_URL + `/${set_id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+const deleteAttemptedSetBySetId = async (set_id : string) => {
   return apiClient(BASE_URL + `/${set_id}`, {
     method: "DELETE",
     headers: {
@@ -63,6 +72,7 @@ export default {
   createAttemptedSet,
   updateAttemptedSet,
   getAttemptedSets,
+  getAttemptedSetBySetId,
   deleteAttemptedSetBySetId,
   deleteAttemptedSetByChildId
 }
