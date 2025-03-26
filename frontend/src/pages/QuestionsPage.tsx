@@ -8,6 +8,8 @@ import QuestionApi from "../api/QuestionApi";
 import { getMinutes, getSeconds, insertAnswerAtRandomIndex } from "../utils";
 import AttemptedSetsApi from "../api/AttemptedSetsApi";
 import { useChildrenList } from "../hooks/useChildrenList";
+import { CreateAttemptedSetResponse } from "../types/AttemptTypes";
+import AttemptedQuestionsApi from "../api/AttemptedQuestionsApi";
 
 
 const QuestionsPage = () => {
@@ -136,7 +138,7 @@ const QuestionsPage = () => {
         (question) => question.correct_answer === question.child_answer
       ).length;
       const score = (correct_answers / total_questions * 100).toFixed(2);
-      await AttemptedSetsApi.createAttemptedSet({
+      const {set_id} : CreateAttemptedSetResponse = await AttemptedSetsApi.createAttemptedSet({
         child_id: activeChild!.child_id,
         topic_id: parseInt(topic_id || ""),
         total_questions: total_questions,
@@ -145,6 +147,8 @@ const QuestionsPage = () => {
         time_spent: totalElapsedTime,
 
       });
+      const response = await AttemptedQuestionsApi.createAttemptedQuestionsBulk(updatedQuestionList, set_id, activeChild!.child_id);
+      console.log(response)
       navigate("/results", { state: { questions_attempt: updatedQuestionList, total_time: totalElapsedTime, total_questions: total_questions, correct_answers: correct_answers, score: score } });
     } catch (error) {
       console.error("Error submitting answers", error);
