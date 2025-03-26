@@ -11,6 +11,7 @@ const attemptedSetRoutes = require("./routes/attemptedSetRoutes");
 const attemptedQuestionRoutes = require("./routes/attemptedQuestionRoutes");
 const llmRoutes = require("./routes/llmRoutes");
 
+
 if (!process.env.JWT_SECRET) {
   console.error(
     "FATAL ERROR: JWT_SECRET is not defined in environment variables"
