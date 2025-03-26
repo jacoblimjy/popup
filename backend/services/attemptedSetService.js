@@ -18,17 +18,83 @@ const updateAttemptedSet = async (set_id, updates) => {
   await db.execute(query, values);
 };
 
-const getAttemptedSetsByChildId = async (child_id, page = 1, limit = 10) => {
+const getAttemptedSetsByFilters = async (filters = {}, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const query = `
-    SELECT * FROM Attempted_Sets 
-    WHERE child_id = ? 
-    ORDER BY attempt_timestamp DESC 
-    LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`
-    ;
 
-  const [attemptedSets] = await db.execute(query, [child_id]);
-  return attemptedSets;
+  // Dynamically build the query based on the filters
+  const conditions = Object.keys(filters)
+    .map((key) => {
+      if (key === "difficulty_id") {
+        return `qs.${key} = ?`;
+      }
+      return `ats.${key} = ?`;
+    })
+    .join(" AND ");
+
+  const params = Object.values(filters).map((value) => parseInt(value, 10));
+
+  const query = `
+    SELECT 
+      ats.*, 
+      aq.aq_id, 
+      aq.question_id, 
+      aq.child_answer, 
+      aq.is_correct, 
+      aq.attempt_timestamp as question_attempt_timestamp, 
+      aq.time_spent as question_time_spent, 
+      qs.question_text,
+      qs.correct_answer,
+      qs.distractors,
+      qs.difficulty_id,
+      qs.topic_id as question_topic_id,
+      qs.explanation
+    FROM Attempted_Sets ats
+    LEFT JOIN Attempted_Questions aq ON ats.set_id = aq.set_id
+    LEFT JOIN Questions qs ON aq.question_id = qs.question_id
+    ${conditions ? `WHERE ${conditions}` : ""}
+    ORDER BY ats.attempt_timestamp DESC
+    LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
+    `;
+
+  const [rows] = await db.execute(query, params);
+
+  const groupedResults = rows.reduce((acc, row) => {
+    const setId = row.set_id;
+
+    if (!acc[setId]) {
+      acc[setId] = {
+        set_id: row.set_id,
+        child_id: row.child_id,
+        topic_id: row.topic_id,
+        total_questions: row.total_questions,
+        correct_answers: row.correct_answers,
+        score: row.score,
+        attempt_timestamp: row.attempt_timestamp,
+        time_spent: row.time_spent,
+        attempted_questions: [],
+      };
+    }
+
+    if (row.aq_id) {
+      acc[setId].attempted_questions.push({
+        aq_id: row.aq_id,
+        question_id: row.question_id,
+        questions_text: row.question_text,
+        difficulty_id: row.difficulty_id,
+        correct_answer: row.correct_answer,
+        distractors: row.distractors,
+        child_answer: row.child_answer,
+        is_correct: row.is_correct,
+        explanation: row.explanation,
+        attempt_timestamp: row.question_attempt_timestamp,
+        time_spent: row.question_time_spent,
+      });
+    }
+
+    return acc;
+  }, {});
+
+  return Object.values(groupedResults);
 };
 
 const getAttemptedSetById = async (set_id) => {
@@ -48,7 +114,7 @@ const deleteAttemptedSetsByChildId = async (child_id) => {
 module.exports = {
   createAttemptedSet,
   updateAttemptedSet,
-  getAttemptedSetsByChildId,
+  getAttemptedSetsByFilters,
   getAttemptedSetById,
   deleteAttemptedSetById,
   deleteAttemptedSetsByChildId,
