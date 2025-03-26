@@ -1,3 +1,5 @@
+import { AttemptedQuestion, AttemptedQuestionResponse } from "./types/AttemptTypes";
+
 const getUserId = () => {
   const user = localStorage.getItem('user');
   if (!user) {
@@ -27,6 +29,24 @@ const formatDetailedDate = (date: string) : string => {
   };
   return `${day}${daySuffix(day)} ${month} ${year}`;
 }
+
+const formatAttemptedQuestions = (questions : AttemptedQuestionResponse[]) => {
+  const formattedQuestions : AttemptedQuestion[] = questions.map(({distractors, ...rest}) => ({
+    ...rest,
+    options: insertAnswerAtRandomIndex(
+      distractors,
+      rest.correct_answer
+    ),
+  }));
+  return formattedQuestions;
+}
+
+const insertAnswerAtRandomIndex = (options: string[], correctAnswer: string) => {
+  const randomIndex = Math.floor(Math.random() * options.length);
+  const newArray = [...options];
+  newArray.splice(randomIndex, 0, correctAnswer);
+  return newArray;
+};
 
 const topics = {
   1: "Use a Rule to Make a Word",
@@ -75,5 +95,7 @@ export {
   difficulty_levels,
   getMinutes,
   getSeconds,
-  formatTime
+  formatTime,
+  insertAnswerAtRandomIndex,
+  formatAttemptedQuestions,
 }

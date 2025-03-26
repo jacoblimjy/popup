@@ -5,7 +5,7 @@ import Loader from "../components/Loader";
 import wallpaper from "../assets/wallpaper.jpg";
 import { ArrowLeft } from "lucide-react";
 import QuestionApi from "../api/QuestionApi";
-import { getMinutes, getSeconds } from "../utils";
+import { getMinutes, getSeconds, insertAnswerAtRandomIndex } from "../utils";
 import AttemptedSetsApi from "../api/AttemptedSetsApi";
 import { useChildrenList } from "../hooks/useChildrenList";
 
@@ -97,13 +97,6 @@ const QuestionsPage = () => {
       clearInterval(totalStopwatchRef.current);
       totalStopwatchRef.current = null;
     }
-  };
-
-  const insertAnswerAtRandomIndex = (options: string[], correctAnswer: string) => {
-    const randomIndex = Math.floor(Math.random() * options.length);
-    const newArray = [...options];
-    newArray.splice(randomIndex, 0, correctAnswer);
-    return newArray;
   };
 
   const handleSelectOption = (option: string) => {

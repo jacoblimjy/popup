@@ -97,10 +97,71 @@ const getAttemptedSetsByFilters = async (filters = {}, page = 1, limit = 10) => 
   return Object.values(groupedResults);
 };
 
+// const getAttemptedSetById = async (set_id) => {
+//   const query = "SELECT * FROM Attempted_Sets WHERE set_id = ?";
+//   const [attemptedSet] = await db.execute(query, [set_id]);
+//   return attemptedSet;
+// };
+
 const getAttemptedSetById = async (set_id) => {
-  const query = "SELECT * FROM Attempted_Sets WHERE set_id = ?";
-  const [attemptedSet] = await db.execute(query, [set_id]);
-  return attemptedSet;
+  const query = `
+    SELECT 
+      ats.*, 
+      aq.aq_id, 
+      aq.question_id, 
+      aq.child_answer, 
+      aq.is_correct, 
+      aq.attempt_timestamp as question_attempt_timestamp, 
+      aq.time_spent as question_time_spent, 
+      qs.question_text,
+      qs.correct_answer,
+      qs.distractors,
+      qs.difficulty_id,
+      qs.topic_id as question_topic_id,
+      qs.explanation
+    FROM Attempted_Sets ats
+    LEFT JOIN Attempted_Questions aq ON ats.set_id = aq.set_id
+    LEFT JOIN Questions qs ON aq.question_id = qs.question_id
+    WHERE ats.set_id = ?
+  `;
+
+  const [rows] = await db.execute(query, [set_id]);
+
+  const groupedResults = rows.reduce((acc, row) => {
+    if (!acc[row.set_id]) {
+      acc[row.set_id] = {
+        set_id: row.set_id,
+        child_id: row.child_id,
+        topic_id: row.topic_id,
+        total_questions: row.total_questions,
+        correct_answers: row.correct_answers,
+        score: row.score,
+        attempt_timestamp: row.attempt_timestamp,
+        time_spent: row.time_spent,
+        attempted_questions: [],
+      };
+    }
+
+    if (row.aq_id) {
+      acc[row.set_id].attempted_questions.push({
+        aq_id: row.aq_id,
+        question_id: row.question_id,
+        questions_text: row.question_text,
+        difficulty_id: row.difficulty_id,
+        correct_answer: row.correct_answer,
+        distractors: row.distractors,
+        child_answer: row.child_answer,
+        is_correct: row.is_correct,
+        explanation: row.explanation,
+        attempt_timestamp: row.question_attempt_timestamp,
+        time_spent: row.question_time_spent,
+      });
+    }
+
+    return acc;
+  }, {});
+
+  return Object.values(groupedResults)[0] || null;
 };
 
 const deleteAttemptedSetById = async (set_id) => {

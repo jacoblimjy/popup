@@ -17,7 +17,7 @@ const ResultsPage = () => {
       <p className="text-2xl font-semibold">Review</p>
       <div className="flex flex-col my-4 border-1 border-gray-300 rounded-md">
         <div className="flex flex-col p-4 gap-4">
-          <div className="flex justify-between">
+          <div className="flex md:flex-row gap-5 flex-col justify-between">
             <p className="text-md font-medium">Practice 4</p>
             <div className="inline-flex items-center gap-2">
               <p className="text-md font-medium">Score: {correct_answers}/{total_questions}</p>

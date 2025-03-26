@@ -67,6 +67,17 @@ const getAttemptedSetsByFilters = async (req, res) => {
   }
 };
 
+const getAttemptedSetBySetId = async (req, res) => {
+  try {
+    const {set_id} = req.params;
+    const attemptedSet = await attemptedSetService.getAttemptedSetById(set_id);
+    res.status(200).json(attemptedSet);
+  } catch (error) {
+    console.error("Error fetching attempted set with questions:", error.message);
+    res.status(500).json({ message: "Failed to fetch attempted set with questions" });
+  }
+};
+
 const deleteAttemptedSetById = async (req, res) => {
   try {
 
@@ -123,6 +134,7 @@ module.exports = {
   createAttemptedSet,
   updateAttemptedSet,
   getAttemptedSetsByFilters,
+  getAttemptedSetBySetId,
   deleteAttemptedSetById,
   deleteAttemptedSetsByChildId,
 };

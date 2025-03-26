@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChildrenList } from "../hooks/useChildrenList";
-import { AttemptedSetResponse } from "../types/AttemptTypes";
+import { AttemptedSet, GetAttemptedSetResponse } from "../types/AttemptTypes";
 import AttemptedSetsApi from "../api/AttemptedSetsApi";
-import { formatDetailedDate } from "../utils";
+import { formatAttemptedQuestions, formatDetailedDate } from "../utils";
 import Loader from "../components/Loader";
 
 const HistoryPage = () => {
   const navigate = useNavigate();
   const { activeChild } = useChildrenList();
   const [page, setPage] = useState(1);
-  const [attempts, setAttempts] = useState<AttemptedSetResponse[]>([]);
+  const [attempts, setAttempts] = useState<AttemptedSet[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // TODO: Remove after topic_name added to api
@@ -30,12 +30,14 @@ const HistoryPage = () => {
   const fetchAttemptedSets = async () => {
     if (activeChild) {
       setIsLoading(true);
-      const response: AttemptedSetResponse[] = await AttemptedSetsApi.getAttemptedSets(activeChild.child_id as number, page);
+      const response: GetAttemptedSetResponse[] = await AttemptedSetsApi.getAttemptedSets(activeChild.child_id as number, page);
 
       const formattedResponse = response.map((attempt) => ({
         ...attempt,
         attempt_timestamp: formatDetailedDate(attempt.attempt_timestamp),
+        attempted_questions: formatAttemptedQuestions(attempt.attempted_questions),
       }));
+      console.log(formattedResponse);
       setAttempts([...attempts, ...formattedResponse]);
       setPage(page + 1);
       setIsLoading(false);
