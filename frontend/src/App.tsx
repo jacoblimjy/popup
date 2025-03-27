@@ -13,6 +13,7 @@ import { ChildrenProvider } from './context/ChildrenProvider'
 import ManageChildrenPage from './pages/ManageChildrenPage'
 import AdminPage from './pages/AdminPage'
 import QuestionsPage from './pages/QuestionsPage'
+import ResultsPage from './pages/ResultsPage'
 
 function App() {
 
@@ -31,6 +32,7 @@ function App() {
           <Route path="/manage-children" element={<ManageChildrenPage/>} />
           <Route path="/admin" element={<AdminPage/>} />
           <Route path="/practice/:topic_id/:difficulty_id" element={<QuestionsPage/>} />
+          <Route path='/results/:set_id' element={<ResultsPage/>} />
         </Routes>
         <ToastContainer limit={3} />
       </ChildrenProvider>

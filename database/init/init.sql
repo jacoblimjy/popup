@@ -218,7 +218,16 @@ INSERT INTO Questions (question_text, answer_format, correct_answer, distractors
 ('What is 2 + 2?', 'text', '4', '["3", "5", "6"]', 1, 1,"explanation", NOW(), NOW(), FALSE),
 ('Complete the pair: Salt and ?', 'text', 'Pepper', '["Sugar", "Spice", "Honey"]', 2, 1, "explanation 1", NOW(), NOW(), FALSE),
 ('Find the anagram in the sentence: "Listen to the silent music."', 'text', 'silent', '["listen", "music", "to"]', 3, 2, "explanation 2", NOW(), NOW(), FALSE),
-('Solve the word ladder: CAT -> COT -> ?', 'text', 'COT', '["DOG", "BAT", "RAT"]', 4, 3, "explanation 3", NOW(), NOW(), FALSE);
+('Solve the word ladder: CASE ____ LASH', 'text', 'CASH', '["CAST", "LACK", "LASS", "LUSH"]', 4, 1, "explanation 3", NOW(), NOW(), FALSE),
+('Solve the word ladder: COLD ____ CARD', 'text', 'CORD', '["CURD", "COED", "CALD", "COLT"]', 4, 1, "explanation 4", NOW(), NOW(), FALSE),
+('Solve the word ladder: HAND ____ BEND', 'text', 'BAND', '["HARD", "BARK", "BOND", "BARE"]', 4, 1, "explanation 5", NOW(), NOW(), FALSE),
+('Solve the word ladder: MIND ____ BOND', 'text', 'BIND', '["MEND", "BAND", "BIRD", "MINO"]', 4, 1, "explanation 6", NOW(), NOW(), FALSE),
+('Solve the word ladder: WORE ____ WARM', 'text', 'WARE', '["WOLE", "WIDE", "WAVE", "WARD"]', 4, 1, "explanation 7", NOW(), NOW(), FALSE),
+('Solve the word ladder: SAND ____ BEND', 'text', 'SEND', '["SIND", "SENT", "BIND", "SENG"]', 4, 1, "explanation 8", NOW(), NOW(), FALSE),
+('Solve the word ladder: LION ____ LOAN', 'text', 'LOON', '["LIAN", "LIND", "LOOP", "LILT"]', 4, 1, "explanation 9", NOW(), NOW(), FALSE),
+('Solve the word ladder: WILL ____ WIND', 'text', 'WILD', '["WILT", "WALL", "WAIL", "WIRL"]', 4, 1, "explanation 10", NOW(), NOW(), FALSE),
+('Solve the word ladder: CLIP ____ SLAP', 'text', 'SLIP', '["CLIM", "SLIM", "SHIP", "FLIP"]', 4, 1, "explanation 11", NOW(), NOW(), FALSE),
+('Solve the word ladder: HARD ____ BIRD', 'text', 'BARD', '["HARE", "HIRD", "HARN", "BIND"]', 4, 1, "explanation 12", NOW(), NOW(), FALSE);
 
 -- Seed Pending_Questions table
 INSERT INTO Pending_Questions (question_text, answer_format, correct_answer, distractors, topic_id, difficulty_id, explanation, date_created, last_modified, is_llm_generated) VALUES
