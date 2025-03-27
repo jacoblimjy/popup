@@ -1,17 +1,25 @@
 const express = require("express");
 const router = express.Router();
 const questionController = require("../controllers/questionController");
+const {
+  authenticateToken,
+  authorizeRole,
+} = require("../middleware/authMiddleware");
 
-router.post("/", questionController.createQuestion);
+const adminOnly = [authenticateToken, authorizeRole([1])];
 
-router.post("/bulk", questionController.createQuestionsBulk);
+const authenticatedUser = [authenticateToken];
 
-router.get("/", questionController.getQuestions);
+router.post("/", adminOnly, questionController.createQuestion);
 
-router.get("/:id", questionController.getQuestionById);
+router.post("/bulk", adminOnly, questionController.createQuestionsBulk);
 
-router.put("/:id", questionController.updateQuestion);
+router.get("/", authenticatedUser, questionController.getQuestions);
 
-router.delete("/:id", questionController.deleteQuestion);
+router.get("/:id", authenticatedUser, questionController.getQuestionById);
+
+router.put("/:id", adminOnly, questionController.updateQuestion);
+
+router.delete("/:id", adminOnly, questionController.deleteQuestion);
 
 module.exports = router;

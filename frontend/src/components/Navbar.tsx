@@ -83,7 +83,7 @@ const Navbar: React.FC = () => {
 							>
 								Courses
 							</Link>
-							{isAuthenticated &&
+							{isAuthenticated && (
 								<>
 									<Link
 										to="/analytics"
@@ -97,57 +97,79 @@ const Navbar: React.FC = () => {
 									>
 										History
 									</Link>
-								</>}
+									<Link
+										to="/admin"
+										className="text-gray-600 hover:text-blue-600 transition"
+									>
+										Admin
+									</Link>
+								</>
+							)}
 						</div>
 					</div>
 
-
-					{isAuthenticated ?
-						<div className="flex items-center space-x-3 ml-auto pr-6"> {/* Right Section - User Profile (Shifted Right) */}
+					{isAuthenticated ? (
+						<div className="flex items-center space-x-3 ml-auto pr-6">
+							{" "}
+							{/* Right Section - User Profile (Shifted Right) */}
 							{/* Children Dropdown */}
 							<div className="relative" ref={childrenMenuRef}>
-								{
-									(!childrenList || childrenList.length >= 1) ?
-										<button
-											onClick={() => setIsChildrenMenuOpen(!isChildrenMenuOpen)}
-											className="flex items-center space-x-2 bg-gray-100 rounded-full px-4 py-1.5 hover:bg-gray-200 transition"
-											disabled={childrenList?.length === 1}
-										>
-											<div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-gray-800 font-bold">
-												{activeChild?.child_name.charAt(0).toUpperCase()}
-											</div>
-											<span className="text-gray-900 font-medium">{activeChild?.child_name}</span>
-											{(childrenList && childrenList.length > 1) && <ChevronDown className="w-4 h-4 text-gray-500" />}
-										</button>
-										:
-										<button
-											onClick={() => navigate("/manage-children")}
-											className="flex items-center space-x-2 bg-yellow-400 rounded-full px-4 py-1.5 hover:bg-yellow-200 transition"
-										>
-											<span className="text-white font-medium">Add Child</span>
-											{(childrenList && childrenList.length > 1) && <ChevronDown className="w-4 h-4 text-gray-500" />}
-										</button>
-								}
+								{!childrenList || childrenList.length >= 1 ? (
+									<button
+										onClick={() => setIsChildrenMenuOpen(!isChildrenMenuOpen)}
+										className="flex items-center space-x-2 bg-gray-100 rounded-full px-4 py-1.5 hover:bg-gray-200 transition"
+										disabled={childrenList?.length === 1}
+									>
+										<div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-gray-800 font-bold">
+											{activeChild?.child_name.charAt(0).toUpperCase()}
+										</div>
+										<span className="text-gray-900 font-medium">
+											{activeChild?.child_name}
+										</span>
+										{childrenList && childrenList.length > 1 && (
+											<ChevronDown className="w-4 h-4 text-gray-500" />
+										)}
+									</button>
+								) : (
+									<button
+										onClick={() => navigate("/manage-children")}
+										className="flex items-center space-x-2 bg-yellow-400 rounded-full px-4 py-1.5 hover:bg-yellow-200 transition"
+									>
+										<span className="text-white font-medium">Add Child</span>
+										{childrenList && childrenList.length > 1 && (
+											<ChevronDown className="w-4 h-4 text-gray-500" />
+										)}
+									</button>
+								)}
 
 								{isChildrenMenuOpen && (
 									<div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 border border-gray-200 z-20">
 										<div className="px-4 py-2 text-sm text-gray-500 font-semibold">
 											Switch Children
 										</div>
-										{(childrenList && childrenList?.length > 0) && childrenList.filter((child) => child.child_id !== activeChild?.child_id).map((child, index) => (
-											<button
-												key={index}
-												className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition"
-												onClick={() => handleSwitchChild(child)}
-											>
-												<p className="text-gray-900 font-medium">{child.child_name}</p>
-												<p className="text-xs text-gray-500">Age {child.age}</p>
-											</button>
-										))}
+										{childrenList &&
+											childrenList?.length > 0 &&
+											childrenList
+												.filter(
+													(child) => child.child_id !== activeChild?.child_id
+												)
+												.map((child, index) => (
+													<button
+														key={index}
+														className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition"
+														onClick={() => handleSwitchChild(child)}
+													>
+														<p className="text-gray-900 font-medium">
+															{child.child_name}
+														</p>
+														<p className="text-xs text-gray-500">
+															Age {child.age}
+														</p>
+													</button>
+												))}
 									</div>
 								)}
 							</div>
-
 							{/* User Account Dropdown */}
 							<div className="relative" ref={userMenuRef}>
 								<button
@@ -187,21 +209,26 @@ const Navbar: React.FC = () => {
 								)}
 							</div>
 						</div>
-						:
+					) : (
 						<div className="flex gap-4">
 							<button
 								className="py-2 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-[#f1c40e] text-white hover:bg-[#e7c53b] focus:outline-none focus:bg-[#e7c53b] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
-								onClick={() => { navigate("/signup") }}
+								onClick={() => {
+									navigate("/signup");
+								}}
 							>
 								Register
 							</button>
 							<button
 								className="py-2 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-[#f1c40e] text-white hover:bg-[#e7c53b] focus:outline-none focus:bg-[#e7c53b] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
-								onClick={() => { navigate("/login") }}
+								onClick={() => {
+									navigate("/login");
+								}}
 							>
 								Login
 							</button>
-						</div>}
+						</div>
+					)}
 				</div>
 			</div>
 		</nav>

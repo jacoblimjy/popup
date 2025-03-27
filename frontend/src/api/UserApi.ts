@@ -1,40 +1,45 @@
 import { Child } from "../types/UserTypes";
+import apiClient from "./ApiClient";
 
-const BASE_URL = "http://localhost:8000/api/users";
+const BASE_URL = "http://localhost:8000/api/auth";
 
 const login = async (email: string, password: string) => {
-  const response = await fetch(BASE_URL + "/login", {
+  return apiClient(BASE_URL + "/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ email, password }),
   });
-
-  if (!response.ok) {
-    throw new Error("Login failed "+ response.statusText);
-  }
-
-  return response.json();
 };
 
 const signup = async (username: string, email: string, children: Child[], password: string) => {
-  const response = await fetch(BASE_URL + "/signup", {
+  return apiClient(BASE_URL + "/signup", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ username, email, children, password }),
   });
+};
 
-  if (!response.ok) {
-    throw new Error('Sign up failed ' + response.statusText);
-  }
-
-  return response.json();
-}
+const updateProfile = async (
+	userId: number,
+	username: string,
+	email: string,
+	password?: string
+) => {
+	// We do a PUT /api/users/:id
+	const url = `${BASE_URL}/${userId}`;
+	return apiClient(url, {
+		method: "PUT",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ username, email, password }),
+	});
+};
 
 export default {
-  login,
-  signup
+	login,
+	signup,
+	updateProfile, // <-- make sure to export it
 };

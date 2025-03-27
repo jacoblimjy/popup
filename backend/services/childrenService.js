@@ -64,8 +64,8 @@ const getChildById = async (childId) => {
   return children[0];
 };
 
-const getChildrenByUserId = async (userId, limit = 10, offset = 0) => {
-    console.log(userId, limit, offset);
+const getChildrenByUserId = async (userId, page = 1, limit = 10) => {
+    const offset = (page - 1) * limit;
     const query = `SELECT * FROM Children WHERE user_id = ? LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
     const [children] = await db.execute(query, [userId]);
   

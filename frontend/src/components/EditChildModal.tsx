@@ -23,12 +23,16 @@ const EditChildModal = ({
 }: EditChildModalProps) => {
 	const [name, setName] = useState(child.child_name);
 	const [age, setAge] = useState(child.age.toString());
+	const [educationLevel, setEducationLevel] = useState(
+		child.education_level.toString()
+	);
 
-	// Ensuring the name and age are correctly prefilled when child changes
+	// Ensuring the name, age, and education level are correctly prefilled when child changes
 	useEffect(() => {
 		if (child) {
 			setName(child.child_name);
 			setAge(child.age.toString());
+			setEducationLevel(child.education_level.toString());
 		}
 	}, [child]);
 
@@ -38,6 +42,7 @@ const EditChildModal = ({
 			...child,
 			child_name: name,
 			age: parseInt(age),
+			education_level: parseInt(educationLevel),
 		};
 		onEditChild(updatedChild);
 		onClose();
@@ -97,6 +102,24 @@ const EditChildModal = ({
 										autoComplete="age"
 										value={age}
 										onChange={(e) => setAge(e.target.value)}
+										className="py-3 px-4 block w-full rounded-md bg-white text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm"
+									/>
+								</div>
+							</div>
+
+							{/* Education Level */}
+							<div className="mt-4">
+								<label className="block text-sm mb-2">Education Level</label>
+								<div className="relative">
+									<input
+										type="number"
+										name="educationLevel"
+										min={1}
+										max={20}
+										required
+										autoComplete="educationLevel"
+										value={educationLevel}
+										onChange={(e) => setEducationLevel(e.target.value)}
 										className="py-3 px-4 block w-full rounded-md bg-white text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm"
 									/>
 								</div>
