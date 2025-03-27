@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	CheckCircle,
 	XCircle,
@@ -6,97 +6,86 @@ import {
 	ChevronDown,
 	FilePlus,
 } from "lucide-react";
-
-// Dummy Data for Pending Questions (now including distractors)
-const DUMMY_QUESTIONS = [
-	{
-		id: 1,
-		type: "Use a Rule to Make a Word",
-		difficulty: "Medium",
-		question: `If you remove the first letter from a 5-letter word meaning "small stream" and add "EN" at the end, you get a new word meaning "writing instrument". What is the original word?`,
-		answer: "BROOK",
-		explanation: `BROOK (small stream) -> ROOK + EN = ROOKEN (writing instrument)`,
-		distractors: ["RIVER", "STREAM", "BANK", "FLOW"],
-		date: "2023-03-15",
-	},
-	{
-		id: 2,
-		type: "Complete a Word Pair",
-		difficulty: "Easy",
-		question: `GRASS is to GREEN as SKY is to _____`,
-		answer: "BLUE",
-		explanation: `Grass is green in colour; similarly, the sky is blue.`,
-		distractors: ["RED", "YELLOW", "PURPLE", "ORANGE"],
-		date: "2023-03-15",
-	},
-	{
-		id: 3,
-		type: "Word Ladders",
-		difficulty: "Easy",
-		question: `Change COLD to WARM in exactly 4 steps, changing one letter at a time.`,
-		answer: `COLD -> CORD -> WORD -> WORM -> WARM`,
-		explanation: `A typical ladder: COLD -> CORD -> WORD -> WORM -> WARM`,
-		distractors: ["BOLD", "FOLD", "WOLD", "COLDY"],
-		date: "2023-03-15",
-	},
-];
+import { adminAPI } from "../api/AdminApi"; // Adjust path as needed
+import { PendingQuestion } from "../types/AdminTypes";
 
 type ActionType = "generate" | "approve" | "reject";
 
-interface Question {
-	id: number;
-	type: string;
-	difficulty: string;
-	question: string;
-	answer: string;
-	explanation: string;
+interface EditData {
+	pending_question_id: number;
+	question_text: string;
+	correct_answer: string;
 	distractors: string[];
-	date: string;
+	explanation: string;
 }
 
-const AdminInterface: React.FC = () => {
+const AdminPage: React.FC = () => {
+	// ---------- State ----------
+
+	// 1) Tabs
 	const [activeTab, setActiveTab] = useState<"generate" | "review">("generate");
 
-	// Generate Questions form state
+	// 2) Generate tab form
 	const [questionTypes, setQuestionTypes] = useState<string[]>([]);
 	const [difficulty, setDifficulty] = useState("Easy");
 	const [numberOfQuestions, setNumberOfQuestions] = useState(5);
 
-	// List of questions pending review
-	const [pendingQuestions, setPendingQuestions] =
-		useState<Question[]>(DUMMY_QUESTIONS);
-
-	// Track collapsible explanation state
+	// 3) Pending questions
+	const [pendingQuestions, setPendingQuestions] = useState<PendingQuestion[]>(
+		[]
+	);
 	const [expandedQuestionId, setExpandedQuestionId] = useState<number | null>(
 		null
 	);
 
-	// ========== 1) SIMPLE CONFIRM MODAL STATE ==========
+	// 4) Confirm modal (Generate/Approve/Reject)
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
 	const [currentAction, setCurrentAction] = useState<ActionType | null>(null);
 	const [targetQuestionId, setTargetQuestionId] = useState<number | null>(null);
 	const [isProcessing, setIsProcessing] = useState(false);
 
-	// ========== 2) EDIT MODAL & CONFIRMATION STATE ==========
+	// 5) Edit modal
 	const [showEditModal, setShowEditModal] = useState(false);
 	const [showConfirmEditModal, setShowConfirmEditModal] = useState(false);
-
-	// The data we are editing now includes distractors.
-	const [editData, setEditData] = useState<{
-		id: number;
-		question: string;
-		answer: string;
-		distractors: string[];
-		explanation: string;
-	}>({
-		id: 0,
-		question: "",
-		answer: "",
+	const [editData, setEditData] = useState<EditData>({
+		pending_question_id: 0,
+		question_text: "",
+		correct_answer: "",
 		distractors: ["", "", "", ""],
 		explanation: "",
 	});
 
-	// ============= ACTION HANDLERS =============
+	// 6) View-only modal (displays full question details)
+	const [showViewModal, setShowViewModal] = useState(false);
+	const [viewData, setViewData] = useState<EditData>({
+		pending_question_id: 0,
+		question_text: "",
+		correct_answer: "",
+		distractors: ["", "", "", ""],
+		explanation: "",
+	});
+
+	// Auth token
+	const token = localStorage.getItem("token") || "";
+
+	// ---------- Data Fetching ----------
+	const fetchPendingQuestions = async () => {
+		try {
+			const data = await adminAPI.getPendingQuestions(token);
+			setPendingQuestions(data);
+		} catch (error) {
+			console.error("Failed to fetch pending questions:", error);
+			setPendingQuestions([]);
+		}
+	};
+
+	useEffect(() => {
+		fetchPendingQuestions();
+	}, []);
+
+	// ---------- Handlers ----------
+
+	/** Toggle question type checkboxes */
 	const handleToggleQuestionType = (type: string) => {
 		if (questionTypes.includes(type)) {
 			setQuestionTypes(questionTypes.filter((t) => t !== type));
@@ -105,7 +94,7 @@ const AdminInterface: React.FC = () => {
 		}
 	};
 
-	// ====== GENERATE ======
+	/** Generate questions (open confirm modal) */
 	const requestGenerateQuestions = () => {
 		if (questionTypes.length === 0) {
 			alert("Please select at least one topic.");
@@ -115,39 +104,60 @@ const AdminInterface: React.FC = () => {
 		setShowConfirmModal(true);
 	};
 
-	// ====== APPROVE ======
+	/** Approve question (open confirm modal) */
 	const requestApprove = (id: number) => {
 		setCurrentAction("approve");
 		setTargetQuestionId(id);
 		setShowConfirmModal(true);
 	};
 
-	// ====== REJECT ======
+	/** Reject question (open confirm modal) */
 	const requestReject = (id: number) => {
 		setCurrentAction("reject");
 		setTargetQuestionId(id);
 		setShowConfirmModal(true);
 	};
 
-	// ====== EDIT ======
-	const requestEdit = (questionId: number) => {
-		const q = pendingQuestions.find((item) => item.id === questionId);
-		if (!q) return;
+	/** Open edit modal */
+	const requestEdit = (pending_question_id: number) => {
+		const target = pendingQuestions.find(
+			(pq) => pq.pending_question_id === pending_question_id
+		);
+		if (!target) return;
+
 		setEditData({
-			id: q.id,
-			question: q.question,
-			answer: q.answer,
-			distractors: q.distractors,
-			explanation: q.explanation,
+			pending_question_id: target.pending_question_id,
+			question_text: target.question_text,
+			correct_answer: target.correct_answer,
+			distractors: target.distractors,
+			explanation: target.explanation,
 		});
 		setShowEditModal(true);
 	};
 
+	/** Open view modal (full question details) */
+	const requestView = (pending_question_id: number) => {
+		const target = pendingQuestions.find(
+			(pq) => pq.pending_question_id === pending_question_id
+		);
+		if (!target) return;
+
+		setViewData({
+			pending_question_id: target.pending_question_id,
+			question_text: target.question_text,
+			correct_answer: target.correct_answer,
+			distractors: target.distractors,
+			explanation: target.explanation,
+		});
+		setShowViewModal(true);
+	};
+
+	/** Toggle explanation collapsible in the list view */
 	const toggleExplanation = (id: number) => {
 		setExpandedQuestionId((prev) => (prev === id ? null : id));
 	};
 
-	// =========== SIMPLE CONFIRM MODAL LOGIC ===========
+	// ---------- Confirm Modal (Generate/Approve/Reject) ----------
 	const cancelModal = () => {
 		setShowConfirmModal(false);
 		setCurrentAction(null);
@@ -158,42 +168,33 @@ const AdminInterface: React.FC = () => {
 	const confirmAction = async () => {
 		if (!currentAction) return;
 		setIsProcessing(true);
+
 		try {
-			switch (currentAction) {
-				case "generate": {
-					console.log("Generating questions with:", {
+			if (currentAction === "generate") {
+				const response = await adminAPI.generateQuestions(
+					{
 						questionTypes,
 						difficulty,
-						numberOfQuestions,
-					});
-					await new Promise((res) => setTimeout(res, 500));
-					alert("Questions generated! (Dummy)");
-					break;
-				}
-				case "approve": {
-					if (targetQuestionId == null) return;
-					console.log("Approved question with ID:", targetQuestionId);
-					await new Promise((res) => setTimeout(res, 500));
-					setPendingQuestions(
-						pendingQuestions.filter((q) => q.id !== targetQuestionId)
-					);
-					alert("Question approved (Dummy)!");
-					break;
-				}
-				case "reject": {
-					if (targetQuestionId == null) return;
-					console.log("Rejected question with ID:", targetQuestionId);
-					await new Promise((res) => setTimeout(res, 500));
-					setPendingQuestions(
-						pendingQuestions.filter((q) => q.id !== targetQuestionId)
-					);
-					alert("Question rejected (Dummy)!");
-					break;
-				}
+						numQuestions: numberOfQuestions,
+					},
+					token
+				);
+				alert(response.message || "Questions generated successfully!");
+				await fetchPendingQuestions();
+			} else if (currentAction === "approve") {
+				if (targetQuestionId == null) return;
+				await adminAPI.approveQuestion(targetQuestionId, token);
+				alert("Question approved!");
+				await fetchPendingQuestions();
+			} else if (currentAction === "reject") {
+				if (targetQuestionId == null) return;
+				await adminAPI.rejectQuestion(targetQuestionId, token);
+				alert("Question rejected!");
+				await fetchPendingQuestions();
 			}
 		} catch (error) {
-			console.error("Error occurred: ", error);
-			alert("Action failed. Please try again.");
+			console.error("Action failed:", error);
+			alert("Action failed. Please check console for details.");
 		} finally {
 			setIsProcessing(false);
 			setShowConfirmModal(false);
@@ -202,7 +203,7 @@ const AdminInterface: React.FC = () => {
 		}
 	};
 
-	// =========== EDIT FORM + CONFIRMATION LOGIC ===========
+	// ---------- Edit Modal ----------
 	const handleSaveEdit = () => {
 		setShowConfirmEditModal(true);
 	};
@@ -214,33 +215,38 @@ const AdminInterface: React.FC = () => {
 
 	const confirmSaveEdit = async () => {
 		try {
-			setPendingQuestions((prev) =>
-				prev.map((q) =>
-					q.id === editData.id
-						? {
-								...q,
-								question: editData.question,
-								answer: editData.answer,
-								distractors: editData.distractors,
-								explanation: editData.explanation,
-						  }
-						: q
-				)
+			const updateData = {
+				question_text: editData.question_text,
+				answer_format: "multiple_choice",
+				correct_answer: editData.correct_answer,
+				distractors: editData.distractors,
+				topic_id: 1,
+				difficulty_id: 1,
+				explanation: editData.explanation,
+			};
+
+			await adminAPI.updatePendingQuestion(
+				editData.pending_question_id,
+				updateData,
+				token
 			);
+
+			alert("Question updated successfully!");
+			await fetchPendingQuestions();
+
 			setShowConfirmEditModal(false);
 			setShowEditModal(false);
-			alert("Question updated successfully! ✅");
-		} catch (err) {
-			console.error("Failed to edit question", err);
-			alert("Failed to edit question. Please try again.");
+		} catch (error) {
+			console.error("Failed to edit question:", error);
+			alert("Failed to edit question. Check console for details.");
 		}
 	};
 
-	// =============== RENDER ===============
+	// ---------- Render ----------
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
+		<div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 text-sm">
 			<div className="max-w-4xl mx-auto space-y-8">
-				{/* TABS */}
+				{/* Tabs */}
 				<div
 					className="flex space-x-2 bg-white rounded-md shadow p-1 border border-gray-200"
 					role="tablist"
@@ -257,6 +263,7 @@ const AdminInterface: React.FC = () => {
 					>
 						Generate Questions
 					</button>
+
 					<button
 						role="tab"
 						aria-selected={activeTab === "review"}
@@ -271,7 +278,7 @@ const AdminInterface: React.FC = () => {
 					</button>
 				</div>
 
-				{/* PANEL: GENERATE QUESTIONS */}
+				{/* --------- Generate Tab --------- */}
 				{activeTab === "generate" && (
 					<div
 						className="bg-white rounded-md shadow p-6 border border-gray-200 space-y-6"
@@ -307,7 +314,7 @@ const AdminInterface: React.FC = () => {
 											checked={questionTypes.includes(type)}
 											onChange={() => handleToggleQuestionType(type)}
 										/>
-										<span className="text-sm">{type}</span>
+										<span>{type}</span>
 									</label>
 								))}
 							</div>
@@ -318,7 +325,7 @@ const AdminInterface: React.FC = () => {
 							)}
 						</div>
 
-						{/* Difficulty Level */}
+						{/* Difficulty */}
 						<div>
 							<h3 className="text-base font-medium mb-2 text-gray-700">
 								Difficulty Level
@@ -340,7 +347,7 @@ const AdminInterface: React.FC = () => {
 							</div>
 						</div>
 
-						{/* Number of Questions (capped at 5) */}
+						{/* Number of Questions */}
 						<div>
 							<h3 className="text-base font-medium mb-2 text-gray-700">
 								Number of Questions
@@ -377,7 +384,7 @@ const AdminInterface: React.FC = () => {
 					</div>
 				)}
 
-				{/* PANEL: REVIEW QUESTIONS */}
+				{/* --------- Review Tab --------- */}
 				{activeTab === "review" && (
 					<div
 						className="space-y-4"
@@ -399,65 +406,85 @@ const AdminInterface: React.FC = () => {
 
 						{pendingQuestions.map((q) => (
 							<div
-								key={q.id}
-								className="bg-white rounded-md shadow p-4 border border-gray-200 transition-shadow hover:shadow-lg"
+								key={q.pending_question_id}
+								className="bg-white rounded-md shadow p-4 border border-gray-200 transition-shadow hover:shadow-lg cursor-pointer"
+								onClick={() => requestView(q.pending_question_id)}
 							>
-								{/* Top Row: Type & Difficulty */}
+								{/* Top Row: Topic & Difficulty */}
 								<div className="flex justify-between items-center mb-2">
 									<div className="text-sm font-semibold text-gray-700">
-										{q.type}
+										{q.topic_id === 1
+											? "Use a Rule to Make a Word"
+											: q.topic_id === 2
+											? "Complete a Word Pair"
+											: q.topic_id === 3
+											? "Word Ladders"
+											: q.topic_id === 4
+											? "Anagram in a Sentence"
+											: "Unknown Topic"}
 									</div>
 									<div
 										className={`px-2 py-1 rounded-md text-xs font-semibold ${
-											q.difficulty === "Easy"
+											q.difficulty_id === 1
 												? "bg-green-100 text-green-700"
-												: q.difficulty === "Medium"
+												: q.difficulty_id === 2
 												? "bg-orange-100 text-orange-700"
 												: "bg-red-100 text-red-700"
 										}`}
 									>
-										{q.difficulty}
+										{q.difficulty_id === 1
+											? "Easy"
+											: q.difficulty_id === 2
+											? "Medium"
+											: "Hard"}
 									</div>
 								</div>
 
-								{/* Question */}
-								<p className="text-sm text-gray-800 mb-2">{q.question}</p>
+								{/* Question text */}
+								<p className="text-sm text-gray-800 mb-2">{q.question_text}</p>
+
 								{/* Answer */}
 								<p className="text-sm text-gray-700 font-semibold">
-									Answer: {q.answer}
+									Answer: {q.correct_answer}
 								</p>
 								{/* Distractors */}
 								<p className="text-sm text-gray-700 mt-1">
 									Distractors: {q.distractors.join(", ")}
 								</p>
 
-								{/* Explanation Collapsible */}
+								{/* Explanation toggler (optional) */}
 								<button
-									className="flex items-center text-blue-600 text-sm mt-2 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-200"
-									onClick={() => toggleExplanation(q.id)}
-									aria-expanded={expandedQuestionId === q.id}
-									aria-controls={`explanation-${q.id}`}
+									className="flex items-center text-blue-600 text-xs mt-2 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-200"
+									onClick={(e) => {
+										e.stopPropagation();
+										toggleExplanation(q.pending_question_id);
+									}}
+									aria-expanded={expandedQuestionId === q.pending_question_id}
+									aria-controls={`explanation-${q.pending_question_id}`}
 								>
 									<span>
-										{expandedQuestionId === q.id
+										{expandedQuestionId === q.pending_question_id
 											? "Hide Explanation"
 											: "Show Explanation"}
 									</span>
 								</button>
 								<div
-									id={`explanation-${q.id}`}
+									id={`explanation-${q.pending_question_id}`}
 									style={{
-										maxHeight: expandedQuestionId === q.id ? "1000px" : "0px",
+										maxHeight:
+											expandedQuestionId === q.pending_question_id
+												? "1000px"
+												: "0px",
 										overflow: "hidden",
 										transition: "max-height 0.3s ease-in-out",
 									}}
-									className="mt-2 text-sm text-gray-600"
+									className="mt-2 text-s text-gray-600"
 								>
-									{expandedQuestionId === q.id && (
+									{expandedQuestionId === q.pending_question_id && (
 										<>
 											<strong>Explanation:</strong> {q.explanation}
-											<p className="text-xs text-gray-400 mt-1">
-												Created on: {q.date}
+											<p className="text-[10px] text-gray-400 mt-1">
+												Created on: {q.date_created?.slice(0, 10)}
 											</p>
 										</>
 									)}
@@ -466,22 +493,31 @@ const AdminInterface: React.FC = () => {
 								{/* Action Buttons */}
 								<div className="mt-3 flex space-x-2">
 									<button
-										onClick={() => requestApprove(q.id)}
-										className="flex-1 inline-flex items-center justify-center space-x-1 bg-green-50 text-green-700 px-2 py-1 rounded-md hover:bg-green-100 transition text-sm focus:outline-none focus:ring-2 focus:ring-green-200"
+										onClick={(e) => {
+											e.stopPropagation();
+											requestApprove(q.pending_question_id);
+										}}
+										className="flex-1 inline-flex items-center justify-center space-x-1 bg-green-50 text-green-700 px-2 py-1 rounded-md hover:bg-green-100 transition text-xs focus:outline-none focus:ring-2 focus:ring-green-200"
 									>
 										<CheckCircle className="w-4 h-4" />
 										<span>Approve</span>
 									</button>
 									<button
-										onClick={() => requestEdit(q.id)}
-										className="flex-1 inline-flex items-center justify-center space-x-1 bg-gray-50 text-gray-700 px-2 py-1 rounded-md hover:bg-gray-100 transition text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+										onClick={(e) => {
+											e.stopPropagation();
+											requestEdit(q.pending_question_id);
+										}}
+										className="flex-1 inline-flex items-center justify-center space-x-1 bg-gray-50 text-gray-700 px-2 py-1 rounded-md hover:bg-gray-100 transition text-xs focus:outline-none focus:ring-2 focus:ring-gray-300"
 									>
 										<Edit2 className="w-4 h-4" />
 										<span>Edit</span>
 									</button>
 									<button
-										onClick={() => requestReject(q.id)}
-										className="flex-1 inline-flex items-center justify-center space-x-1 bg-red-50 text-red-700 px-2 py-1 rounded-md hover:bg-red-100 transition text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+										onClick={(e) => {
+											e.stopPropagation();
+											requestReject(q.pending_question_id);
+										}}
+										className="flex-1 inline-flex items-center justify-center space-x-1 bg-red-50 text-red-700 px-2 py-1 rounded-md hover:bg-red-100 transition text-xs focus:outline-none focus:ring-2 focus:ring-red-200"
 									>
 										<XCircle className="w-4 h-4" />
 										<span>Reject</span>
@@ -493,37 +529,23 @@ const AdminInterface: React.FC = () => {
 				)}
 			</div>
 
-			{/* === 1) SIMPLE CONFIRM MODAL === */}
+			{/* --- Confirm Modal (Generate/Approve/Reject) --- */}
 			{showConfirmModal && currentAction && (
-				<div className="fixed inset-0 flex items-center justify-center z-50 bg-transparent">
-					<div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200 w-96">
+				<div className="fixed inset-0 flex items-center justify-center z-50">
+					<div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200 w-96 text-sm">
 						<h2 className="text-lg font-semibold text-gray-900">
-							{(() => {
-								switch (currentAction) {
-									case "generate":
-										return "Confirm Generate";
-									case "approve":
-										return "Confirm Approve";
-									case "reject":
-										return "Confirm Reject";
-									default:
-										return "Confirm Action";
-								}
-							})()}
+							{currentAction === "generate"
+								? "Confirm Generate"
+								: currentAction === "approve"
+								? "Confirm Approve"
+								: "Confirm Reject"}
 						</h2>
-						<p className="text-sm text-gray-600 mt-2">
-							{(() => {
-								switch (currentAction) {
-									case "generate":
-										return "Are you sure you want to generate these questions?";
-									case "approve":
-										return "Are you sure you want to approve this question?";
-									case "reject":
-										return "Are you sure you want to reject this question?";
-									default:
-										return "Are you sure you want to proceed?";
-								}
-							})()}
+						<p className="mt-2 text-gray-600">
+							{currentAction === "generate"
+								? "Are you sure you want to generate these questions?"
+								: currentAction === "approve"
+								? "Are you sure you want to approve this question?"
+								: "Are you sure you want to reject this question?"}
 						</p>
 						<div className="mt-4 flex justify-end space-x-3">
 							<button
@@ -545,47 +567,48 @@ const AdminInterface: React.FC = () => {
 				</div>
 			)}
 
-			{/* === 2) EDIT MODAL (FORM) === */}
+			{/* --- Edit Modal --- */}
 			{showEditModal && (
-				<div className="fixed inset-0 flex items-center justify-center z-50 bg-transparent">
-					<div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200 w-full max-w-md">
+				<div className="fixed inset-0 flex items-center justify-center z-50">
+					<div
+						className="bg-white p-6 rounded-lg shadow-lg border border-gray-200
+                       w-full max-w-3xl max-h-[90vh] overflow-y-auto -smtext"
+					>
 						<h2 className="text-lg font-semibold text-gray-900">
 							Edit Question
 						</h2>
 
-						{/* QUESTION TEXT */}
+						{/* question_text */}
 						<div className="mt-4">
-							<label className="block text-sm font-medium text-gray-700">
+							<label className="block font-medium text-gray-700">
 								Question
 							</label>
 							<textarea
-								value={editData.question}
+								value={editData.question_text}
 								onChange={(e) =>
-									setEditData((prev) => ({ ...prev, question: e.target.value }))
+									setEditData({ ...editData, question_text: e.target.value })
 								}
 								className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-200"
-								rows={3}
+								rows={8}
 							/>
 						</div>
 
-						{/* ANSWER */}
+						{/* correct_answer */}
 						<div className="mt-4">
-							<label className="block text-sm font-medium text-gray-700">
-								Answer
-							</label>
+							<label className="block font-medium text-gray-700">Answer</label>
 							<input
 								type="text"
-								value={editData.answer}
+								value={editData.correct_answer}
 								onChange={(e) =>
-									setEditData((prev) => ({ ...prev, answer: e.target.value }))
+									setEditData({ ...editData, correct_answer: e.target.value })
 								}
 								className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-200"
 							/>
 						</div>
 
-						{/* DISTRACTORS - Moved Under Answer */}
+						{/* distractors */}
 						<div className="mt-4">
-							<label className="block text-sm font-medium text-gray-700">
+							<label className="block font-medium text-gray-700">
 								Distractors
 							</label>
 							{editData.distractors.map((d, index) => (
@@ -594,34 +617,31 @@ const AdminInterface: React.FC = () => {
 									type="text"
 									value={d}
 									onChange={(e) => {
-										const newDistractors = [...editData.distractors];
-										newDistractors[index] = e.target.value;
-										setEditData({ ...editData, distractors: newDistractors });
+										const newArr = [...editData.distractors];
+										newArr[index] = e.target.value;
+										setEditData({ ...editData, distractors: newArr });
 									}}
 									className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-200 mb-2"
 								/>
 							))}
 						</div>
 
-						{/* EXPLANATION */}
+						{/* explanation */}
 						<div className="mt-4">
-							<label className="block text-sm font-medium text-gray-700">
+							<label className="block font-medium text-gray-700">
 								Explanation
 							</label>
 							<textarea
 								value={editData.explanation}
 								onChange={(e) =>
-									setEditData((prev) => ({
-										...prev,
-										explanation: e.target.value,
-									}))
+									setEditData({ ...editData, explanation: e.target.value })
 								}
 								className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-200"
-								rows={3}
+								rows={8}
 							/>
 						</div>
 
-						{/* ACTION BUTTONS */}
+						{/* Buttons */}
 						<div className="mt-6 flex justify-end space-x-3">
 							<button
 								onClick={cancelEdit}
@@ -640,14 +660,14 @@ const AdminInterface: React.FC = () => {
 				</div>
 			)}
 
-			{/* === 2b) CONFIRM EDIT MODAL === */}
+			{/* --- Confirm Edit Modal --- */}
 			{showConfirmEditModal && (
-				<div className="fixed inset-0 flex items-center justify-center z-50 bg-transparent">
-					<div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200 w-96">
+				<div className="fixed inset-0 flex items-center justify-center z-50">
+					<div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200 w-96 text-sm">
 						<h2 className="text-lg font-semibold text-gray-900">
 							Confirm Edit
 						</h2>
-						<p className="text-sm text-gray-600 mt-2">
+						<p className="text-gray-600 mt-2">
 							Are you sure you want to save these changes?
 						</p>
 						<div className="mt-4 flex justify-end space-x-3">
@@ -667,8 +687,76 @@ const AdminInterface: React.FC = () => {
 					</div>
 				</div>
 			)}
+
+			{/* --- View Modal (full details) --- */}
+			{showViewModal && (
+				<div className="fixed inset-0 flex items-center justify-center z-50">
+					<div
+						className="bg-white p-6 rounded-lg shadow-lg border border-gray-200
+                       w-full max-w-4xl max-h-[95vh] overflow-y-auto text-sm"
+					>
+						{/* <h2 className="text-lg font-semibold text-gray-900 mb-4">
+							View Question
+						</h2> */}
+
+						{/* Larger question area */}
+						<div className="mt-2">
+							<label className="block font-medium text-gray-700">
+								Question
+							</label>
+							<textarea
+								value={viewData.question_text}
+								readOnly
+								className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-200"
+								rows={20}
+							/>
+						</div>
+
+						{/* Single-line Answer & Distractors */}
+						<p className="mt-4 text-gray-700">
+							<strong>Answer:</strong> E) {viewData.correct_answer}
+						</p>
+
+						<p className="mt-2 text-gray-700">
+							<strong>Distractors:</strong>{" "}
+							{viewData.distractors.length >= 4 ? (
+								<>
+									A) {viewData.distractors[0]}, B) {viewData.distractors[1]}, C){" "}
+									{viewData.distractors[2]}, D) {viewData.distractors[3]}
+								</>
+							) : (
+								// fallback if < 4 items
+								viewData.distractors.join(", ")
+							)}
+						</p>
+
+						{/* Explanation gets more vertical space */}
+						<div className="mt-4">
+							<label className="block font-medium text-gray-700">
+								Explanation
+							</label>
+							<textarea
+								readOnly
+								value={viewData.explanation}
+								className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-200"
+								rows={6}
+							/>
+						</div>
+
+						{/* Close Button */}
+						<div className="mt-6 flex justify-end">
+							<button
+								onClick={() => setShowViewModal(false)}
+								className="px-4 py-2 bg-gray-200 text-gray-900 rounded-md hover:bg-gray-300 transition"
+							>
+								Close
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 };
 
-export default AdminInterface;
+export default AdminPage;
