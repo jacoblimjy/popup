@@ -1,0 +1,171 @@
+prompts:
+  - topic: "anagram"
+    difficulty: "easy"
+    system_message: |
+      1. Construct a sentence of no more than ten words, with a SIX letter word capitalised. 
+         The SIX letter word chosen should be under one of these categories: Noun, verb, adjective or adverb.
+      2. A short detailed explanation on why the capitalised word fits the context of the sentence.
+      3. Create four other words using the same set of letters as the capitalised SIX-letter word. These four words can be anagrams, misspellings by swapping the 
+         consonants around or made-up anagrams that resemble the spelling of real words.
+         Ensure that the letters A, B, C, D, E for the options only appear once.
+
+      Requirements:
+      - Ensure that the sentence is in proper English
+      - Ensure that the capitalised word is exactly SIX letters long
+
+      Refer to the examples given and return the output as a json as follows.
+      {
+         "question_text":
+         "answer_format": "multiple_choice"
+         "correct_answer":
+         "explanation":
+         "distractors":
+      }
+
+    few_shot_examples: |
+      ## EXAMPLE PUZZLE 1
+      TITLE: Use a Rule to Make a Word
+
+      INSTRUCTIONS:
+      ## EXAMPLE PUZZLE 1
+      Question Text:
+      The GREEDY chicken ate all the corn.
+
+      Explanation:
+      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
+      The sentence describes a chicken that ate all the corn. A fitting adjective to describe this behaviour would be GREEDY.
+
+      Correct Answer: (A, GREEDY)
+
+      Distractors: [(B, YERGED), (C, GREYED), (D, DEGERY), (E, GREDYE)]
+
+
+      ## EXAMPLE PUZZLE 2
+      Question Text:
+      It was quite CLOUDY and cold when we went to the park.
+
+      Explanation:
+      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
+      The sentence describes the weather as cold. A fitting adjective to describe the weather as well would be CLOUDY.
+
+      Correct Answer: (D, CLOUDY)
+
+      Distractors: [(A, CUDLOY), (B, YULCOD), (C, LOCUDY), (E, CLOYUD)]
+
+    assignment: |
+      Ensure that the capitalised word must be EXACTLY SIX letters long.
+
+  - topic: "anagram"
+    difficulty: "medium"
+    system_message: |
+      1. Construct a sentence of no more than fifteen words, with a SEVEN letter word capitalised. 
+        The SEVEN letter word chosen should be under one of these categories: Noun, verb, adjective or adverb.
+      2. A short detailed explanation on why the capitalised word fits the context of the sentence.
+      3. Create four other words using the same set of letters as the capitalised SEVEN-letter word. These four words can be anagrams, misspellings by swapping the 
+        consonants around or made-up anagrams that resemble the spelling of real words.
+        Ensure that the letters A, B, C, D, E for the options only appear once.
+
+      Requirements:
+      - Ensure that the sentence is in proper English
+      - Ensure that the capitalised word is exactly SEVEN letters long
+
+      Refer to the examples given and return the output as a json as follows.
+      {
+        "question_text":
+        "answer_format": "multiple_choice"
+        "correct_answer":
+        "explanation":
+        "distractors":
+      }
+
+    few_shot_examples: |
+      ## EXAMPLE PUZZLE 1
+      TITLE: Use a Rule to Make a Word
+
+      INSTRUCTIONS:
+      ## EXAMPLE PUZZLE 1
+      Question Text:
+      I ordered LASAGNA for dinner when I went to the Italian restaurant.
+
+      Explanation:
+      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
+      The sentence mentions an Italian restaurant and dinner, which suggests the food ordered is a well-known Italian dish. 
+      LASAGNA is a fitting noun as it refers to a popular layered pasta dish.
+
+      Correct Answer: (D, LASAGNA)
+
+      Distractors: [(A, LASANGA), (B, LANSAGA), (C, SAGALNA), (E, LAGSANA)]
+
+
+      ## EXAMPLE PUZZLE 2
+      Question Text:
+      My aunt has five nieces and NEPHEWS.
+
+      Explanation:
+      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
+      The sentence mentions nieces, which implies a reference to family members. A fitting noun to match 'nieces' in this context is 'NEPHEWS,' 
+      which refers to male relatives.
+
+      Correct Answer: (B, NEPHEWS)
+
+      Distractors: [(A, NEPHWES), (C, NEHPEWS), (D, PENHEWS), (E, NHEPEWS)]
+
+    assignment: |
+      Ensure that the capitalised word must be EXACTLY SEVEN letters long.
+
+  - topic: "anagram"
+    difficulty: "hard"
+    system_message: |
+      1. Construct a sentence of no more than fifteen words, with an EIGHT or NINE letter word capitalised. 
+        The EIGHT or NINE letter word chosen should be under one of these categories: Noun, verb, adjective or adverb.
+      2. A short detailed explanation on why the capitalised word fits the context of the sentence.
+      3. Create four other words using the same set of letters as the capitalised EIGHT or NINE letter word. These four words can be anagrams, misspellings by swapping the 
+        consonants around or made-up anagrams that resemble the spelling of real words.
+        Ensure that the letters A, B, C, D, E for the options only appear once.
+
+      Requirements:
+      - Ensure that the sentence is in proper English
+      - Ensure that the capitalised word is EIGHT or NINE letters long
+
+      Refer to the examples given and return the output as a json as follows.
+      {
+        "question_text":
+        "answer_format": "multiple_choice"
+        "correct_answer":
+        "explanation":
+        "distractors":
+      }
+
+    few_shot_examples: |
+      ## EXAMPLE PUZZLE 1
+      TITLE: Use a Rule to Make a Word
+
+      INSTRUCTIONS:
+      ## EXAMPLE PUZZLE 1
+      Question Text: I was SHOUTING when I lost my voice.
+
+      Explanation:
+      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
+      The sentence describes someone who has lost their voice. 
+      The word SHOUTING is a fitting verb because you lose your voice when you talk a lot or shout.
+
+      Correct Answer: (E, SHOUTING)
+
+      Distractors: [(A, THOUSING), (B, GOUTHINS), (C, TOUSHIGN), (D, SNOUTIGH)]
+
+
+      ## EXAMPLE PUZZLE 2
+      Question Text:
+      He walked CAREFULLY on the tightrope.
+
+      Explanation:
+      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
+      The sentence describes someone walking on a tightrope, which requires caution and precision. 
+      The word CAREFULLY is a fitting adverb because it means to do something with caution to avoid mistakes or danger.
+
+      Correct Answer: (B, CAREFULLY)
+
+      Distractors: [(A, FAYCURELL), (C, CALLEFURY), (D, FURCELYAL), (E, RECALLUFY)]
+
+    assignment: |
+      Ensure that the capitalised word is exactly EIGHT or NINE letters long.
