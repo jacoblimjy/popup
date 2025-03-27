@@ -1,3 +1,5 @@
+import { getSessionTimeoutHandler } from "../utils";
+
 const apiClient = async (url: string, options: RequestInit = {}) => {
   const token = localStorage.getItem("token");
 
@@ -11,6 +13,13 @@ const apiClient = async (url: string, options: RequestInit = {}) => {
     ...options,
     headers,
   });
+  if (response.status === 403) {
+    const handleSessionTimeout = getSessionTimeoutHandler();
+    if (handleSessionTimeout) {
+      handleSessionTimeout();
+    }
+    return;
+  }
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }

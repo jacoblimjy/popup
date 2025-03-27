@@ -1,8 +1,8 @@
-import { Attempt, AttemptedSetRequest, AttemptedSetResponse } from "../types/AttemptTypes";
+import { Attempt, CreateAttemptedSetRequest, GetAttemptedSetResponse } from "../types/AttemptTypes";
 import apiClient from "./ApiClient";
 const BASE_URL = "http://localhost:8000/api/attempted_sets";
 
-const createAttemptedSet = async (attemptedSet : AttemptedSetRequest) => {
+const createAttemptedSet = async (attemptedSet : CreateAttemptedSetRequest) => {
   const req_body = {
     ...attemptedSet
   }
@@ -30,7 +30,7 @@ const updateAttemptedSet = async (updated_attempt : Attempt, set_id: number) => 
   });
 }
 
-const getAttemptedSets = async (child_id : number, page_id: number = 1) : Promise<AttemptedSetResponse[]> => {
+const getAttemptedSets = async (child_id : number, page_id: number = 1) : Promise<GetAttemptedSetResponse[]> => {
   return apiClient(BASE_URL + `?child_id=${child_id}&page=${page_id}`, {
     method: "GET",
     headers: {
@@ -39,7 +39,16 @@ const getAttemptedSets = async (child_id : number, page_id: number = 1) : Promis
   });
 }
 
-const deleteAttemptedSetBySetId = async (set_id : number) => {
+const getAttemptedSetBySetId = async (set_id : string) : Promise<GetAttemptedSetResponse> => {
+  return apiClient(BASE_URL + `/${set_id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+const deleteAttemptedSetBySetId = async (set_id : string) => {
   return apiClient(BASE_URL + `/${set_id}`, {
     method: "DELETE",
     headers: {
@@ -63,6 +72,7 @@ export default {
   createAttemptedSet,
   updateAttemptedSet,
   getAttemptedSets,
+  getAttemptedSetBySetId,
   deleteAttemptedSetBySetId,
   deleteAttemptedSetByChildId
 }

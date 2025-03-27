@@ -44,6 +44,7 @@ const Navbar: React.FC = () => {
 
 	const handleLogout = () => {
 		logout();
+		setActiveChild(null);
 		navigate("/", { replace: true });
 		setIsChildrenMenuOpen(false);
 		setIsUserMenuOpen(false);

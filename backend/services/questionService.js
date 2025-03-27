@@ -113,9 +113,8 @@ const getQuestions = async (filters = {}, limit = 10, offset = 0) => {
 
     const [questions] = await db.execute(query, params);
 
-    return questions.map((question) => ({
-      ...question,
-    }));
+    return questions;
+
   } catch (error) {
     throw error;
   }

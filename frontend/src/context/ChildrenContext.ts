@@ -5,7 +5,7 @@ interface ChildrenContextType {
   childrenList: DetailedChild[] | null;
   activeChild: DetailedChild | null;
   getChildrenList: () => void;
-  setActiveChild: (child: DetailedChild) => void;
+  setActiveChild: (child: DetailedChild | null) => void;
 }
 
 export const ChildrenContext = createContext<ChildrenContextType | undefined>(undefined);
