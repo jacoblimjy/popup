@@ -14,6 +14,7 @@ import ManageChildrenPage from './pages/ManageChildrenPage'
 import AdminPage from './pages/AdminPage'
 import QuestionsPage from './pages/QuestionsPage'
 import ResultsPage from './pages/ResultsPage'
+import AnalyticsPage from './pages/AnalyticsPage'
 
 function App() {
 
@@ -30,6 +31,7 @@ function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/manage-children" element={<ManageChildrenPage/>} />
+          <Route path="/analytics" element={<AnalyticsPage/>} />
           <Route path="/admin" element={<AdminPage/>} />
           <Route path="/practice/:topic_id/:difficulty_id" element={<QuestionsPage/>} />
           <Route path='/results/:set_id' element={<ResultsPage/>} />
