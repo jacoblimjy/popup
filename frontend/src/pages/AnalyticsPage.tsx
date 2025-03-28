@@ -143,7 +143,7 @@ const AnalyticsPage = () => {
           <h3 className="my-3 font-semibold text-lg">Best Scoring Question Type</h3>
           <p className="text-gray-400">You excelled at solving Anagrams! You got <span className="font-bold underline">95%</span> correct - amazing work!</p>
         </div>
-        <div className="flex flex-col rounded shadow-md p-5 gap-4">
+        <div className="flex flex-col rounded shadow-md p-5 gap-4 md:h-full h-[400px]">
           <p className="font-medium">Accuracy by Question Type</p>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart layout="horizontal" data={sampleAccuracyBarChartData}>
@@ -168,7 +168,7 @@ const AnalyticsPage = () => {
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex flex-col rounded shadow-md p-5 gap-4">
+        <div className="flex flex-col rounded shadow-md p-5 gap-4 md:h-full h-[400px]">
           <p className="font-medium">Time Spent Per Question Type</p>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -197,7 +197,7 @@ const AnalyticsPage = () => {
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex flex-col rounded shadow-md p-5 gap-4">
+        <div className="flex flex-col rounded shadow-md p-5 gap-4 md:h-full h-[400px]">
           <p className="font-medium">Score Over Time</p>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={sampleScoreLineChartData}>
