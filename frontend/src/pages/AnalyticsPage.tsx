@@ -207,7 +207,7 @@ const AnalyticsPage = () => {
               <Tooltip />
               <Line 
                 dataKey="score" 
-                
+                stroke="#8884d8"
               />
             </LineChart>
           </ResponsiveContainer>
