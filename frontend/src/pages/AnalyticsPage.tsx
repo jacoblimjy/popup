@@ -121,7 +121,7 @@ const AnalyticsPage = () => {
     <div className="p-10 flex flex-col items-center h-full">
       <h1 className="text-3xl font-bold mb-5">Overall Accuracy: 85%</h1>
       <p className="text-gray-400">You did a great job!</p>
-      <div className="grid md:grid-cols-3 grid-cols-1 gap-8 h-2/3">
+      <div className="grid xl:grid-cols-3 grid-cols-1 gap-8 h-2/3">
         <div className="flex flex-col rounded shadow-md p-5 gap-4">
           <div className="bg-[#f1c40e] text-white rounded-lg w-12 h-12 flex items-center justify-center">
             <Zap />
@@ -143,7 +143,7 @@ const AnalyticsPage = () => {
           <h3 className="my-3 font-semibold text-lg">Best Scoring Question Type</h3>
           <p className="text-gray-400">You excelled at solving Anagrams! You got <span className="font-bold underline">95%</span> correct - amazing work!</p>
         </div>
-        <div className="flex flex-col rounded shadow-md p-5 gap-4 md:h-full h-[400px]">
+        <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px]">
           <p className="font-medium">Accuracy by Question Type</p>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart layout="horizontal" data={sampleAccuracyBarChartData}>
@@ -168,7 +168,7 @@ const AnalyticsPage = () => {
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex flex-col rounded shadow-md p-5 gap-4 md:h-full h-[400px]">
+        <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px]">
           <p className="font-medium">Time Spent Per Question Type</p>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -197,7 +197,7 @@ const AnalyticsPage = () => {
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex flex-col rounded shadow-md p-5 gap-4 md:h-full h-[400px]">
+        <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px]">
           <p className="font-medium">Score Over Time</p>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={sampleScoreLineChartData}>
