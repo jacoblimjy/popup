@@ -46,7 +46,7 @@ const CoursesPage = () => {
             <div className="bg-gray-100 p-10 mt-12 rounded-lg w-[600px] h-[300px] flex flex-col justify-between">
                 <div className="grid grid-cols-2 gap-4">
                     {Object.entries(topics).map(([key, topic]) => (
-                        <button key={key} className={`py-3 px-2 rounded-lg text-white text-center transition-all ${chosenTopic === key ? "bg-yellow-600" : "bg-yellow-400 hover:bg-yellow-600"}`}
+                        <button key={key} className={`py-2 px-2 rounded-lg text-white text-center transition-all ${chosenTopic === key ? "bg-yellow-600" : "bg-yellow-400 hover:bg-yellow-600"} border-4 ${chosenTopic === key ? "border-black" : "border-transparent"}`}
                             onClick={() => handleSelectTopic(key)}>
                             {topic}
                         </button>
@@ -57,7 +57,7 @@ const CoursesPage = () => {
                     <h3 className="text-lg">Difficulty Level</h3>
                     <div className="flex gap-10">
                         {Object.entries(difficulty_levels).map(([key, level]) => (
-                            <button key={key} className={`w-20 py-3 px-2 rounded-lg text-white text-center transition-all ${difficulty === key
+                            <button key={key} className={`w-22 py-3 px-2 rounded-lg text-white text-center transition-all ${difficulty === key
                                 ? level === "Easy"
                                     ? "bg-green-700"
                                     : level === "Medium"
@@ -68,7 +68,7 @@ const CoursesPage = () => {
                                     : level === "Medium"
                                         ? "bg-orange-400 hover:bg-orange-600"
                                         : "bg-red-400 hover:bg-red-800"
-                                }`}
+                                } border-4 ${difficulty === key ? "border-black" : "border-transparent"}`}
                                 onClick={() => handleSelectDifficulty(key)}>
                                 {level}
                             </button>
