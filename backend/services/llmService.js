@@ -20,6 +20,343 @@ const DIFFICULTY_MAPPINGS = {
 };
 
 /**
+ * Calculate text similarity between two strings using Jaccard similarity
+ * @param {string} text1
+ * @param {string} text2
+ * @returns {number} Similarity score between 0 and 1
+ */
+function calculateTextSimilarity(text1, text2) {
+  // Split texts into words
+  const words1 = text1.split(/\s+/).filter((word) => word.length > 2); // Filter out very short words
+  const words2 = text2.split(/\s+/).filter((word) => word.length > 2);
+
+  // Create sets of words
+  const set1 = new Set(words1);
+  const set2 = new Set(words2);
+
+  // Calculate intersection
+  const intersection = new Set();
+  for (const word of set1) {
+    if (set2.has(word)) {
+      intersection.add(word);
+    }
+  }
+
+  // Calculate union
+  const union = new Set([...set1, ...set2]);
+
+  // Jaccard similarity = size of intersection / size of union
+  return union.size === 0 ? 0 : intersection.size / union.size;
+}
+
+/**
+ * Check if a question is a duplicate of an existing question in the database
+ * Primary check is based on the correct answer, with secondary checks on question text
+ *
+ * @param {Object} question - The question object to check
+ * @param {string} question.question_text - The text of the question
+ * @param {string} question.correct_answer - The correct answer to the question
+ * @param {number} question.topic_id - The topic ID of the question
+ * @returns {Promise<{isDuplicate: boolean, existingQuestionId: number|null, reason: string|null}>}
+ */
+async function checkDuplicateQuestion(question) {
+  try {
+    const { question_text, correct_answer, topic_id } = question;
+
+    // Get similarity threshold from environment or use default
+    const similarityThreshold = parseFloat(
+      process.env.QUESTION_SIMILARITY_THRESHOLD || 0.7
+    );
+
+    // Convert correct answer to lowercase for case-insensitive comparison
+    const normalizedAnswer = correct_answer.toLowerCase().trim();
+
+    const [exactAnswerMatches] = await db.execute(
+      `SELECT 
+        question_id, 
+        question_text, 
+        correct_answer 
+      FROM 
+        Questions 
+      WHERE 
+        LOWER(TRIM(correct_answer)) = ? 
+        AND topic_id = ?`,
+      [normalizedAnswer, topic_id]
+    );
+
+    if (exactAnswerMatches.length > 0) {
+      return {
+        isDuplicate: true,
+        existingQuestionId: exactAnswerMatches[0].question_id,
+        reason: `Question has same correct answer as existing question ID ${exactAnswerMatches[0].question_id}`,
+      };
+    }
+
+    const [pendingExactAnswerMatches] = await db.execute(
+      `SELECT 
+        pending_question_id, 
+        question_text, 
+        correct_answer 
+      FROM 
+        Pending_Questions 
+      WHERE 
+        LOWER(TRIM(correct_answer)) = ? 
+        AND topic_id = ?`,
+      [normalizedAnswer, topic_id]
+    );
+
+    if (pendingExactAnswerMatches.length > 0) {
+      return {
+        isDuplicate: true,
+        existingQuestionId: pendingExactAnswerMatches[0].pending_question_id,
+        reason: `Question has same correct answer as pending question ID ${pendingExactAnswerMatches[0].pending_question_id}`,
+      };
+    }
+
+    // Normalize the question text
+    const normalizedQuestionText = question_text
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "") // Remove punctuation
+      .replace(/\s+/g, " ") // Normalize whitespace
+      .trim();
+
+    // Get all questions of the same topic for comparison
+    const [topicQuestions] = await db.execute(
+      `SELECT 
+        question_id, 
+        question_text 
+      FROM 
+        Questions 
+      WHERE 
+        topic_id = ?`,
+      [topic_id]
+    );
+
+    // Check similarity with existing questions
+    for (const existingQuestion of topicQuestions) {
+      const existingText = existingQuestion.question_text
+        .toLowerCase()
+        .replace(/[^\w\s]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      // Calculate text similarity (Jaccard similarity of words)
+      const similarity = calculateTextSimilarity(
+        normalizedQuestionText,
+        existingText
+      );
+
+      // If similarity is above threshold, consider it a duplicate
+      if (similarity > similarityThreshold) {
+        return {
+          isDuplicate: true,
+          existingQuestionId: existingQuestion.question_id,
+          reason: `Question text is ${Math.round(
+            similarity * 100
+          )}% similar to existing question ID ${existingQuestion.question_id}`,
+        };
+      }
+    }
+
+    const [pendingTopicQuestions] = await db.execute(
+      `SELECT 
+        pending_question_id, 
+        question_text 
+      FROM 
+        Pending_Questions 
+      WHERE 
+        topic_id = ?`,
+      [topic_id]
+    );
+
+    for (const pendingQuestion of pendingTopicQuestions) {
+      const pendingText = pendingQuestion.question_text
+        .toLowerCase()
+        .replace(/[^\w\s]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      const similarity = calculateTextSimilarity(
+        normalizedQuestionText,
+        pendingText
+      );
+
+      if (similarity > similarityThreshold) {
+        return {
+          isDuplicate: true,
+          existingQuestionId: pendingQuestion.pending_question_id,
+          reason: `Question text is ${Math.round(
+            similarity * 100
+          )}% similar to pending question ID ${
+            pendingQuestion.pending_question_id
+          }`,
+        };
+      }
+    }
+
+    return {
+      isDuplicate: false,
+      existingQuestionId: null,
+      reason: null,
+    };
+  } catch (error) {
+    console.error("Error checking for duplicate questions:", error);
+    return {
+      isDuplicate: false,
+      existingQuestionId: null,
+      reason: `Error during duplicate check: ${error.message}`,
+    };
+  }
+}
+
+/**
+ * Process and validate questions returned from the LLM
+ * Enhanced with duplicate detection focusing on answer similarity
+ */
+async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
+  const validQuestions = [];
+  const skippedQuestions = []; // Track skipped questions for reporting
+  const wordnet = new WordNet();
+
+  // Helper function to check if a word exists using WordNet
+  const wordExists = async (word) => {
+    return new Promise((resolve) => {
+      wordnet.lookup(word.toLowerCase().trim(), (results) => {
+        resolve(results.length > 0);
+      });
+    });
+  };
+
+  console.log(
+    `Processing ${questions.length} generated questions for topic ID ${topic_id}, difficulty ID ${difficulty_id}`
+  );
+
+  // Validate each question
+  for (const question of questions) {
+    try {
+      // Track validation information for this question
+      const validationInfo = {
+        question_text: question.question_text,
+        status: "processing",
+        reason: null,
+      };
+
+      // 1. Basic structure validation
+      if (!question.question_text || !question.correct_answer) {
+        validationInfo.status = "rejected";
+        validationInfo.reason =
+          "Missing required fields (question_text or correct_answer)";
+        skippedQuestions.push(validationInfo);
+        console.warn("Skipping question - missing required fields");
+        continue;
+      }
+
+      // 2. Ensure distractors are present and in array format
+      const distractors = Array.isArray(question.distractors)
+        ? question.distractors
+        : question.distractors
+        ? [question.distractors]
+        : [];
+
+      if (distractors.length < 2) {
+        validationInfo.status = "rejected";
+        validationInfo.reason = "Insufficient distractors (minimum 2 required)";
+        skippedQuestions.push(validationInfo);
+        console.warn("Skipping question - insufficient distractors");
+        continue;
+      }
+
+      // 3. Validate the correct answer is a real word/phrase
+      const words = question.correct_answer.split(/\s+/);
+      let allWordsValid = true;
+
+      for (const word of words) {
+        // Skip very short words, punctuation, numbers, etc.
+        if (word.length <= 1 || !isNaN(word) || /[^\w]/.test(word)) continue;
+
+        const isValid = await wordExists(word);
+        if (!isValid) {
+          validationInfo.status = "rejected";
+          validationInfo.reason = `Invalid word detected in answer: "${word}"`;
+          allWordsValid = false;
+          break;
+        }
+      }
+
+      if (!allWordsValid) {
+        skippedQuestions.push(validationInfo);
+        console.warn(`Skipping question - invalid word detected in answer`);
+        continue;
+      }
+
+      // 4. Check for duplicate questions based on answer and question similarity
+      const questionToCheck = {
+        question_text: question.question_text,
+        correct_answer: question.correct_answer,
+        topic_id: topic_id,
+      };
+
+      const duplicateCheck = await checkDuplicateQuestion(questionToCheck);
+
+      if (duplicateCheck.isDuplicate) {
+        validationInfo.status = "duplicate";
+        validationInfo.reason = duplicateCheck.reason;
+        validationInfo.existingQuestionId = duplicateCheck.existingQuestionId;
+        skippedQuestions.push(validationInfo);
+        console.warn(`Skipping question - ${duplicateCheck.reason}`);
+        continue;
+      }
+
+      // 5. Format the question for database insertion
+      validQuestions.push({
+        question_text: question.question_text,
+        answer_format: question.answer_format || "multiple_choice",
+        correct_answer: question.correct_answer,
+        distractors: distractors,
+        topic_id: topic_id,
+        difficulty_id: difficulty_id,
+        explanation: question.explanation || "No explanation provided",
+        is_llm_generated: true,
+      });
+
+      validationInfo.status = "accepted";
+      console.log(
+        `Question validated and accepted: "${question.question_text.substring(
+          0,
+          50
+        )}..."`
+      );
+    } catch (error) {
+      console.error("Error validating question:", error);
+      // Record the error but continue processing other questions
+      skippedQuestions.push({
+        question_text: question.question_text || "Unknown question",
+        status: "error",
+        reason: `Error during validation: ${error.message}`,
+      });
+    }
+  }
+
+  // Log validation summary
+  console.log(
+    `Validation complete. ${validQuestions.length} accepted, ${skippedQuestions.length} rejected.`
+  );
+
+  // Return both valid questions and information about skipped questions
+  return {
+    validQuestions,
+    skippedQuestions,
+    stats: {
+      total: questions.length,
+      accepted: validQuestions.length,
+      rejected: skippedQuestions.length,
+      duplicates: skippedQuestions.filter((q) => q.status === "duplicate")
+        .length,
+    },
+  };
+}
+
+/**
  * Main function to generate questions
  * This function will use either the OpenAI API or mock data based on the OPENAI_API_KEY environment variable
  *
@@ -91,13 +428,12 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
       difficulty_id
     );
 
-    if (processedQuestions.length === 0) {
+    if (processedQuestions.validQuestions.length === 0) {
       throw new Error("No valid questions could be generated");
     }
-
     // 7. Save to pending questions collection
     const result = await pendingQuestionService.createPendingQuestionsBulk(
-      processedQuestions
+      processedQuestions.validQuestions
     );
 
     return {
@@ -107,6 +443,8 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
       totalProcessed: result.totalProcessed,
       successCount: result.successCount,
       failureCount: result.failureCount,
+      validationStats: processedQuestions.stats,
+      skippedQuestions: processedQuestions.skippedQuestions,
     };
   } catch (error) {
     console.error("Error generating questions:", error);
@@ -145,7 +483,7 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
         ],
         temperature: 0.7,
         max_tokens: 3000,
-        response_format: { 
+        response_format: {
           // TODO: We can refactor this schema to another file
           type: "json_schema",
           json_schema: {
@@ -154,35 +492,41 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
             schema: {
               type: "object",
               properties: {
-                questions:
-                {
+                questions: {
                   type: "array",
                   items: {
                     type: "object",
                     properties: {
                       question_text: { type: "string" },
-                      answer_format: { 
+                      answer_format: {
                         type: "string",
                         // Enum values for answer format
                         // We can edit the prompts yaml later on
-                        enum: ["multiple_choice"]
+                        enum: ["multiple_choice"],
                       },
                       correct_answer: { type: "string" },
                       explanation: { type: "string" },
                       distractors: {
                         type: "array",
-                        items: { type: "string" }
+                        items: { type: "string" },
                       },
                     },
-                    required: ["question_text", "answer_format", "correct_answer", "explanation", "distractors"],
+                    required: [
+                      "question_text",
+                      "answer_format",
+                      "correct_answer",
+                      "explanation",
+                      "distractors",
+                    ],
                     additionalProperties: false,
                   },
-                }
+                },
               },
               required: ["questions"],
-              additionalProperties: false
-            }
-          } },
+              additionalProperties: false,
+            },
+          },
+        },
       },
       {
         headers: {
@@ -412,81 +756,6 @@ ${promptTemplate.assignment}`;
   }
 }
 
-/**
- * Process and validate questions returned from the LLM
- */
-async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
-  const validQuestions = [];
-  const wordnet = new WordNet();
-
-  // Helper function to check if a word exists using WordNet
-  const wordExists = async (word) => {
-    return new Promise((resolve) => {
-      wordnet.lookup(word.toLowerCase().trim(), (results) => {
-        resolve(results.length > 0);
-      });
-    });
-  };
-
-  // Validate each question
-  for (const question of questions) {
-    try {
-      // 1. Basic structure validation
-      if (!question.question_text || !question.correct_answer) {
-        console.warn("Skipping question - missing required fields");
-        continue;
-      }
-
-      // 2. Ensure distractors are present and in array format
-      const distractors = Array.isArray(question.distractors)
-        ? question.distractors
-        : question.distractors
-        ? [question.distractors]
-        : [];
-
-      if (distractors.length < 2) {
-        console.warn("Skipping question - insufficient distractors");
-        continue;
-      }
-
-      // 3. Validate the correct answer is a real word/phrase
-      const words = question.correct_answer.split(/\s+/);
-      let allWordsValid = true;
-
-      for (const word of words) {
-        // Skip very short words, punctuation, numbers, etc.
-        if (word.length <= 1 || !isNaN(word) || /[^\w]/.test(word)) continue;
-
-        const isValid = await wordExists(word);
-        if (!isValid) {
-          console.warn(`Skipping question - invalid word detected: "${word}"`);
-          allWordsValid = false;
-          break;
-        }
-      }
-
-      if (!allWordsValid) continue;
-
-      // 4. Format the question for database insertion
-      validQuestions.push({
-        question_text: question.question_text,
-        answer_format: question.answer_format || "multiple_choice",
-        correct_answer: question.correct_answer,
-        distractors: distractors,
-        topic_id: topic_id,
-        difficulty_id: difficulty_id,
-        explanation: question.explanation || "No explanation provided",
-        is_llm_generated: true,
-      });
-    } catch (error) {
-      console.error("Error validating question:", error);
-      // Skip this question but continue processing others
-    }
-  }
-
-  return validQuestions;
-}
-
 async function getTopicInfo(topic_id) {
   const [rows] = await db.execute("SELECT * FROM Topics WHERE topic_id = ?", [
     topic_id,
@@ -545,4 +814,6 @@ module.exports = {
   generateQuestionsMock,
   getTopicByName,
   getDifficultyByLabel,
+  checkDuplicateQuestion,
+  calculateTextSimilarity,
 };
