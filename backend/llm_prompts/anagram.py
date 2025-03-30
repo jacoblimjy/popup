@@ -20,7 +20,6 @@ def validate_anagrams(jumbled, correct_word, distractor_words):
         raise ValueError(f"Duplicate words detected")
 
     for word in all_words:
-        print(sorted(word))
         if sorted(word) != sorted_correct:
             raise ValueError(f"Invalid anagram found: {word} is not an anagram of {correct_word}")
     

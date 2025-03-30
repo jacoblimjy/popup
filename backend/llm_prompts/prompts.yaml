@@ -24,10 +24,6 @@ prompts:
 
     few_shot_examples: |
       ## EXAMPLE PUZZLE 1
-      TITLE: Use a Rule to Make a Word
-
-      INSTRUCTIONS:
-      ## EXAMPLE PUZZLE 1
       Question Text:
       The GREEDY chicken ate all the corn.
 
@@ -79,10 +75,6 @@ prompts:
       }
 
     few_shot_examples: |
-      ## EXAMPLE PUZZLE 1
-      TITLE: Use a Rule to Make a Word
-
-      INSTRUCTIONS:
       ## EXAMPLE PUZZLE 1
       Question Text:
       I ordered LASAGNA for dinner when I went to the Italian restaurant.
@@ -137,10 +129,6 @@ prompts:
       }
 
     few_shot_examples: |
-      ## EXAMPLE PUZZLE 1
-      TITLE: Use a Rule to Make a Word
-
-      INSTRUCTIONS:
       ## EXAMPLE PUZZLE 1
       Question Text: I was SHOUTING when I lost my voice.
 
