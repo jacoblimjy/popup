@@ -46,11 +46,10 @@ def process_json(input):
     question_text = (
         f"TITLE: Anagram in a Sentence\n\n"
         "INSTRUCTIONS:\n"
-        "Rearrange the letters in capitals to spell a word that completes "
-        "the sentence in a sensible way.\n\n"
+        "Rearrange the letters in capitals to spell a word that completes the sentence in a sensible way.\n\n"
         f"{modified_sentence}\n\n"
         "Which of the following is the answer?\n"
-        + "\n".join(sorted_options)
+        + "\n".join([f"{option.split(', ')[0].strip(' ()')}) {option.split(', ')[1].strip(' ()')}" for option in sorted_options])
     )
 
     output = input.copy()
