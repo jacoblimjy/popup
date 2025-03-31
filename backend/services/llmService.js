@@ -5,6 +5,11 @@ const fs = require("fs");
 const path = require("path");
 const pendingQuestionService = require("./pendingQuestionService");
 const { WordNet } = require("natural");
+const {
+  getLLMConfig,
+  getQuestionGenConfig,
+  hasOpenAIAPIKey,
+} = require("../config/llmSettings");
 
 const TOPIC_MAPPINGS = {
   1: "rule", // Use a Rule to Make a Word
@@ -63,14 +68,13 @@ async function checkDuplicateQuestion(question) {
   try {
     const { question_text, correct_answer, topic_id } = question;
 
-    // Get similarity threshold from environment or use default
-    const similarityThreshold = parseFloat(
-      process.env.QUESTION_SIMILARITY_THRESHOLD || 0.7
-    );
+    // Get similarity threshold from configuration
+    const { similarityThreshold } = getQuestionGenConfig();
 
     // Convert correct answer to lowercase for case-insensitive comparison
     const normalizedAnswer = correct_answer.toLowerCase().trim();
 
+    // First, check if there's a question with the exact same answer within the same topic
     const [exactAnswerMatches] = await db.execute(
       `SELECT 
         question_id, 
@@ -92,6 +96,7 @@ async function checkDuplicateQuestion(question) {
       };
     }
 
+    // Also check pending questions (questions not yet approved)
     const [pendingExactAnswerMatches] = await db.execute(
       `SELECT 
         pending_question_id, 
@@ -112,6 +117,10 @@ async function checkDuplicateQuestion(question) {
         reason: `Question has same correct answer as pending question ID ${pendingExactAnswerMatches[0].pending_question_id}`,
       };
     }
+
+    // Next, check for similar question text
+    // This is a secondary check that helps catch questions that are phrased differently
+    // but are essentially asking the same thing
 
     // Normalize the question text
     const normalizedQuestionText = question_text
@@ -158,6 +167,7 @@ async function checkDuplicateQuestion(question) {
       }
     }
 
+    // Also check pending questions for text similarity
     const [pendingTopicQuestions] = await db.execute(
       `SELECT 
         pending_question_id, 
@@ -374,8 +384,14 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
       );
     }
 
+    // Get configuration for question generation
+    const { maxQuestionsPerBatch } = getQuestionGenConfig();
+
     // Cap number of questions
-    const questionCount = Math.min(Math.max(1, parseInt(num_questions)), 20);
+    const questionCount = Math.min(
+      Math.max(1, parseInt(num_questions)),
+      maxQuestionsPerBatch
+    );
 
     // 2. Get topic and difficulty information from database
     const topicInfo = await getTopicInfo(topic_id);
@@ -412,8 +428,7 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
     let rawQuestions;
 
     // Check if we have an API key for OpenAI
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (apiKey && apiKey.length > 0) {
+    if (hasOpenAIAPIKey()) {
       console.log("Using OpenAI API for question generation");
       rawQuestions = await generateQuestionsWithOpenAI(prompt, questionCount);
     } else {
@@ -464,10 +479,13 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
   try {
     console.log("Calling OpenAI API...");
 
+    // Get LLM configuration
+    const llmConfig = getLLMConfig();
+
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: "gpt-4o", // Use the appropriate model (gpt-4, gpt-3.5-turbo, etc.)
+        model: llmConfig.model,
         messages: [
           {
             role: "system",
@@ -481,8 +499,11 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
               `\n\nGenerate exactly ${numQuestions} questions in JSON format.`,
           },
         ],
-        temperature: 0.7,
-        max_tokens: 3000,
+        temperature: llmConfig.temperature,
+        max_tokens: llmConfig.maxTokens,
+        top_p: llmConfig.topP,
+        frequency_penalty: llmConfig.frequencyPenalty,
+        presence_penalty: llmConfig.presencePenalty,
         response_format: {
           // TODO: We can refactor this schema to another file
           type: "json_schema",
