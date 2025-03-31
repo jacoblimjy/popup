@@ -46,5 +46,14 @@ def rule_eval(input):
     unsolved_set = input.get("unsolved_set")
 
     evaluation = position_match(solved_set, unsolved_set)
-    print(evaluation)
+
+    output = input.copy()
+
+    if not evaluation:
+        raise ValueError("Evaluation failed: Solved and unsolved sets do not follow the same rule.")
+    
+    output.pop("solved_set", None)
+    output.pop("unsolved_set", None)
+    return output
+
     
