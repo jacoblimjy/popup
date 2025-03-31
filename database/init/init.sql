@@ -74,11 +74,11 @@ CREATE TABLE Child_Performance (
     up_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     child_id INTEGER,
     topic_id INTEGER,
-    accuracy_score FLOAT,
+    accuracy_score DECIMAL(5,2),
     estimated_proficiency FLOAT,
     questions_attempted INTEGER,
-    time_spent INTEGER,
-    difficulty_level INTEGER,
+    average_time_spent DECIMAL(5,2),
+    difficulty_id INTEGER,
     current_mastery VARCHAR(255),
     date_recorded DATE,
     FOREIGN KEY (child_id) REFERENCES Children(child_id) ON DELETE CASCADE, -- if child is deleted, delete all their performance records
@@ -131,20 +131,20 @@ BEGIN
         FROM Child_Performance
         WHERE child_id = NEW.child_id
           AND topic_id = (SELECT topic_id FROM Questions WHERE question_id = NEW.question_id)
-          AND difficulty_level = (SELECT difficulty_id FROM Questions WHERE question_id = NEW.question_id)
+          AND difficulty_id = (SELECT difficulty_id FROM Questions WHERE question_id = NEW.question_id)
     ) THEN
         -- Incrementally update the metrics
         UPDATE Child_Performance
         SET 
             questions_attempted = questions_attempted + 1,
-            time_spent = time_spent + NEW.time_spent,
+            average_time_spent = ROUND((average_time_spent * questions_attempted + NEW.time_spent) / (questions_attempted + 1), 2),
             accuracy_score = ROUND(
                 (accuracy_score * questions_attempted + IF(NEW.is_correct, 100, 0)) / (questions_attempted + 1),
                 2
             )
         WHERE child_id = NEW.child_id
           AND topic_id = (SELECT topic_id FROM Questions WHERE question_id = NEW.question_id)
-          AND difficulty_level = (SELECT difficulty_id FROM Questions WHERE question_id = NEW.question_id);
+          AND difficulty_id = (SELECT difficulty_id FROM Questions WHERE question_id = NEW.question_id);
     ELSE
         -- Insert a new record if it doesn't exist
         INSERT INTO Child_Performance (
@@ -153,8 +153,8 @@ BEGIN
             accuracy_score, 
             estimated_proficiency, 
             questions_attempted, 
-            time_spent, 
-            difficulty_level, 
+            average_time_spent, 
+            difficulty_id, 
             current_mastery, 
             date_recorded
         )
@@ -164,7 +164,7 @@ BEGIN
             ROUND(IF(NEW.is_correct, 100, 0), 2), -- Initial accuracy score rounded to 2 decimal places
             NULL, -- estimated_proficiency can be calculated separately if needed
             1, -- First question attempted
-            NEW.time_spent, -- Initial time spent
+            ROUND(NEW.time_spent, 2), -- Initial time spent
             (SELECT difficulty_id FROM Questions WHERE question_id = NEW.question_id),
             NULL, -- current_mastery can be calculated separately if needed
             CURDATE()
