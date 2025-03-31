@@ -2,7 +2,11 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const db = require("../db");
-const { authenticateToken } = require("../middleware/authMiddleware");
+const {
+  authenticateToken,
+  authorizeRole,
+  ROLES,
+} = require("../middleware/authMiddleware");
 
 router.get("/:id", authenticateToken, async (req, res) => {
   try {

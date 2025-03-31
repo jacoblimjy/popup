@@ -4,12 +4,13 @@ const llmController = require("../controllers/llmController");
 const {
   authenticateToken,
   authorizeRole,
+  ROLES,
 } = require("../middleware/authMiddleware");
 
 router.post(
   "/questions/generate",
   authenticateToken,
-  authorizeRole([1]), // Role ID 1 for admin
+  authorizeRole([1]), 
   llmController.generateQuestions
 );
 
