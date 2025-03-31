@@ -259,13 +259,15 @@ prompts:
       5. Offer five multiple-choice options (A-E), with exactly one correct answer.
       6. Include a short "DETAILED EXPLANATION" which explains the pattern step by step and why the chosen option is correct.
 
-      Give the output in the following json format:
+      Give the output in the following json string format, escaping all the double quotes inside strings:
       {
         "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer
         "correct_answer": correct option LETTER
         "answer_format": "multiple_choice"
         "explanation": DETAILED EXPLANATION section
         "distractors": list of incorrect option LETTERS (there should strictly be 4)
+        "solved_set": list of strings in the same order (length = 3)
+        "unsolved_set": list of strings in the same order and include the correct answer in within the brackets (length = 3)
       }
 
   - topic: "rule"
@@ -372,13 +374,15 @@ prompts:
       5. Offer five multiple-choice options (A-E), with exactly one correct answer.
       6. Include a short "DETAILED EXPLANATION" which explains the pattern step by step and why the chosen option is correct.
 
-      Give the output in the following json format:
+      Give the output in the following json string format, escaping all the double quotes inside strings:
       {
         "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer
         "correct_answer": correct option LETTER
         "answer_format": "multiple_choice"
         "explanation": DETAILED EXPLANATION section
         "distractors": list of incorrect option LETTERS (there should strictly be 4)
+        "solved_set": list of strings in the same order (length = 3)
+        "unsolved_set": list of strings in the same order and include the correct answer in within the brackets (length = 3)
       }
 
   - topic: "rule"
@@ -528,13 +532,15 @@ prompts:
       5. Offer five multiple-choice options (A-E), with exactly one correct answer.
       6. Include a short "DETAILED EXPLANATION" which explains the pattern step by step and why the chosen option is correct.
 
-      Give the output in the following json format:
+      Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-          "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer
-          "correct_answer": correct option LETTER
-          "answer_format": "multiple_choice"
-          "explanation": DETAILED EXPLANATION section (strictly follow the step-by-step explanations given in the examples)
-          "distractors": list of incorrect option LETTERS (there should strictly be 4)
+        "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer
+        "correct_answer": correct option LETTER
+        "answer_format": "multiple_choice"
+        "explanation": DETAILED EXPLANATION section
+        "distractors": list of incorrect option LETTERS (there should strictly be 4)
+        "solved_set": list of strings in the same order (length = 3)
+        "unsolved_set": list of strings in the same order and include the correct answer in within the brackets (length = 3)
       }
 
       Reminder: 
