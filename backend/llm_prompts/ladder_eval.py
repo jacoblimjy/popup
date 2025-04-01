@@ -1,3 +1,7 @@
+from nltk.corpus import words
+
+english_words = set(words.words())
+
 def one_letter_change(word1, word2):
     if len(word1) != len(word2): # ensures all words are of equal length
         return set()
@@ -11,6 +15,12 @@ def one_letter_change(word1, word2):
 
 def ladder_eval(input):
     word_set = input.get("set")
+
+    # Check if every word in the set is a real English word.
+    for word in word_set:
+        if word.lower() not in english_words:
+            raise ValueError(f"{word} is not a recognised English word.")
+        
     available_positions = set(range(len(word_set[0])))
 
     for i in range(len(word_set) - 1):
