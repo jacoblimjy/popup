@@ -77,7 +77,7 @@ CREATE TABLE Child_Performance (
     accuracy_score DECIMAL(5,2),
     estimated_proficiency FLOAT,
     questions_attempted INTEGER,
-    average_time_spent DECIMAL(5,2),
+    average_time_spent DECIMAL(10,2),
     difficulty_id INTEGER,
     current_mastery VARCHAR(255),
     date_recorded DATE,
