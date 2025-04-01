@@ -5,9 +5,9 @@ const getChildPerformanceByFilters = async (req, res) => {
   try {
     const { child_id, topic_id, difficulty_id } = req.query;
 
-    if (!child_id || !topic_id) {
+    if (!child_id ) {
       return res.status(400).json({
-        message: "child_id and topic_id are required",
+        message: "child_id is required",
       });
     }
 
@@ -37,7 +37,7 @@ const getChildPerformanceByFilters = async (req, res) => {
           );
       }
     } else {
-      performances = await childPerformanceService.getOverallChildPerformance(
+      performances = await childPerformanceService.getChildPerformanceByChildId(
         child_id
       );
     }
