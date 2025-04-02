@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [isAdmin, setIsAdmin] = useState(false);
 	const [user, setUser] = useState<User | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const [isAuthLoading, setIsAuthLoading] = useState(true);
 
 	useEffect(() => {
 		// If user is stored in localStorage, restore it
@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			setIsAdmin(JSON.parse(storedUser).role_id === 1);
 			setUser(JSON.parse(storedUser));
 		}
-		setIsLoading(false);
+		setIsAuthLoading(false);
 		setSessionTimeoutHandler(handleSessionTimeout);
 	}, []);
 
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	};
 
 	return (
-		<AuthContext.Provider value={{ isAuthenticated, login, logout, user, isAdmin, isLoading }}>
+		<AuthContext.Provider value={{ isAuthenticated, login, logout, user, isAdmin, isAuthLoading }}>
 			{children}
 		</AuthContext.Provider>
 	);

@@ -6,10 +6,12 @@ import AttemptedSetsApi from "../api/AttemptedSetsApi";
 import { formatAttemptedQuestions, formatDetailedDate, topics } from "../utils";
 import Loader from "../components/Loader";
 import NoChildModal from "../components/NoChildModal";
+import { useAuth } from "../hooks/useAuth";
 
 const HistoryPage = () => {
   const navigate = useNavigate();
   const { activeChild } = useChildrenList();
+  const { isAuthLoading } = useAuth();
   const [page, setPage] = useState(1);
   const [attempts, setAttempts] = useState<AttemptedSet[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,6 +24,7 @@ const HistoryPage = () => {
 
   const fetchAttemptedSets = async () => {
     setIsLoading(true);
+    setIsNoChildModalOpen(false);
     if (activeChild) {
       const response: GetAttemptedSetResponse[] = await AttemptedSetsApi.getAttemptedSets(activeChild.child_id as number, page);
 
@@ -51,7 +54,7 @@ const HistoryPage = () => {
   };
   return (
     <div className="relative h-full">
-      {isLoading ? <Loader loading={isLoading} /> :
+      {isLoading || isAuthLoading ? <Loader loading={isLoading || isAuthLoading} /> :
         <div className="flex flex-col items-center p-6 h-full w-full">
           <div className="flex flex-col items-center gap-3 border border-gray-200 rounded-lg p-8 w-xl">
             <div className="size-14 rounded-full ring-2 ring-white bg-[#f1c40e] text-center text-white flex items-center justify-center">
@@ -105,7 +108,9 @@ const HistoryPage = () => {
               <p>No attempts yet</p>
             }
           </div>
-        </div>}
+
+        </div>
+      }
       <NoChildModal
         isOpen={isNoChildModalOpen}
         onClose={() => setIsNoChildModalOpen(false)}

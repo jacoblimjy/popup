@@ -7,33 +7,59 @@ import { ChildPerformance, OverallPerformance } from "../types/ChildPerformanceT
 import Loader from "../components/Loader"
 import { topics } from "../utils"
 import NoChildModal from "../components/NoChildModal"
+import { useAuth } from "../hooks/useAuth"
 
 const AnalyticsPage = () => {
   const { activeChild } = useChildrenList();
-  const [accuracyBarChartData, setAccuracyBarChartData] = useState<{ name: string; accuracy: number }[]>([]);
-  const [avgTimePieChartData, setAvgTimePieChartData] = useState<{ name: string; time: number }[]>([]);
-  const [questionsCompletedData, setQuestionsCompletedData] = useState<{ name: string; questions: number }[]>([]);
+  const { isAuthLoading } = useAuth();
+  const [accuracyBarChartData, setAccuracyBarChartData] = useState<{ name: string; accuracy: number }[]>(
+    [
+      { name: "Use a Rule to Make a Word", accuracy: 0 },
+      { name: "Complete a Word Pair", accuracy: 0 },
+      { name: "Anagram in a Sentence", accuracy: 0 },
+      { name: "Word Ladders", accuracy: 0 },
+    ]
+  );
+  const [avgTimePieChartData, setAvgTimePieChartData] = useState<{ name: string; time: number }[]>(
+    [
+      { name: "Use a Rule to Make a Word", time: 0 },
+      { name: "Complete a Word Pair", time: 0 },
+      { name: "Anagram in a Sentence", time: 0 },
+      { name: "Word Ladders", time: 0 },
+    ]
+  );
+  const [questionsCompletedData, setQuestionsCompletedData] = useState<{ name: string; questions: number }[]>(
+    [
+      { name: "Use a Rule to Make a Word", questions: 0 },
+      { name: "Complete a Word Pair", questions: 0 },
+      { name: "Anagram in a Sentence", questions: 0 },
+      { name: "Word Ladders", questions: 0 },
+    ]
+  );
   const [fastestCategory, setFastestCategory] = useState<ChildPerformance | null>(null);
   const [challengingCategory, setChallengingCategory] = useState<ChildPerformance | null>(null);
   const [bestCategory, setBestCategory] = useState<ChildPerformance | null>(null);
   const [overallPerformance, setOverallPerformance] = useState<OverallPerformance | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isNoChildModalOpen, setIsNoChildModalOpen] = useState(false);
+  const [hasNoData, setHasNoData] = useState(false);
 
 
   useEffect(() => {
-    if (activeChild) {
-      fetchChildPerformances();
-    } else {
-      setIsNoChildModalOpen(true);
-    }
+    fetchChildPerformances();
   }, [activeChild]);
 
   const fetchChildPerformances = async () => {
-    if (!activeChild) return;
+    setIsLoading(true)
+
+    if (!activeChild) {
+      setIsNoChildModalOpen(true);
+      return;
+    }
 
     try {
-      setIsLoading(true)
+      setIsNoChildModalOpen(false);
+
       const child_id = activeChild?.child_id;
       const [performanceResponse, overallResponse] = await Promise.all([
         ChildPerformanceApi.getChildPerformanceByChildId(child_id),
@@ -43,6 +69,12 @@ const AnalyticsPage = () => {
 
       if (!performanceResponse.success) {
         console.error("Error fetching child performances:", performanceResponse.error);
+        return;
+      }
+
+      if (performanceResponse.data.length === 0) {
+        setHasNoData(true);
+        setIsLoading(false);
         return;
       }
 
@@ -77,7 +109,14 @@ const AnalyticsPage = () => {
       name: topics[item.topic_id as keyof typeof topics],
       accuracy: item.average_accuracy_score,
     }));
-    setAccuracyBarChartData(updatedData);
+
+    // Update only the matching topic's accuracy
+    const mergedData = accuracyBarChartData.map((seed) => {
+      const match = updatedData.find((update) => update.name === seed.name);
+      return match ? { ...seed, accuracy: match.accuracy } : seed;
+    });
+
+    setAccuracyBarChartData(mergedData);
   }
 
   const updateAverageTimePieChartData = (data: ChildPerformance[]) => {
@@ -85,7 +124,12 @@ const AnalyticsPage = () => {
       name: topics[item.topic_id as keyof typeof topics],
       time: item.average_time_per_question,
     }));
-    setAvgTimePieChartData(updatedData);
+
+    const mergedData = avgTimePieChartData.map((seed) => {
+      const match = updatedData.find((update) => update.name === seed.name);
+      return match ? { ...seed, time: match.time } : seed;
+    });
+    setAvgTimePieChartData(mergedData);
   }
 
   const updateQuestionsCompletedData = (data: ChildPerformance[]) => {
@@ -93,7 +137,11 @@ const AnalyticsPage = () => {
       name: topics[item.topic_id as keyof typeof topics],
       questions: item.total_questions_attempted,
     }));
-    setQuestionsCompletedData(updatedData);
+    const mergedData = questionsCompletedData.map((seed) => {
+      const match = updatedData.find((update) => update.name === seed.name);
+      return match ? { ...seed, questions: match.questions } : seed;
+    });
+    setQuestionsCompletedData(mergedData);
   }
 
   const updateFastestCategory = (data: ChildPerformance[]) => {
@@ -268,101 +316,110 @@ const AnalyticsPage = () => {
   return (
     <div className="relative p-10 flex flex-col items-center h-full">
 
-      {isLoading ? <Loader loading={isLoading} /> : <><h1 className="text-3xl font-bold mb-5">Overall Accuracy: {overallPerformance?.overall_score}%</h1>
-        <p className="text-gray-400">{getPerformanceMessage(overallPerformance?.overall_score)}</p>
-        <div className="grid xl:grid-cols-3 grid-cols-1 gap-8 h-full">
-          <div className="flex flex-col rounded shadow-md p-5 gap-4">
-            <div className="bg-[#f1c40e] text-white rounded-lg w-12 h-12 flex items-center justify-center">
-              <Zap />
+      {isLoading || isAuthLoading ? <Loader loading={isLoading || isAuthLoading} /> :
+        (hasNoData ?
+          <p>No analytics data found. Start a practice to view your statistics here</p>
+          :
+          <>
+            <h1 className="text-3xl font-bold mb-5">Overall Accuracy: {overallPerformance?.overall_score}%</h1>
+            <p className="text-gray-400">{getPerformanceMessage(overallPerformance?.overall_score)}</p>
+            <div className="grid xl:grid-cols-3 grid-cols-1 gap-8 h-full">
+              <div className="flex flex-col rounded shadow-md p-5 gap-4">
+                <div className="bg-[#f1c40e] text-white rounded-lg w-12 h-12 flex items-center justify-center">
+                  <Zap />
+                </div>
+                <h3 className="my-3 font-semibold text-lg">Fastest Category</h3>
+                <p className="text-gray-400">You're quickest at solving <span className="font-bold underline">{topics[fastestCategory?.topic_id as keyof typeof topics]}</span>! You answered time in an average of {fastestCategory?.average_time_per_question} seconds.</p>
+              </div>
+              <div className="flex flex-col rounded shadow-md p-5 gap-4">
+                <div className="bg-[#f1c40e] text-white rounded-lg w-12 h-12 flex items-center justify-center">
+                  <AlertTriangle />
+                </div>
+                <h3 className="my-3 font-semibold text-lg">Most Challenging Question Type</h3>
+                <p className="text-gray-400"><span className="font-bold underline">{topics[challengingCategory?.topic_id as keyof typeof topics]}</span> were tricky! You got <span className="font-bold underline">{challengingCategory?.average_accuracy_score}%</span> correct - keep practicing!</p>
+              </div>
+              <div className="flex flex-col rounded shadow-md p-5 gap-4">
+                <div className="bg-[#f1c40e] text-white rounded-lg w-12 h-12 flex items-center justify-center">
+                  <Timer />
+                </div>
+                <h3 className="my-3 font-semibold text-lg">Best Scoring Question Type</h3>
+                <p className="text-gray-400">You excelled at solving <span className="font-bold underline">{topics[bestCategory?.topic_id as keyof typeof topics]}</span>! You got <span className="font-bold underline">{bestCategory?.average_accuracy_score}%</span> correct - amazing work!</p>
+              </div>
+              <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px]">
+                <p className="font-medium">Accuracy by Question Type</p>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart layout="horizontal" data={accuracyBarChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <YAxis unit="%" domain={[0, 100]} />
+                    <Tooltip content={<CustomAccuracyTooltip />} />
+                    <Legend
+                      content={<CustomAccuracyLegend />}
+                      wrapperStyle={{ paddingTop: 20 }}
+                      payload={[
+                        { value: 'Use a Rule to Make a Word', type: 'circle', color: '#8884d8' },
+                        { value: 'Complete a Word Pair', type: 'circle', color: '#82ca9d' },
+                        { value: 'Anagram in a Sentence', type: 'circle', color: '#ffc658' },
+                        { value: 'Word Ladders', type: 'circle', color: '#ff8042' },
+                      ]}
+                    />
+                    <Bar dataKey="accuracy">
+                      {accuracyBarChartData.map((_entry, index) => (
+                        <Cell key={`cell-${index}`} fill={["#8884d8", "#82ca9d", "#ffc658", "#ff8042"][index % 4]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px]">
+                <p className="font-medium">Average Time Spent Per Question Type</p>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Tooltip content={<CustomTimeTooltip />} />
+                    <Legend
+                      content={<CustomTimeLegend />}
+                      wrapperStyle={{ paddingTop: 20 }}
+                      payload={[
+                        { value: 'Use a Rule to Make a Word', type: 'circle', color: '#8884d8' },
+                        { value: 'Complete a Word Pair', type: 'circle', color: '#82ca9d' },
+                        { value: 'Anagram in a Sentence', type: 'circle', color: '#ffc658' },
+                        { value: 'Word Ladders', type: 'circle', color: '#ff8042' },
+                      ]}
+                    />
+                    <Pie
+                      dataKey="time"
+                      data={avgTimePieChartData}
+                      innerRadius={45}
+                      outerRadius={80}
+                      paddingAngle={2}
+                    >
+                      {avgTimePieChartData.map((_entry, index) => (
+                        <Cell key={`cell-${index}`} fill={["#8884d8", "#82ca9d", "#ffc658", "#ff8042"][index % 4]} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px]">
+                <p className="font-medium">Questions Attempted</p>
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart margin={{ left: 100, right: 100 }} data={questionsCompletedData}>
+                    <PolarGrid />
+                    <PolarAngleAxis dataKey="name" tick={(props) => <CustomPolarAngleTick {...props} />} />
+                    <PolarRadiusAxis domain={[0, getMaxAttemptedQuestions()]} />
+                    <Tooltip />
+                    <Radar dataKey="questions" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-            <h3 className="my-3 font-semibold text-lg">Fastest Category</h3>
-            <p className="text-gray-400">You're quickest at solving <span className="font-bold underline">{topics[fastestCategory?.topic_id as keyof typeof topics]}</span>! You answered time in an average of {fastestCategory?.average_time_per_question} seconds.</p>
-          </div>
-          <div className="flex flex-col rounded shadow-md p-5 gap-4">
-            <div className="bg-[#f1c40e] text-white rounded-lg w-12 h-12 flex items-center justify-center">
-              <AlertTriangle />
-            </div>
-            <h3 className="my-3 font-semibold text-lg">Most Challenging Question Type</h3>
-            <p className="text-gray-400"><span className="font-bold underline">{topics[challengingCategory?.topic_id as keyof typeof topics]}</span> were tricky! You got <span className="font-bold underline">{challengingCategory?.average_accuracy_score}%</span> correct - keep practicing!</p>
-          </div>
-          <div className="flex flex-col rounded shadow-md p-5 gap-4">
-            <div className="bg-[#f1c40e] text-white rounded-lg w-12 h-12 flex items-center justify-center">
-              <Timer />
-            </div>
-            <h3 className="my-3 font-semibold text-lg">Best Scoring Question Type</h3>
-            <p className="text-gray-400">You excelled at solving <span className="font-bold underline">{topics[bestCategory?.topic_id as keyof typeof topics]}</span>! You got <span className="font-bold underline">{bestCategory?.average_accuracy_score}%</span> correct - amazing work!</p>
-          </div>
-          <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px]">
-            <p className="font-medium">Accuracy by Question Type</p>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart layout="horizontal" data={accuracyBarChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <YAxis unit="%" domain={[0, 100]} />
-                <Tooltip content={<CustomAccuracyTooltip />} />
-                <Legend
-                  content={<CustomAccuracyLegend />}
-                  wrapperStyle={{ paddingTop: 20 }}
-                  payload={[
-                    { value: 'Use a Rule to Make a Word', type: 'circle', color: '#8884d8' },
-                    { value: 'Complete a Word Pair', type: 'circle', color: '#82ca9d' },
-                    { value: 'Anagram in a Sentence', type: 'circle', color: '#ffc658' },
-                    { value: 'Word Ladders', type: 'circle', color: '#ff8042' },
-                  ]}
-                />
-                <Bar dataKey="accuracy">
-                  {accuracyBarChartData.map((_entry, index) => (
-                    <Cell key={`cell-${index}`} fill={["#8884d8", "#82ca9d", "#ffc658", "#ff8042"][index % 4]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px]">
-            <p className="font-medium">Average Time Spent Per Question Type</p>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Tooltip content={<CustomTimeTooltip />} />
-                <Legend
-                  content={<CustomTimeLegend />}
-                  wrapperStyle={{ paddingTop: 20 }}
-                  payload={[
-                    { value: 'Use a Rule to Make a Word', type: 'circle', color: '#8884d8' },
-                    { value: 'Complete a Word Pair', type: 'circle', color: '#82ca9d' },
-                    { value: 'Anagram in a Sentence', type: 'circle', color: '#ffc658' },
-                    { value: 'Word Ladders', type: 'circle', color: '#ff8042' },
-                  ]}
-                />
-                <Pie
-                  dataKey="time"
-                  data={avgTimePieChartData}
-                  innerRadius={45}
-                  outerRadius={80}
-                  paddingAngle={2}
-                >
-                  {avgTimePieChartData.map((_entry, index) => (
-                    <Cell key={`cell-${index}`} fill={["#8884d8", "#82ca9d", "#ffc658", "#ff8042"][index % 4]} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px]">
-            <p className="font-medium">Questions Attempted</p>
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart margin={{ left: 100, right: 100 }} data={questionsCompletedData}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="name" tick={(props) => <CustomPolarAngleTick {...props} />} />
-                <PolarRadiusAxis domain={[0, getMaxAttemptedQuestions()]} />
-                <Tooltip />
-                <Radar dataKey="questions" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        </div></>}
-        <NoChildModal
-          isOpen={isNoChildModalOpen}
-          onClose={() => setIsNoChildModalOpen(false)}
-        />
+
+          </>
+        )
+      }
+      <NoChildModal
+        isOpen={isNoChildModalOpen}
+        onClose={() => setIsNoChildModalOpen(false)}
+      />
     </div>
   )
 }

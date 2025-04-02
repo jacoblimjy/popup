@@ -16,11 +16,12 @@ export const ChildrenProvider = ({ children }: { children: ReactNode }) => {
       const response = await ChildrenApi.getChildrenByUserId();
       console.log(response);
       setChildrenList(response);
-      if (activeChild === null) {
+      if (activeChild === null || !activeChild) {
         setActiveChild(response[0]);
       } else {
         setActiveChild(response.find((child : DetailedChild) => child.child_id === activeChild?.child_id));
       }
+
     } catch(e) {
       console.log("Failed to get children list",e);
     }
