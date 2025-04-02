@@ -1,6 +1,6 @@
 import { AlertTriangle, Timer, Zap } from "lucide-react"
 import { useEffect, useState } from "react"
-import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, PolarAngleAxis, PolarAngleAxisProps, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, YAxis } from "recharts"
 import { useChildrenList } from "../hooks/useChildrenList"
 import ChildPerformanceApi from "../api/ChildPerformanceApi"
 import { ChildPerformance, OverallPerformance } from "../types/ChildPerformanceTypes"
@@ -17,20 +17,6 @@ const AnalyticsPage = () => {
   const [bestCategory, setBestCategory] = useState<ChildPerformance | null>(null);
   const [overallPerformance, setOverallPerformance] = useState<OverallPerformance | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-
-  const sampleScoreLineChartData = [
-    { name: '1', score: 85 },
-    { name: '2', score: 90 },
-    { name: '3', score: 95 },
-    { name: '4', score: 80 },
-    { name: '5', score: 100 },
-    { name: '6', score: 75 },
-    { name: '7', score: 95 },
-    { name: '8', score: 90 },
-    { name: '9', score: 85 },
-    { name: '10', score: 95 },
-  ]
 
   useEffect(() => {
     if (activeChild) {
@@ -228,6 +214,52 @@ const AnalyticsPage = () => {
     );
   };
 
+
+  interface CustomPolarAngleProps extends PolarAngleAxisProps {
+    payload: { value: string }; // Ensure payload has a `value` property
+  }
+
+
+  const CustomPolarAngleTick: React.FC<CustomPolarAngleProps> = ({ x, y, payload, textAnchor }) => {
+    const text = payload.value;
+    // Function to split text into lines without breaking words, with a max line length of 10
+    const splitText = (text: string, maxLength: number) => {
+      const words = text.split(" ");
+      const lines: string[] = [];
+      let currentLine = "";
+
+      words.forEach((word) => {
+        if ((currentLine + word).length <= maxLength) {
+          currentLine += (currentLine ? " " : "") + word;
+        } else {
+          if (currentLine) lines.push(currentLine);
+          currentLine = word;
+        }
+      });
+
+      if (currentLine) lines.push(currentLine);
+      return lines;
+    };
+
+    const lines = splitText(text, 12);
+
+    return (
+      <text
+        x={x}
+        y={y}
+        textAnchor={textAnchor}
+        fill="#666"
+        fontSize={12}
+      >
+        {lines.map((line, index) => (
+          <tspan key={index} x={x} dy={index === 0 ? 0 : 12}>
+            {line}
+          </tspan>
+        ))}
+      </text>
+    );
+  };
+
   return (
     <div className="relative p-10 flex flex-col items-center h-full">
 
@@ -260,7 +292,7 @@ const AnalyticsPage = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart layout="horizontal" data={accuracyBarChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <YAxis unit="%" />
+                <YAxis unit="%" domain={[0, 100]} />
                 <Tooltip content={<CustomAccuracyTooltip />} />
                 <Legend
                   content={<CustomAccuracyLegend />}
@@ -312,10 +344,10 @@ const AnalyticsPage = () => {
           <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px]">
             <p className="font-medium">Questions Attempted</p>
             <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={questionsCompletedData}>
+              <RadarChart margin={{ left: 100, right: 100 }} data={questionsCompletedData}>
                 <PolarGrid />
-                <PolarAngleAxis dataKey="name" />
-                <PolarRadiusAxis domain={[0, getMaxAttemptedQuestions()]}/>
+                <PolarAngleAxis dataKey="name" tick={(props) => <CustomPolarAngleTick {...props} />} />
+                <PolarRadiusAxis domain={[0, getMaxAttemptedQuestions()]} />
                 <Tooltip />
                 <Radar dataKey="questions" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
               </RadarChart>
