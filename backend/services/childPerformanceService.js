@@ -1,5 +1,22 @@
 const db = require("../db");
 
+const getChildPerformanceByChildId = async (child_id) => {
+  const [performances] = await db.execute(
+    `SELECT
+      child_id,
+      topic_id,
+      SUM(average_time_spent * questions_attempted) AS total_time_spent,
+      SUM(questions_attempted) AS total_questions_attempted,
+      ROUND(AVG(accuracy_score), 2) AS average_accuracy_score,
+      ROUND(SUM(average_time_spent * questions_attempted) / SUM(questions_attempted), 2) AS average_time_per_question
+    FROM Child_Performance
+    WHERE child_id = ?
+    GROUP BY child_id, topic_id`,
+    [child_id]
+  );
+  return performances;
+};
+
 const getChildPerformanceByChildIdAndTopicId = async (child_id, topic_id) => {
   const [performances] = await db.execute(
     `
@@ -75,4 +92,5 @@ module.exports = {
   getOverallChildPerformance,
   deleteChildPerformanceByUpId,
   deleteChildPerformanceByChildId,
+  getChildPerformanceByChildId,
 };
