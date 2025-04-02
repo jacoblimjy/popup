@@ -35,7 +35,7 @@ const signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const [result] = await db.execute(
-      "INSERT INTO Users (username, email, password_hash, role_id, date_created) VALUES (?, ?, ?, 1, NOW())",
+      "INSERT INTO Users (username, email, password_hash, role_id, date_created) VALUES (?, ?, ?, 2, NOW())",
       [username, email, hashedPassword]
     );
 

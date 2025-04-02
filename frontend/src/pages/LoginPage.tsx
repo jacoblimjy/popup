@@ -117,21 +117,6 @@ const LoginPage = () => {
                       8+ characters required
                     </p>
                   </div>
-                  <div className="flex items-center">
-                    <div className="flex">
-                      <input
-                        id="remember-me"
-                        name="remember-me"
-                        type="checkbox"
-                        className="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div className="ms-3">
-                      <label htmlFor="remember-me" className="text-sm">
-                        Remember me
-                      </label>
-                    </div>
-                  </div>
                   <button
                     type="submit"
                     className="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
