@@ -6,6 +6,7 @@ import ChildPerformanceApi from "../api/ChildPerformanceApi"
 import { ChildPerformance, OverallPerformance } from "../types/ChildPerformanceTypes"
 import Loader from "../components/Loader"
 import { topics } from "../utils"
+import NoChildModal from "../components/NoChildModal"
 
 const AnalyticsPage = () => {
   const { activeChild } = useChildrenList();
@@ -17,10 +18,14 @@ const AnalyticsPage = () => {
   const [bestCategory, setBestCategory] = useState<ChildPerformance | null>(null);
   const [overallPerformance, setOverallPerformance] = useState<OverallPerformance | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isNoChildModalOpen, setIsNoChildModalOpen] = useState(false);
+
 
   useEffect(() => {
     if (activeChild) {
       fetchChildPerformances();
+    } else {
+      setIsNoChildModalOpen(true);
     }
   }, [activeChild]);
 
@@ -354,6 +359,10 @@ const AnalyticsPage = () => {
             </ResponsiveContainer>
           </div>
         </div></>}
+        <NoChildModal
+          isOpen={isNoChildModalOpen}
+          onClose={() => setIsNoChildModalOpen(false)}
+        />
     </div>
   )
 }
