@@ -111,12 +111,13 @@ const AnalyticsPage = () => {
     }));
 
     // Update only the matching topic's accuracy
-    const mergedData = accuracyBarChartData.map((seed) => {
-      const match = updatedData.find((update) => update.name === seed.name);
-      return match ? { ...seed, accuracy: match.accuracy } : seed;
+    setAccuracyBarChartData((prevData) => {
+      const mergedData = prevData.map((seed) => {
+        const match = updatedData.find((update) => update.name === seed.name);
+        return match ? { ...seed, accuracy: match.accuracy } : seed;
+      });
+      return mergedData;
     });
-
-    setAccuracyBarChartData(mergedData);
   }
 
   const updateAverageTimePieChartData = (data: ChildPerformance[]) => {
