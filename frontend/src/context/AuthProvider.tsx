@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		setUser(null);
 		localStorage.removeItem("user");
 		localStorage.removeItem("token");
+		localStorage.removeItem("activeChild");
 	};
 
 	const handleSessionTimeout = () => {

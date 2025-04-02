@@ -38,7 +38,7 @@ const ManageChildrenPage: React.FC = () => {
 	const deleteChild = async (id: number) => {
 		try {
 			await ChildrenApi.deleteChild(id);
-			await getChildrenList();
+			await getChildrenList(true);
 		} catch (error) {
 			console.error(error);
 		}

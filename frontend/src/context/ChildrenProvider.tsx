@@ -11,12 +11,27 @@ export const ChildrenProvider = ({ children }: { children: ReactNode }) => {
     getChildrenList();
   }, []);
 
-  const getChildrenList = async () => {
+  useEffect(() => {
+    if (activeChild) {
+      localStorage.setItem("activeChild", JSON.stringify(activeChild));
+    }
+  }, [activeChild]);
+
+  const getChildrenList = async (refresh : boolean = false) => {
+    if (localStorage.getItem("activeChild")) {
+      const activeChildFromStorage = JSON.parse(localStorage.getItem("activeChild") || "");
+      setActiveChild(activeChildFromStorage);
+    }
     try {
       const response = await ChildrenApi.getChildrenByUserId();
       console.log(response);
       setChildrenList(response);
-      if (activeChild === null || !activeChild) {
+      if (localStorage.getItem("activeChild")) {
+        const activeChildFromStorage = JSON.parse(localStorage.getItem("activeChild") || "");
+        setActiveChild(activeChildFromStorage);
+        return;
+      }
+      if (activeChild === null || !activeChild || refresh) {
         setActiveChild(response[0]);
       } else {
         setActiveChild(response.find((child : DetailedChild) => child.child_id === activeChild?.child_id));

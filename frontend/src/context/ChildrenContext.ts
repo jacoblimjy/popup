@@ -4,7 +4,7 @@ import { DetailedChild } from '../types/UserTypes';
 interface ChildrenContextType {
   childrenList: DetailedChild[] | null;
   activeChild: DetailedChild | null;
-  getChildrenList: () => void;
+  getChildrenList: (refresh? : boolean) => void;
   setActiveChild: (child: DetailedChild | null) => void;
 }
 
