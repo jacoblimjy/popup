@@ -7,6 +7,7 @@ import { setSessionTimeoutHandler } from "../utils";
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const navigate = useNavigate();
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
+	const [isAdmin, setIsAdmin] = useState(false);
 	const [user, setUser] = useState<User | null>(null);
 
 	useEffect(() => {
@@ -14,6 +15,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		const storedUser = localStorage.getItem("user");
 		if (storedUser) {
 			setIsAuthenticated(true);
+			setIsAdmin(JSON.parse(storedUser).role_id === 1);
 			setUser(JSON.parse(storedUser));
 		}
 		setSessionTimeoutHandler(handleSessionTimeout);
@@ -22,11 +24,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const login = (user: User) => {
 		setIsAuthenticated(true);
 		setUser(user);
+		setIsAdmin(user.role_id === 1);
 		localStorage.setItem("user", JSON.stringify(user));
 	};
 
 	const logout = () => {
 		setIsAuthenticated(false);
+		setIsAdmin(false);
 		setUser(null);
 		localStorage.removeItem("user");
 		localStorage.removeItem("token");
@@ -40,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	};
 
 	return (
-		<AuthContext.Provider value={{ isAuthenticated, login, logout, user }}>
+		<AuthContext.Provider value={{ isAuthenticated, login, logout, user, isAdmin }}>
 			{children}
 		</AuthContext.Provider>
 	);

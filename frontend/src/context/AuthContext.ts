@@ -3,6 +3,7 @@ import { User } from '../types/UserTypes';
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  isAdmin: boolean;
   login: (user : User) => void;
   logout: () => void;
   user: User | null;

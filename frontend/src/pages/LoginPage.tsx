@@ -24,6 +24,7 @@ const LoginPage = () => {
         userId: response.userId,
         username: response.username,
         email: response.email,
+        role_id: response.role_id,
       }
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('token', response.token);
