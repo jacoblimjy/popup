@@ -18,7 +18,7 @@ export const ChildrenProvider = ({ children }: { children: ReactNode }) => {
   }, [activeChild]);
 
   const getChildrenList = async (refresh : boolean = false) => {
-    if (localStorage.getItem("activeChild")) {
+    if (localStorage.getItem("activeChild") && !refresh) {
       const activeChildFromStorage = JSON.parse(localStorage.getItem("activeChild") || "");
       setActiveChild(activeChildFromStorage);
     }
@@ -26,11 +26,7 @@ export const ChildrenProvider = ({ children }: { children: ReactNode }) => {
       const response = await ChildrenApi.getChildrenByUserId();
       console.log(response);
       setChildrenList(response);
-      if (localStorage.getItem("activeChild")) {
-        const activeChildFromStorage = JSON.parse(localStorage.getItem("activeChild") || "");
-        setActiveChild(activeChildFromStorage);
-        return;
-      }
+      
       if (activeChild === null || !activeChild || refresh) {
         setActiveChild(response[0]);
       } else {

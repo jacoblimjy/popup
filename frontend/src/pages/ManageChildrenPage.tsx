@@ -17,7 +17,7 @@ const ManageChildrenPage: React.FC = () => {
 	const handleAddChild = async (child: Child) => {
 		try {
 			await ChildrenApi.createChild(child);
-			await getChildrenList();
+			await getChildrenList(true);
 		} catch (error) {
 			console.error(error);
 		}
@@ -39,6 +39,7 @@ const ManageChildrenPage: React.FC = () => {
 		try {
 			await ChildrenApi.deleteChild(id);
 			await getChildrenList(true);
+			localStorage.removeItem("activeChild");
 		} catch (error) {
 			console.error(error);
 		}

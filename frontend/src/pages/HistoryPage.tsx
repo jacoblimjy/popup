@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChildrenList } from "../hooks/useChildrenList";
-import { AttemptedSet, GetAttemptedSetResponse } from "../types/AttemptTypes";
+import { AttemptedSet } from "../types/AttemptTypes";
 import AttemptedSetsApi from "../api/AttemptedSetsApi";
 import { formatAttemptedQuestions, formatDetailedDate, topics } from "../utils";
 import Loader from "../components/Loader";
 import NoChildModal from "../components/NoChildModal";
 import { useAuth } from "../hooks/useAuth";
+import { OverallPerformance } from "../types/ChildPerformanceTypes";
+import ChildPerformanceApi from "../api/ChildPerformanceApi";
 
 const HistoryPage = () => {
   const navigate = useNavigate();
@@ -16,37 +18,49 @@ const HistoryPage = () => {
   const [attempts, setAttempts] = useState<AttemptedSet[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isNoChildModalOpen, setIsNoChildModalOpen] = useState(false);
+  const [overallPerformance, setOverallPerformance] = useState<OverallPerformance | null>(null);
+
 
   useEffect(() => {
     fetchAttemptedSets();
 
-  }, [activeChild]);
+  }, []);
 
   const fetchAttemptedSets = async () => {
-    setIsLoading(true);
-    setIsNoChildModalOpen(false);
-    if (activeChild) {
-      const response: GetAttemptedSetResponse[] = await AttemptedSetsApi.getAttemptedSets(activeChild.child_id as number, page);
+    try {
+      setIsLoading(true);
+      setIsNoChildModalOpen(false);
+      if (activeChild) {
+        const child_id = activeChild.child_id;
+        const [attemptedSetResponse, overallResponse] = await Promise.all([
+          AttemptedSetsApi.getAttemptedSets(activeChild.child_id as number, page),
+          ChildPerformanceApi.getOverallPerformanceByChildId(child_id)
+        ]);
 
-      const formattedResponse = response.map((attempt) => ({
-        ...attempt,
-        attempt_timestamp: formatDetailedDate(attempt.attempt_timestamp),
-        attempted_questions: formatAttemptedQuestions(attempt.attempted_questions),
-      }));
-      console.log(formattedResponse);
-      setAttempts([...attempts, ...formattedResponse]);
-      setPage(page + 1);
-      setIsLoading(false);
-    } else {
-      setIsNoChildModalOpen(true);
+        const formattedResponse = attemptedSetResponse.map((attempt) => ({
+          ...attempt,
+          attempt_timestamp: formatDetailedDate(attempt.attempt_timestamp),
+          attempted_questions: formatAttemptedQuestions(attempt.attempted_questions),
+        }));
+        console.log(formattedResponse);
+        setAttempts([...attempts, ...formattedResponse]);
+        setPage(page + 1);
+        const overall = {
+          total_questions_completed: parseInt(overallResponse.data.total_questions_completed),
+          overall_score: parseFloat(overallResponse.data.overall_score),
+          average_time_per_question: parseFloat((overallResponse.data.average_time_per_question / 1000).toFixed(2)), // Convert ms to s
+        }
+        setOverallPerformance(overall);
+        setIsLoading(false);
+      } else {
+        console.log("No active child found");
+        setIsNoChildModalOpen(true);
+      }
+    } catch (error) {
+      console.error("Error fetching attempted sets:", error);
+      // setIsLoading(false);
     }
   }
-
-  const statistics = {
-    attempted: 50,
-    completed: 48,
-    averageScore: 98.8,
-  };
 
   const handleReviewAttempt = (setId: number) => {
     console.log(`Reviewing attempt ${setId}`);
@@ -64,17 +78,12 @@ const HistoryPage = () => {
             <hr className="border-gray-300 w-full" />
             <div className="flex gap-3 w-3/4 justify-around items-center">
               <div className="flex flex-col">
-                <p className="text-base font-medium">{statistics.attempted}</p>
+                <p className="text-base font-medium">{overallPerformance?.total_questions_completed}</p>
                 <p className="text-sm text-gray-500">Attempted</p>
               </div>
               <div className="border-l-1 border-gray-300 h-3/4"></div>
               <div className="flex flex-col">
-                <p className="text-base font-medium">{statistics.completed}</p>
-                <p className="text-sm text-gray-500">Completed</p>
-              </div>
-              <div className="border-l-1 border-gray-300 h-3/4"></div>
-              <div className="flex flex-col">
-                <p className="text-base font-medium">{statistics.averageScore}%</p>
+                <p className="text-base font-medium">{overallPerformance?.overall_score}%</p>
                 <p className="text-sm text-gray-500">Average Score</p>
               </div>
             </div>
