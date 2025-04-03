@@ -1,15 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const childrenController = require("../controllers/childrenController");
-const { authenticateToken } = require("../middleware/authMiddleware");
+const {
+  authenticateToken,
+  authorizeRole,
+  ROLES,
+} = require("../middleware/authMiddleware");
 
 router.use(authenticateToken);
 
-router.post("/", childrenController.createChild);
-router.post("/batch", childrenController.createChildrenBatch);
-router.put("/:id", childrenController.updateChild);
-router.get("/:id", childrenController.getChildById);
-router.get("/", childrenController.getChildrenByUserId);
-router.delete("/:id", childrenController.deleteChild);
+router.post("/", authenticateToken, childrenController.createChild);
+router.post(
+  "/batch",
+  authenticateToken,
+  childrenController.createChildrenBatch
+);
+router.put("/:id", authenticateToken, childrenController.updateChild);
+router.get("/:id", authenticateToken, childrenController.getChildById);
+router.get("/", authenticateToken, childrenController.getChildrenByUserId);
+router.delete("/:id", authenticateToken, childrenController.deleteChild);
 
 module.exports = router;

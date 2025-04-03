@@ -4,22 +4,40 @@ const questionController = require("../controllers/questionController");
 const {
   authenticateToken,
   authorizeRole,
+  ROLES,
 } = require("../middleware/authMiddleware");
 
-const adminOnly = [authenticateToken, authorizeRole([1])];
 
-const authenticatedUser = [authenticateToken];
+router.post(
+  "/",
+  authenticateToken,
+  authorizeRole([ROLES.ADMIN]),
+  questionController.createQuestion
+);
 
-router.post("/", adminOnly, questionController.createQuestion);
+router.post(
+  "/bulk",
+  authenticateToken,
+  authorizeRole([ROLES.ADMIN]),
+  questionController.createQuestionsBulk
+);
 
-router.post("/bulk", adminOnly, questionController.createQuestionsBulk);
+router.get("/", authenticateToken, questionController.getQuestions);
 
-router.get("/", authenticatedUser, questionController.getQuestions);
+router.get("/:id", authenticateToken, questionController.getQuestionById);
 
-router.get("/:id", authenticatedUser, questionController.getQuestionById);
+router.put(
+  "/:id",
+  authenticateToken,
+  authorizeRole([ROLES.ADMIN]),
+  questionController.updateQuestion
+);
 
-router.put("/:id", adminOnly, questionController.updateQuestion);
-
-router.delete("/:id", adminOnly, questionController.deleteQuestion);
+router.delete(
+  "/:id",
+  authenticateToken,
+  authorizeRole([ROLES.ADMIN]),
+  questionController.deleteQuestion
+);
 
 module.exports = router;

@@ -4,33 +4,55 @@ const pendingQuestionController = require("../controllers/pendingQuestionControl
 const {
   authenticateToken,
   authorizeRole,
+  ROLES,
 } = require("../middleware/authMiddleware");
 
-const adminOnly = [authenticateToken, authorizeRole([1])];
-
-router.post("/", adminOnly, pendingQuestionController.createPendingQuestion);
+router.post(
+  "/",
+  authenticateToken,
+  authorizeRole([ROLES.ADMIN]),
+  pendingQuestionController.createPendingQuestion
+);
 
 router.post(
   "/bulk",
-  adminOnly,
+  authenticateToken,
+  authorizeRole([ROLES.ADMIN]),
   pendingQuestionController.createPendingQuestionsBulk
 );
 
 router.post(
   "/convert/:id",
-  adminOnly,
+  authenticateToken,
+  authorizeRole([ROLES.ADMIN]),
   pendingQuestionController.convertPendingQuestionToQuestion
 );
 
-router.get("/", adminOnly, pendingQuestionController.getPendingQuestions);
+router.get(
+  "/",
+  authenticateToken,
+  authorizeRole([ROLES.ADMIN]),
+  pendingQuestionController.getPendingQuestions
+);
 
-router.get("/:id", adminOnly, pendingQuestionController.getPendingQuestionById);
+router.get(
+  "/:id",
+  authenticateToken,
+  authorizeRole([ROLES.ADMIN]),
+  pendingQuestionController.getPendingQuestionById
+);
 
-router.put("/:id", adminOnly, pendingQuestionController.updatePendingQuestion);
+router.put(
+  "/:id",
+  authenticateToken,
+  authorizeRole([ROLES.ADMIN]),
+  pendingQuestionController.updatePendingQuestion
+);
 
 router.delete(
   "/:id",
-  adminOnly,
+  authenticateToken,
+  authorizeRole([ROLES.ADMIN]),
   pendingQuestionController.deletePendingQuestion
 );
 

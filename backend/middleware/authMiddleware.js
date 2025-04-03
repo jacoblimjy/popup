@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { ROLES } = require("../config/roles");
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
@@ -39,4 +40,4 @@ const authorizeRole = (roles = []) => {
   };
 };
 
-module.exports = { authenticateToken, authorizeRole };
+module.exports = { authenticateToken, authorizeRole, ROLES };
