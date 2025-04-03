@@ -1,13 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { difficulty_levels, topics } from "../utils";
+import NoChildModal from "../components/NoChildModal";
+import { useChildrenList } from "../hooks/useChildrenList";
 
 const CoursesPage = () => {
     const navigate = useNavigate();
+    const { childrenList } = useChildrenList();
+
     const [chosenTopic, setChosenTopic] = useState<string | null>(null);
     const [difficulty, setDifficulty] = useState<string | null>(null);
+    const [isNoChildModalOpen, setIsNoChildModalOpen] = useState(false);
 
     const handleStartPractice = () => {
+        if (!childrenList || childrenList.length === 0) {
+            setIsNoChildModalOpen(true);
+            return;
+        }
+        
         if (chosenTopic && difficulty) {
             navigate(`/practice/${chosenTopic}/${difficulty}/`);
         }
@@ -82,6 +92,8 @@ const CoursesPage = () => {
                 className="mt-12 py-3 px-6 disabled:bg-purple-200 bg-purple-500 hover:bg-purple-400 text-white rounded-lg"
                 disabled={!chosenTopic || !difficulty}> Start Practice
             </button>
+
+            <NoChildModal isOpen={isNoChildModalOpen} onClose={() => {setIsNoChildModalOpen(false)}}/>
         </div>
     )
 }

@@ -9,7 +9,7 @@ import { DetailedChild } from "../types/UserTypes";
 const Navbar: React.FC = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
-	const { isAuthenticated, logout } = useAuth();
+	const { isAuthenticated, logout, isAdmin } = useAuth();
 	const { activeChild, childrenList, setActiveChild } = useChildrenList();
 	const [isChildrenMenuOpen, setIsChildrenMenuOpen] = useState(false);
 	const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -98,12 +98,12 @@ const Navbar: React.FC = () => {
 									>
 										History
 									</Link>
-									<Link
+									{isAdmin && <Link
 										to="/admin"
 										className="text-gray-600 hover:text-blue-600 transition"
 									>
 										Admin
-									</Link>
+									</Link>}
 								</>
 							)}
 						</div>
