@@ -24,6 +24,7 @@ const LoginPage = () => {
         userId: response.userId,
         username: response.username,
         email: response.email,
+        role_id: response.role_id,
       }
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('token', response.token);
@@ -115,21 +116,6 @@ const LoginPage = () => {
                     >
                       8+ characters required
                     </p>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="flex">
-                      <input
-                        id="remember-me"
-                        name="remember-me"
-                        type="checkbox"
-                        className="shrink-0 mt-0.5 border-gray-200 rounded text-blue-600 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div className="ms-3">
-                      <label htmlFor="remember-me" className="text-sm">
-                        Remember me
-                      </label>
-                    </div>
                   </div>
                   <button
                     type="submit"

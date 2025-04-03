@@ -9,7 +9,7 @@ import { DetailedChild } from "../types/UserTypes";
 const Navbar: React.FC = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
-	const { isAuthenticated, logout } = useAuth();
+	const { isAuthenticated, logout, isAdmin } = useAuth();
 	const { activeChild, childrenList, setActiveChild } = useChildrenList();
 
 	// For children & user dropdown
@@ -90,38 +90,36 @@ const Navbar: React.FC = () => {
 							</div>
 							<span className="text-xl font-semibold text-gray-900">Popup</span>
 						</Link>
-					</div>
-
-					{/* Desktop Nav (hidden on mobile) */}
-					<div className="hidden md:flex items-center space-x-6 ml-8">
-						<Link
-							to="/courses"
-							className="text-gray-600 hover:text-blue-600 transition"
-						>
-							Courses
-						</Link>
-						{isAuthenticated && (
-							<>
-								<Link
-									to="/analytics"
-									className="text-gray-600 hover:text-blue-600 transition"
-								>
-									Analytics
-								</Link>
-								<Link
-									to="/history"
-									className="text-gray-600 hover:text-blue-600 transition"
-								>
-									History
-								</Link>
-								<Link
-									to="/admin"
-									className="text-gray-600 hover:text-blue-600 transition"
-								>
-									Admin
-								</Link>
-							</>
-						)}
+						<div className="hidden md:flex space-x-6">
+							<Link
+								to="/courses"
+								className="text-gray-600 hover:text-blue-600 transition"
+							>
+								Courses
+							</Link>
+							{isAuthenticated && (
+								<>
+									<Link
+										to="/analytics"
+										className="text-gray-600 hover:text-blue-600 transition"
+									>
+										Analytics
+									</Link>
+									<Link
+										to="/history"
+										className="text-gray-600 hover:text-blue-600 transition"
+									>
+										History
+									</Link>
+									{isAdmin && <Link
+										to="/admin"
+										className="text-gray-600 hover:text-blue-600 transition"
+									>
+										Admin
+									</Link>}
+								</>
+							)}
+						</div>
 					</div>
 
 					{/* Right Section:
@@ -284,13 +282,13 @@ const Navbar: React.FC = () => {
 							>
 								History
 							</Link>
-							<Link
+							{isAdmin && <Link
 								to="/admin"
 								className="block text-gray-600 hover:text-blue-600 transition"
 								onClick={() => setIsMobileMenuOpen(false)}
 							>
 								Admin
-							</Link>
+							</Link>}
 						</>
 					)}
 				</div>

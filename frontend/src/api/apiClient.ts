@@ -13,7 +13,7 @@ const apiClient = async (url: string, options: RequestInit = {}) => {
     ...options,
     headers,
   });
-  if (response.status === 403) {
+  if (response.status === 403 || (!url.endsWith("/login") && response.status === 401)) {
     const handleSessionTimeout = getSessionTimeoutHandler();
     if (handleSessionTimeout) {
       handleSessionTimeout();
