@@ -6,7 +6,7 @@ import {
 	ChevronDown,
 	FilePlus,
 } from "lucide-react";
-import { adminAPI } from "../api/AdminApi"; // Adjust path as needed
+import { adminAPI } from "../api/AdminApi"; // Adjust path if needed
 import { PendingQuestion } from "../types/AdminTypes";
 
 type ActionType = "generate" | "approve" | "reject";
@@ -21,13 +21,13 @@ interface EditData {
 
 const AdminPage: React.FC = () => {
 	// ---------- State ----------
-
 	// 1) Tabs
 	const [activeTab, setActiveTab] = useState<"generate" | "review">("generate");
 
 	// 2) Generate tab form
 	const [questionTypes, setQuestionTypes] = useState<string[]>([]);
 	const [difficulty, setDifficulty] = useState("Easy");
+	// Changed limit to 20
 	const [numberOfQuestions, setNumberOfQuestions] = useState(5);
 
 	// 3) Pending questions
@@ -84,7 +84,6 @@ const AdminPage: React.FC = () => {
 	}, []);
 
 	// ---------- Handlers ----------
-
 	/** Toggle question type checkboxes */
 	const handleToggleQuestionType = (type: string) => {
 		if (questionTypes.includes(type)) {
@@ -347,7 +346,7 @@ const AdminPage: React.FC = () => {
 							</div>
 						</div>
 
-						{/* Number of Questions */}
+						{/* Number of Questions (allow up to 20) */}
 						<div>
 							<h3 className="text-base font-medium mb-2 text-gray-700">
 								Number of Questions
@@ -355,13 +354,13 @@ const AdminPage: React.FC = () => {
 							<input
 								type="number"
 								min={1}
-								max={5}
+								max={20}
 								className="w-20 border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
 								value={numberOfQuestions}
 								onChange={(e) => {
 									let newVal = Number(e.target.value);
 									if (newVal < 1) newVal = 1;
-									if (newVal > 5) newVal = 5;
+									if (newVal > 20) newVal = 20;
 									setNumberOfQuestions(newVal);
 								}}
 							/>
@@ -387,7 +386,7 @@ const AdminPage: React.FC = () => {
 				{/* --------- Review Tab --------- */}
 				{activeTab === "review" && (
 					<div
-						className="space-y-4"
+						className="space-y-4 pb-8"
 						role="tabpanel"
 						aria-label="Review pending questions"
 					>
@@ -478,7 +477,7 @@ const AdminPage: React.FC = () => {
 										overflow: "hidden",
 										transition: "max-height 0.3s ease-in-out",
 									}}
-									className="mt-2 text-s text-gray-600"
+									className="mt-2 text-xs text-gray-600"
 								>
 									{expandedQuestionId === q.pending_question_id && (
 										<>
@@ -572,7 +571,7 @@ const AdminPage: React.FC = () => {
 				<div className="fixed inset-0 flex items-center justify-center z-50">
 					<div
 						className="bg-white p-6 rounded-lg shadow-lg border border-gray-200
-                       w-full max-w-3xl max-h-[90vh] overflow-y-auto -smtext"
+                       w-full max-w-3xl max-h-[90vh] overflow-y-auto text-sm"
 					>
 						<h2 className="text-lg font-semibold text-gray-900">
 							Edit Question
@@ -695,11 +694,6 @@ const AdminPage: React.FC = () => {
 						className="bg-white p-6 rounded-lg shadow-lg border border-gray-200
                        w-full max-w-4xl max-h-[95vh] overflow-y-auto text-sm"
 					>
-						{/* <h2 className="text-lg font-semibold text-gray-900 mb-4">
-							View Question
-						</h2> */}
-
-						{/* Larger question area */}
 						<div className="mt-2">
 							<label className="block font-medium text-gray-700">
 								Question
@@ -712,7 +706,6 @@ const AdminPage: React.FC = () => {
 							/>
 						</div>
 
-						{/* Single-line Answer & Distractors */}
 						<p className="mt-4 text-gray-700">
 							<strong>Answer:</strong> E) {viewData.correct_answer}
 						</p>
@@ -730,7 +723,6 @@ const AdminPage: React.FC = () => {
 							)}
 						</p>
 
-						{/* Explanation gets more vertical space */}
 						<div className="mt-4">
 							<label className="block font-medium text-gray-700">
 								Explanation
@@ -743,7 +735,6 @@ const AdminPage: React.FC = () => {
 							/>
 						</div>
 
-						{/* Close Button */}
 						<div className="mt-6 flex justify-end">
 							<button
 								onClick={() => setShowViewModal(false)}
