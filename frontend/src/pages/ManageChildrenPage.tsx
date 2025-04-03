@@ -47,9 +47,9 @@ const ManageChildrenPage: React.FC = () => {
 
 	return (
 		<div className="bg-gray-50 min-h-screen">
-			<div className="max-w-2xl mx-auto px-6 pt-12">
-				{/* Header */}
-				<div className="flex justify-between items-center mb-6">
+			<div className="max-w-2xl mx-auto px-4 sm:px-6 pt-12">
+				{/* Header (responsive stacking) */}
+				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
 					<h1 className="text-3xl font-semibold text-gray-900">
 						Manage Children
 					</h1>
@@ -63,47 +63,51 @@ const ManageChildrenPage: React.FC = () => {
 
 				{/* Child Cards */}
 				<div className="space-y-4">
-					{childrenList && childrenList.length > 0 ? childrenList.map((child) => (
-						<div
-							key={child.child_id}
-							className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between border border-gray-200"
-						>
-							{/* Left Section (Avatar + Details) */}
-							<div className="flex items-center space-x-4">
-								<div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-gray-800 font-bold">
-									{child.child_name.charAt(0).toUpperCase()}
+					{childrenList && childrenList.length > 0 ? (
+						childrenList.map((child) => (
+							<div
+								key={child.child_id}
+								className="bg-white p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between border border-gray-200"
+							>
+								{/* Left Section (Avatar + Details) */}
+								<div className="flex items-center space-x-4">
+									<div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-gray-800 font-bold">
+										{child.child_name.charAt(0).toUpperCase()}
+									</div>
+									<div>
+										<p className="text-lg font-semibold text-gray-900">
+											{child.child_name}
+										</p>
+										<p className="text-sm text-gray-500">Age {child.age}</p>
+										<p className="text-xs text-gray-400">
+											Joined {formatDate(child.date_created)}
+										</p>
+									</div>
 								</div>
-								<div>
-									<p className="text-lg font-semibold text-gray-900">
-										{child.child_name}
-									</p>
-									<p className="text-sm text-gray-500">Age {child.age}</p>
-									<p className="text-xs text-gray-400">Joined {formatDate(child.date_created)}</p>
-								</div>
-							</div>
 
-							{/* Action Buttons */}
-							<div className="flex items-center space-x-4">
-								<button
-									className="p-2 rounded-lg hover:bg-gray-100 transition"
-									onClick={() => {
-										setCurrentChild(child);
-										setIsEditModalOpen(true);
-									}}
-								>
-									<Edit className="w-5 h-5 text-gray-500" />
-								</button>
-								<button
-									className="p-2 rounded-lg hover:bg-gray-100 transition"
-									onClick={() => deleteChild(child.child_id)}
-								>
-									<Trash2 className="w-5 h-5 text-red-500" />
-								</button>
+								{/* Action Buttons (stack on small screens) */}
+								<div className="mt-4 sm:mt-0 flex items-center space-x-4">
+									<button
+										className="p-2 rounded-lg hover:bg-gray-100 transition"
+										onClick={() => {
+											setCurrentChild(child);
+											setIsEditModalOpen(true);
+										}}
+									>
+										<Edit className="w-5 h-5 text-gray-500" />
+									</button>
+									<button
+										className="p-2 rounded-lg hover:bg-gray-100 transition"
+										onClick={() => deleteChild(child.child_id)}
+									>
+										<Trash2 className="w-5 h-5 text-red-500" />
+									</button>
+								</div>
 							</div>
-						</div>
-					)) :
+						))
+					) : (
 						<p>No child added yet</p>
-					}
+					)}
 				</div>
 			</div>
 

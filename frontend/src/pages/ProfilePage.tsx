@@ -53,9 +53,9 @@ const ProfilePage: React.FC = () => {
 	return (
 		<>
 			<div className="bg-gray-50 min-h-screen">
-				<div className="max-w-2xl mx-auto px-6 pt-12">
-					{/* Header Section */}
-					<div className="flex justify-between items-center mb-6">
+				<div className="max-w-2xl mx-auto px-4 sm:px-6 pt-12">
+					{/* Header Section (responsive stacking) */}
+					<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
 						<h1 className="text-3xl font-semibold text-gray-900">
 							Profile (Parent)
 						</h1>
@@ -71,7 +71,7 @@ const ProfilePage: React.FC = () => {
 								type="text"
 								value={fullName}
 								onChange={(e) => setFullName(e.target.value)}
-								className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-200"
+								className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-200"
 							/>
 						</div>
 
@@ -84,7 +84,7 @@ const ProfilePage: React.FC = () => {
 								type="email"
 								value={user ? user.email : ""}
 								disabled
-								className="w-full px-4 py-2 border border-gray-300 bg-gray-100 rounded-md text-gray-500 cursor-not-allowed"
+								className="mt-1 w-full px-4 py-2 border border-gray-300 bg-gray-100 rounded-md text-gray-500 cursor-not-allowed"
 							/>
 						</div>
 
@@ -98,7 +98,7 @@ const ProfilePage: React.FC = () => {
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
 								placeholder="Enter new password"
-								className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-200"
+								className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:ring focus:ring-blue-200"
 							/>
 						</div>
 
@@ -117,7 +117,7 @@ const ProfilePage: React.FC = () => {
 
 			{/* Confirmation Modal */}
 			{showConfirmModal && (
-				<div className="fixed inset-0 flex items-center justify-center">
+				<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
 					<div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200 w-96">
 						<h2 className="text-lg font-semibold text-gray-900">
 							Confirm Changes

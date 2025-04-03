@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ChevronDown, User, LogOut, Users } from "lucide-react";
+import { ChevronDown, User, LogOut, Users, Menu } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { toast } from "react-toastify";
 import { useChildrenList } from "../hooks/useChildrenList";
@@ -11,27 +11,40 @@ const Navbar: React.FC = () => {
 	const navigate = useNavigate();
 	const { isAuthenticated, logout, isAdmin } = useAuth();
 	const { activeChild, childrenList, setActiveChild } = useChildrenList();
+
+	// For children & user dropdown
 	const [isChildrenMenuOpen, setIsChildrenMenuOpen] = useState(false);
 	const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 	const childrenMenuRef = useRef<HTMLDivElement | null>(null);
 	const userMenuRef = useRef<HTMLDivElement | null>(null);
 
-	// Close menus when clicking outside
+	// For mobile main nav (hamburger)
+	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+	// ================ Key Fix: auto-set the first child as active if none ================
+	useEffect(() => {
+		// If we have a children list and no active child set yet, set the first child
+		if (childrenList && childrenList.length > 0 && !activeChild) {
+			setActiveChild(childrenList[0]);
+		}
+	}, [childrenList, activeChild, setActiveChild]);
+
+	// Close dropdowns if clicking outside
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
 			const target = event.target as Node;
-
+			// children
 			if (
 				childrenMenuRef.current &&
 				!childrenMenuRef.current.contains(target)
 			) {
 				setIsChildrenMenuOpen(false);
 			}
+			// user
 			if (userMenuRef.current && !userMenuRef.current.contains(target)) {
 				setIsUserMenuOpen(false);
 			}
 		};
-
 		document.addEventListener("mousedown", handleClickOutside);
 		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, []);
@@ -39,8 +52,8 @@ const Navbar: React.FC = () => {
 	const handleSwitchChild = (child: DetailedChild) => {
 		setActiveChild(child);
 		setIsChildrenMenuOpen(false);
-		navigate("/")
-	}
+		navigate("/");
+	};
 
 	const handleLogout = () => {
 		logout();
@@ -58,9 +71,9 @@ const Navbar: React.FC = () => {
 			progress: undefined,
 			theme: "light",
 		});
+	};
 
-	}
-
+	// Hide navbar on login/signup
 	if (location.pathname === "/login" || location.pathname === "/signup") {
 		return null;
 	}
@@ -69,8 +82,8 @@ const Navbar: React.FC = () => {
 		<nav className="bg-white border-b border-gray-200 shadow-sm">
 			<div className="max-w-[1440px] mx-auto px-4">
 				<div className="flex items-center justify-between h-16">
-					{/* Left Section - Logo & Navigation (More Left-Aligned) */}
-					<div className="flex items-center space-x-8 w-1/2 pl-4">
+					{/* Left Section - Logo */}
+					<div className="flex items-center space-x-4">
 						<Link to="/" className="flex items-center space-x-2">
 							<div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center text-white font-bold">
 								P
@@ -109,17 +122,17 @@ const Navbar: React.FC = () => {
 						</div>
 					</div>
 
+					{/* Right Section:
+              Keep child & user menus visible on mobile. */}
 					{isAuthenticated ? (
 						<div className="flex items-center space-x-3 ml-auto pr-6">
-							{" "}
-							{/* Right Section - User Profile (Shifted Right) */}
 							{/* Children Dropdown */}
 							<div className="relative" ref={childrenMenuRef}>
-								{!childrenList || childrenList.length >= 1 ? (
+								{childrenList && childrenList.length > 0 ? (
 									<button
 										onClick={() => setIsChildrenMenuOpen(!isChildrenMenuOpen)}
 										className="flex items-center space-x-2 bg-gray-100 rounded-full px-4 py-1.5 hover:bg-gray-200 transition"
-										disabled={childrenList?.length === 1}
+										disabled={childrenList.length === 1}
 									>
 										<div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-gray-800 font-bold">
 											{activeChild?.child_name.charAt(0).toUpperCase()}
@@ -127,30 +140,28 @@ const Navbar: React.FC = () => {
 										<span className="text-gray-900 font-medium">
 											{activeChild?.child_name}
 										</span>
-										{childrenList && childrenList.length > 1 && (
+										{childrenList.length > 1 && (
 											<ChevronDown className="w-4 h-4 text-gray-500" />
 										)}
 									</button>
 								) : (
+									// If no child or the list is empty, show Add Child
 									<button
 										onClick={() => navigate("/manage-children")}
 										className="flex items-center space-x-2 bg-yellow-400 rounded-full px-4 py-1.5 hover:bg-yellow-200 transition"
 									>
 										<span className="text-white font-medium">Add Child</span>
-										{childrenList && childrenList.length > 1 && (
-											<ChevronDown className="w-4 h-4 text-gray-500" />
-										)}
 									</button>
 								)}
 
-								{isChildrenMenuOpen && (
-									<div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 border border-gray-200 z-20">
-										<div className="px-4 py-2 text-sm text-gray-500 font-semibold">
-											Switch Children
-										</div>
-										{childrenList &&
-											childrenList?.length > 0 &&
-											childrenList
+								{isChildrenMenuOpen &&
+									childrenList &&
+									childrenList.length > 1 && (
+										<div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 border border-gray-200 z-20">
+											<div className="px-4 py-2 text-sm text-gray-500 font-semibold">
+												Switch Children
+											</div>
+											{childrenList
 												.filter(
 													(child) => child.child_id !== activeChild?.child_id
 												)
@@ -168,9 +179,10 @@ const Navbar: React.FC = () => {
 														</p>
 													</button>
 												))}
-									</div>
-								)}
+										</div>
+									)}
 							</div>
+
 							{/* User Account Dropdown */}
 							<div className="relative" ref={userMenuRef}>
 								<button
@@ -211,9 +223,10 @@ const Navbar: React.FC = () => {
 							</div>
 						</div>
 					) : (
-						<div className="flex gap-4">
+						// If not authenticated
+						<div className="hidden md:flex items-center gap-4 ml-auto pr-6">
 							<button
-								className="py-2 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-[#f1c40e] text-white hover:bg-[#e7c53b] focus:outline-none focus:bg-[#e7c53b] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+								className="py-2 px-4 inline-flex justify-center items-center text-sm font-medium rounded-lg border border-transparent bg-[#f1c40e] text-white hover:bg-[#e7c53b] focus:outline-none"
 								onClick={() => {
 									navigate("/signup");
 								}}
@@ -221,7 +234,7 @@ const Navbar: React.FC = () => {
 								Register
 							</button>
 							<button
-								className="py-2 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-[#f1c40e] text-white hover:bg-[#e7c53b] focus:outline-none focus:bg-[#e7c53b] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+								className="py-2 px-4 inline-flex justify-center items-center text-sm font-medium rounded-lg border border-transparent bg-[#f1c40e] text-white hover:bg-[#e7c53b] focus:outline-none"
 								onClick={() => {
 									navigate("/login");
 								}}
@@ -230,8 +243,56 @@ const Navbar: React.FC = () => {
 							</button>
 						</div>
 					)}
+
+					{/* Hamburger for main nav (Courses etc.) - shown only on mobile */}
+					<div className="md:hidden flex items-center">
+						<button
+							onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+							className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
+						>
+							<Menu className="w-6 h-6 text-gray-600" />
+						</button>
+					</div>
 				</div>
 			</div>
+
+			{/* Mobile main menu */}
+			{isMobileMenuOpen && (
+				<div className="md:hidden bg-white border-t border-gray-200 shadow-sm p-4 space-y-2">
+					<Link
+						to="/courses"
+						className="block text-gray-600 hover:text-blue-600 transition"
+						onClick={() => setIsMobileMenuOpen(false)}
+					>
+						Courses
+					</Link>
+					{isAuthenticated && (
+						<>
+							<Link
+								to="/analytics"
+								className="block text-gray-600 hover:text-blue-600 transition"
+								onClick={() => setIsMobileMenuOpen(false)}
+							>
+								Analytics
+							</Link>
+							<Link
+								to="/history"
+								className="block text-gray-600 hover:text-blue-600 transition"
+								onClick={() => setIsMobileMenuOpen(false)}
+							>
+								History
+							</Link>
+							{isAdmin && <Link
+								to="/admin"
+								className="block text-gray-600 hover:text-blue-600 transition"
+								onClick={() => setIsMobileMenuOpen(false)}
+							>
+								Admin
+							</Link>}
+						</>
+					)}
+				</div>
+			)}
 		</nav>
 	);
 };
