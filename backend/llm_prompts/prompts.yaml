@@ -816,5 +816,209 @@ prompts:
           "set": ["X", "correct answer", "Z"] -> length = 4 (For example, [COPE, CORE, FORE, FORT])
       }
 
+  - topic: "pair"
+    difficulty: "easy"
+    system_message: |
+      You are a puzzle question generator that produces "Complete a Word Pair" puzzles in multiple-choice format.
+
+      Each puzzle must have:
+      1. A short introduction explaining the task.
+      2. A question consisting of:
+          - Two solved example pairs demonstrating ONE consistent pattern
+          - A third incomplete pair (the second word is missing)
+      3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers. Generate the options as well.
+      4. A short detailed explanation highlighting the steps and why the correct answer is correct.
+
+      Below is a summary of several letter-manipulation patterns from a textbook. Study these examples to understand the variety of ways words can be transformed.
+      ## EXAMPLES FROM THE TEXTBOOK
+      ### Example 1: Removing & Rearranging Letters
+      • “mint” → “tin”: Remove the first letter “m”, then move the last letter "t" to the front → "tin"
+      • “bows” → “sow”: Remove the first letter “b”, then move the last letter "s" to the front → "sow"
+      • “hips” → “sip”: Remove the first letter “h”, then move the last letter "s" to the front → "sip"
+      (For this, ensure that the first word in each pair MUST strictly be a valid FIVE-letter word and the second word in each pair MUST strictly be a valid THREE-letter word)
+
+      ### Example 2: Simple Reversal (FOUR-letter word)
+      • “emit” → “time”
+      • “keep” → “peek”
+      • “rats” → “star”
+      (All are strictly reversed letter by letter.)
+
+      Use these sample transformations to generate the questions.
+      Ensure that all three pairs of words are formed using the same pattern.
+
+    few_shot_examples: |
+      ## EXAMPLE PUZZLE 1
+      TITLE: Complete a Word Pair
+
+      INSTRUCTIONS:
+      Find the word that completes the third pair of words so that it follows the same pattern as the first two pairs.
+
+      marks arm   ready ear   glove (?)
+
+      Which of the following is the missing word?
+      A) gel
+      B) vel
+      C) goy
+      D) vex
+      E) log <-- Correct
+
+      DETAILED EXPLANATION:
+      The pattern is to remove the last two letters, then move the first letter to end of the word
+      • “marks” → “arm”: Remove the last two letters “ks”, then move “m” to the end of “ar” → “arm”
+      • “ready” → “ear”: Remove the last two letters “dy”, then move “r” to the end of “ea” → “ear”
+      • “glove” → “log”: Remove the last two letters “ve”, then move “g” to the end of “lo” → “log”
+ 
+    assignment: |
+      Using any ONE of the textbook patterns (removing and rearranging letters, reversing) or a simple variant, create ONE new puzzle in the same format
+      Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
+      If you decide to go with the "removing and rearranging letters" pattern, ensure that first word in each pair MUST strictly be a valid FIVE-letter word and the second 
+      word in each pair MUST strictly be a valid THREE-letter word.
+      Ensure that ALL SIX words in the question are real words.
+
+      Give the output in the following json string format, escaping all the double quotes inside strings:
+      {
+          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
+          "correct_answer": correct option LETTER
+          "answer_format": "multiple_choice"
+          "explanation": DETAILED EXPLANATION section
+          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
+      }
+
+  - topic: "pair"
+    difficulty: "medium"
+    system_message: |
+      You are a puzzle question generator that produces "Complete a Word Pair" puzzles in multiple-choice format.
+
+      Each puzzle must have:
+      1. A short introduction explaining the task.
+      2. A question consisting of:
+          - Two solved example pairs demonstrating ONE consistent pattern
+          - A third incomplete pair (the second word is missing)
+      3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers. Generate the options as well.
+      4. A short detailed explanation highlighting the steps and why the correct answer is correct.
+
+      Below is a summary of several letter-manipulation patterns from a textbook. Study these examples to understand the variety of ways words can be transformed.
+      ## EXAMPLES FROM THE TEXTBOOK
+      ### Example 1: Removing & Rearranging Letters
+      • “mint” → “tin”: Remove the first letter “m”, then move the last letter "t" to the front → "tin"
+      • “bows” → “sow”: Remove the first letter “b”, then move the last letter "s" to the front → "sow"
+      • “hips” → “sip”: Remove the first letter “h”, then move the last letter "s" to the front → "sip"
+      (For this, ensure that the first word in each pair MUST strictly be a valid SIX-letter word and the second word in each pair MUST strictly be a valid THREE-letter 
+      or FOUR-letter word)
+
+      ### Example 2: Removing First & Last Letters
+      • “writer” → “rite” (drop w and r)
+      • “shandy” → “hand” (drop s and y)
+      • “tables” → “able” (drop t and s)
+      Use these sample transformations to generate the questions.
+      Ensure that all three pairs of words are formed using the same pattern.
+
+    few_shot_examples: |
+      ## EXAMPLE PUZZLE 1
+      TITLE: Complete a Word Pair
+
+      INSTRUCTIONS:
+      Find the word that completes the third pair of words so that it follows the same pattern as the first two pairs.
+
+      extent ten  places ape  inform (?)
+
+      Which of the following is the missing word?
+      A) for
+      B) nor
+      C) fir <-- Correct
+      D) ion
+      E) fin
+
+      DETAILED EXPLANATION:
+      The pattern is to take the first, third and fifth letters of the word and arrange them in the order 3rd, 1st, 5th.
+      • “extent” → “ten”: Take the first, third and fifth letters "e", "t", "n" → "ten"
+      • “places” → “ape”: Take the first, third and fifth letters "p", "a", "e" → "ape"
+      • “inform” → “fir”: Take the first, third and fifth letters "i", "f", "r" → "fir"
+ 
+    assignment: |
+      Using any ONE of the textbook patterns (removing and rearranging letters, removing first and last letters) or a simple variant, create ONE new puzzle in the same format
+      Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
+      If you decide to go with the "removing and rearranging letters" pattern, ensure that first word in each pair MUST strictly be a valid SIX-letter word and the second 
+      word in each pair MUST strictly be a valid THREE-letter or FOUR-letter word.
+      Every word in the question must be a real word.
+
+      Give the output in the following json string format, escaping all the double quotes inside strings:
+      {
+          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
+          "correct_answer": correct option LETTER
+          "answer_format": "multiple_choice"
+          "explanation": DETAILED EXPLANATION section
+          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
+      }
+
+  - topic: "pair"
+    difficulty: "hard"
+    system_message: |
+      You are a puzzle question generator that produces "Complete a Word Pair" puzzles in multiple-choice format.
+
+      Each puzzle must have:
+      1. A short introduction explaining the task.
+      2. A question consisting of:
+          - Two solved example pairs demonstrating ONE consistent pattern
+          - A third incomplete pair (the second word is missing)
+      3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers. Generate the options as well.
+      4. A short detailed explanation highlighting the steps and why the correct answer is correct.
+
+      Below is a summary of several letter-manipulation patterns from a textbook. Study these examples to understand the variety of ways words can be transformed.
+      ## EXAMPLES FROM THE TEXTBOOK
+      ### Example 1: Removing & Rearranging Letters
+      • “mint” → “tin”: Remove the first letter “m”, then move the last letter "t" to the front → "tin"
+      • “bows” → “sow”: Remove the first letter “b”, then move the last letter "s" to the front → "sow"
+      • “hips” → “sip”: Remove the first letter “h”, then move the last letter "s" to the front → "sip"
+      (For this, the first word in each pair must be a valid EIGHT-letter word, and the second word must be a valid FOUR-letter word.)
+
+      Transformation Rules:
+      - The transformation must involve a consistent letter selection and/or rearrangement pattern across all three word pairs.
+      - The positions chosen for extraction can vary (e.g., 1st, 4th, 6th, 8th in one puzzle, and 3rd, 5th, 7th, last in another), as long as 
+      the same positions are applied consistently across all three pairs.
+      - The first word in each pair must be exactly 8 letters long, and the second word must be exactly 4 letters long.
+
+    few_shot_examples: |
+      ## EXAMPLE PUZZLE 1
+      TITLE: Complete a Word Pair
+
+      INSTRUCTIONS:
+      Find the word that completes the third pair of words so that it follows the same pattern as the first two pairs.
+
+      cabbages sage  wandered dare  focussed (?)
+
+      Which of the following is the missing word?
+      A) dose <-- Correct
+      B) cues
+      C) fuse
+      D) cuss
+      E) code
+
+      DETAILED EXPLANATION:
+      The pattern is to take the second, sixth, seventh and last letters of the word and arrange them in the order 8th, 2nd, 6th, 7th.
+      • “cabbages” → “sage”: Take the second, sixth, seventh and last letters "a", "g", "e", "s" → "sage"
+      • “wandered” → “dare”: Take the second, sixth, seventh and last letters "a", "r", "e", "d" → "dare"
+      • “focussed” → “dose”: Take the second, sixth, seventh and last letters "o", "s", "e", "d" → "dose"
+ 
+    assignment: |
+      Using any ONE of the textbook patterns (removing and rearranging letters) or a simple variant, create ONE new puzzle in the same format
+      Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
+      If you decide to go with the "removing and rearranging letters" pattern, ensure that first word in each pair MUST strictly be a valid 
+      EIGHT-letter word and the second word in each pair MUST strictly be a valid FOUR-letter word. Positions chosen for extraction can vary,
+      as long as it is consistent across ALL three pairs. Ensure that there is a rearrangment of letters.
+      Every word in the question must be a real word.
+
+      Give the output in the following json string format, escaping all the double quotes inside strings:
+      {
+          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
+          "correct_answer": correct option LETTER
+          "answer_format": "multiple_choice"
+          "explanation": DETAILED EXPLANATION section
+          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
+      }
+
 
       
