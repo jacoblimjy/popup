@@ -551,3 +551,474 @@ prompts:
       Remember to consider all possible letter combinations. 
       - There can be more than one real word in the combinations, but only one should appear as an option. The answer must be definitive.
       The words given in the solved and unsolved set should not appear as an option.
+
+  - topic: "word_ladders"
+    difficulty: "easy"
+    system_message: |
+      You are a puzzle question generator that produces "Word Ladder" puzzles in multiple-choice format.
+
+      Each puzzle must have:
+      1. A short introduction explaining the task.
+      2. A question that demonstrates a letter change in each step. The letter change must occur at different positions in each step.
+        For example, if the first step changes the first letter, the next step must change a different letter.
+      3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers.
+      4. A short detailed explanation highlighting the steps and why the correct answer is correct.
+
+      Requirements:
+      - Ensure that the question has only one missing word in the format `X ____ Z`, where X and Z are placeholders.
+      - Ensure that X and Z are common and easily recognisable four-letter words.
+
+      Constraints of the Correct Answer:
+      - A real four-letter word that fits the word ladder pattern, following the one-letter change rule.
+      - The word must correctly connect X to Z without skipping an intermediate step.
+
+      Constraints of an Incorrect Answer:
+      - Must be a four-letter word, but cannot be X or Z.
+      - May follow the one-letter change rule but in the wrong position
+      - May change more than one letter
+      - May not be a real word
+
+    few_shot_examples: |
+      ## EXAMPLE PUZZLE 1
+      TITLE: Word Ladders
+
+      INSTRUCTIONS:
+      Change one letter at a time to make the first word into the final word.
+      The answer must be a real word.
+
+      CASE ____ LASH
+
+      Which of the following is the missing word?
+      A) CAST 
+      B) LUSH
+      C) LACK
+      D) CASH <-- Correct
+      E) LASS
+
+      DETAILED EXPLANATION:
+      CASE → CASH: Change the last letter from 'E' to 'H' to form "CASH"  
+      CASH → LASH: Change the first letter from 'C' to 'L' to form "LASH"
+
+      ---
+
+      ## EXAMPLE PUZZLE 2
+      TITLE: Word Ladders
+
+      INSTRUCTIONS:
+      Change one letter at a time to make the first word into the final word.
+      The answer must be a real word.
+
+      PLAN ____ CLAP
+
+      Which of the following is the missing word?
+      A) CLAN <-- Correct
+      B) PLAT
+      C) CLAM
+      D) FLAN
+      E) FLAP
+
+      DETAILED EXPLANATION:
+      PLAN → CLAN: Change the first letter from 'P' to 'C' to form "CLAN"  
+      CLAN → CLAP: Change the last letter from 'N' to 'P' to form "CLAP"
+ 
+    assignment: |
+      Ensure that all words in the ladder are exactly four letters long, and are simple and commonly known words.
+      There should be only ONE missing word that needs to be filled in.
+      Each word in the sequence should differ from the next by only one letter.
+      Every word in the ladder must be a valid English word.
+
+      Give the output in the following json string format, escaping all the double quotes inside strings:
+      {
+          "question_text": TITLE and INSTRUCTIONS section WITHOUT identifying which is the correct answer
+          "correct_answer": correct option LETTER
+          "answer_format": "multiple_choice"
+          "explanation": DETAILED EXPLANATION section
+          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "set": ["X", "correct answer", "Z"]
+      }
+
+  - topic: "word_ladders"
+    difficulty: "medium"
+    system_message: |
+      You are a puzzle question generator that produces "Word Ladder" puzzles in multiple-choice format.
+
+      Each puzzle must have:
+      1. A short introduction explaining the task.
+      2. A question that demonstrates a letter change in each step. The letter change must occur at different positions in each step.
+        For example, if the first step changes the first letter, the next step must change a different letter.
+      3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers.
+      4. A short detailed explanation highlighting the steps and why the correct answer is correct.
+
+      Requirements:
+      - Ensure that the question has only one missing word in the format `X ____ Z`, where X and Z are placeholders.
+
+      Constraints of the Correct Answer:
+      - A real four-letter word that fits the word ladder pattern, following the one-letter change rule.
+      - Ensure that the correct answer is a more complex or less commonly known four-letter word.
+      - The word must correctly connect X to Z without skipping an intermediate step.
+
+      Constraints of an Incorrect Answer:
+      - Must be a four-letter word, but cannot be X or Z.
+      - May follow the one-letter change rule but in the wrong position
+      - May change more than one letter
+      - May not be a real word
+
+    few_shot_examples: |
+      ## EXAMPLE PUZZLE 1
+      TITLE: Word Ladders
+
+      INSTRUCTIONS:
+      Change one letter at a time to make the first word into the final word.
+      The answer must be a real word.
+
+      VILE ____ BIKE
+
+      Which of the following is the missing word?
+      A) VIBE
+      B) VICE
+      C) BILE <-- Correct
+      D) VIVE
+      E) BILK
+
+      DETAILED EXPLANATION:
+      VILE → BILE: Change the first letter from 'V' to 'B' to form "BILE"  
+      BILE → BIKE: Change the third letter from 'L' to 'K' to form "BIKE"
+
+      ---
+
+      ## EXAMPLE PUZZLE 2
+      TITLE: Word Ladders
+
+      INSTRUCTIONS:
+      Change one letter at a time to make the first word into the final word.
+      The answer must be a real word.
+
+      RIFT ____ RITE
+
+      Which of the following is the missing word?
+      A) RISE
+      B) WIFE
+      C) SIFT
+      D) RAFT
+      E) RIFE <-- Correct
+
+      DETAILED EXPLANATION:
+      RIFT → RIFE: Change the last letter from 'T' to 'E' to form "RIFE"  
+      RIFE → RITE: Change the third letter from 'F' to 'T' to form "RITE"
+ 
+    assignment: |
+      Ensure that all words in the ladder are exactly four letters long, and more complex or less commonly known word.
+      There should be only ONE missing word that needs to be filled in.
+      Each word in the sequence should differ from the next by only one letter.
+      Every word in the ladder must be a valid English word.
+
+      Give the output in the following json string format, escaping all the double quotes inside strings:
+      {
+          "question_text": TITLE and INSTRUCTIONS section WITHOUT identifying which is the correct answer
+          "correct_answer": correct option LETTER
+          "answer_format": "multiple_choice"
+          "explanation": DETAILED EXPLANATION section
+          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "set": ["X", "correct answer", "Z"]
+      }
+
+  - topic: "word_ladders"
+    difficulty: "hard"
+    system_message: |
+      You are a puzzle question generator that produces "Word Ladder" puzzles in multiple-choice format.
+
+      Each puzzle must have:
+      1. A short introduction explaining the task.
+      2. A question that demonstrates a letter change in each step (eg. "LOOK" → "LOCK"). 
+      3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers. Generate the options as as well.
+      4. A short detailed explanation highlighting the steps and why the correct answer is correct.
+
+      Requirements (To be enforced strictly):
+      - You can only change one letter at a time.
+      - The position of the letter changed must be different in every step.
+        - That means the first, second, and third steps must each modify a unique letter index (from 0 to 3).
+        - For example, if Step 1 changes the 2nd letter (index 1), Step 2 cannot change index 1 again, and Step 3 must also change a new 
+          letter position not already used in Steps 1 or 2.
+        - Ensure each of the 3 transitions (X → A → B → Z) uses 3 different letter positions.
+      - Ensure that the question has strictly two missing words in the format X ____ ____ Z, where X and Z are placeholders.  
+      - The generated options should be formatted as A, B.
+
+      Constraints of the Correct Answer:
+      - Two real four-letter word that fits the word ladder pattern, following the one-letter change rule.
+      - The two words must correctly connect X to Z without skipping an intermediate step.
+      - Both A and B must be correct for the option to be considered fully accurate.
+
+      Constraints of an Incorrect Answer:
+      - Must be four-letter words, but cannot be X or Z.
+      - May follow the one-letter change rule but in the wrong position
+      - May change more than one letter
+      - May not be a real word
+
+    few_shot_examples: |
+      ## EXAMPLE PUZZLE 1
+      TITLE: Word Ladders
+
+      INSTRUCTIONS:
+      Change one letter at a time to make the first word into the final word.
+      The two answers must be real words.
+
+      COPE ____ ____ FORT
+
+      Which of the following is the missing word?
+      A) COGE, FORT
+      B) CORE, CORT
+      C) COGE, FORE
+      D) DOPE, FOPE
+      E) CORE, FORE <-- Correct
+
+      DETAILED EXPLANATION:
+      First, identify the letter that appears in both the first and last word in the same position.
+      COPE → CORE: Change the third letter from 'P' to 'R' to form "CORE"  
+      CORE → FORE: Change the first letter from 'C' to 'F' to form "FORE" 
+      FORE → FORT: Change the last letter from 'E' to 'T' to form "FORT" 
+
+      ---
+
+      ## EXAMPLE PUZZLE 2
+      TITLE: Word Ladders
+
+      INSTRUCTIONS:
+      Change one letter at a time to make the first word into the final word.
+      The two answers must be real words.
+
+      SPED ____ ____ FLEA
+
+      Which of the following is the missing word?
+      A) SLED, FLED <-- Correct
+      B) SPEA, FLEE 
+      C) BLED, FLED
+      D) FPED, FLEW 
+      E) SPAD, FLAD 
+
+      DETAILED EXPLANATION:
+      First, identify the letter that appears in both the first and last word in the same position.
+      SPED → SLED: Change the second letter from 'P' to 'L' to form "SLED"  
+      SLED → FLED: Change the first letter from 'S' to 'F' to form "FLED" 
+      FLED → FLEA: Change the last letter from 'D' to 'A' to form "FLEA"  
+ 
+    assignment: |
+      Ensure that all words in the ladder are exactly four letters long. There should have two missing words that need to be filled in.
+      Each word in the sequence should differ from the next by only one letter. Ensure the position that the letter changes differ each step.
+      Every word in the ladder must be a valid English word.
+
+      Give the output in the following json string format, escaping all the double quotes inside strings:
+      {
+          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
+          "correct_answer": correct option LETTER
+          "answer_format": "multiple_choice"
+          "explanation": DETAILED EXPLANATION section
+          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "set": ["X", "correct answer", "Z"] -> length = 4 (For example, [COPE, CORE, FORE, FORT])
+      }
+
+  - topic: "word_pair"
+    difficulty: "easy"
+    system_message: |
+      You are a puzzle question generator that produces "Complete a Word Pair" puzzles in multiple-choice format.
+
+      Each puzzle must have:
+      1. A short introduction explaining the task.
+      2. A question consisting of:
+          - Two solved example pairs demonstrating ONE consistent pattern
+          - A third incomplete pair (the second word is missing)
+      3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers. Generate the options as well.
+      4. A short detailed explanation highlighting the steps and why the correct answer is correct.
+
+      Below is a summary of several letter-manipulation patterns from a textbook. Study these examples to understand the variety of ways words can be transformed.
+      ## EXAMPLES FROM THE TEXTBOOK
+      ### Example 1: Removing & Rearranging Letters
+      • “mint” → “tin”: Remove the first letter “m”, then move the last letter "t" to the front → "tin"
+      • “bows” → “sow”: Remove the first letter “b”, then move the last letter "s" to the front → "sow"
+      • “hips” → “sip”: Remove the first letter “h”, then move the last letter "s" to the front → "sip"
+      (For this, ensure that the first word in each pair MUST strictly be a valid FIVE-letter word and the second word in each pair MUST strictly be a valid THREE-letter word)
+
+      ### Example 2: Simple Reversal (FOUR-letter word)
+      • “emit” → “time”
+      • “keep” → “peek”
+      • “rats” → “star”
+      (All are strictly reversed letter by letter.)
+
+      Use these sample transformations to generate the questions.
+      Ensure that all three pairs of words are formed using the same pattern.
+
+    few_shot_examples: |
+      ## EXAMPLE PUZZLE 1
+      TITLE: Complete a Word Pair
+
+      INSTRUCTIONS:
+      Find the word that completes the third pair of words so that it follows the same pattern as the first two pairs.
+
+      marks arm   ready ear   glove (?)
+
+      Which of the following is the missing word?
+      A) gel
+      B) vel
+      C) goy
+      D) vex
+      E) log <-- Correct
+
+      DETAILED EXPLANATION:
+      The pattern is to remove the last two letters, then move the first letter to end of the word
+      • “marks” → “arm”: Remove the last two letters “ks”, then move “m” to the end of “ar” → “arm”
+      • “ready” → “ear”: Remove the last two letters “dy”, then move “r” to the end of “ea” → “ear”
+      • “glove” → “log”: Remove the last two letters “ve”, then move “g” to the end of “lo” → “log”
+ 
+    assignment: |
+      Using any ONE of the textbook patterns (removing and rearranging letters, reversing) or a simple variant, create ONE new puzzle in the same format
+      Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
+      If you decide to go with the "removing and rearranging letters" pattern, ensure that first word in each pair MUST strictly be a valid FIVE-letter word and the second 
+      word in each pair MUST strictly be a valid THREE-letter word.
+      Ensure that ALL SIX words in the question are real words.
+
+      Give the output in the following json string format, escaping all the double quotes inside strings:
+      {
+          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
+          "correct_answer": correct option LETTER
+          "answer_format": "multiple_choice"
+          "explanation": DETAILED EXPLANATION section
+          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
+      }
+
+  - topic: "word_pair"
+    difficulty: "medium"
+    system_message: |
+      You are a puzzle question generator that produces "Complete a Word Pair" puzzles in multiple-choice format.
+
+      Each puzzle must have:
+      1. A short introduction explaining the task.
+      2. A question consisting of:
+          - Two solved example pairs demonstrating ONE consistent pattern
+          - A third incomplete pair (the second word is missing)
+      3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers. Generate the options as well.
+      4. A short detailed explanation highlighting the steps and why the correct answer is correct.
+
+      Below is a summary of several letter-manipulation patterns from a textbook. Study these examples to understand the variety of ways words can be transformed.
+      ## EXAMPLES FROM THE TEXTBOOK
+      ### Example 1: Removing & Rearranging Letters
+      • “mint” → “tin”: Remove the first letter “m”, then move the last letter "t" to the front → "tin"
+      • “bows” → “sow”: Remove the first letter “b”, then move the last letter "s" to the front → "sow"
+      • “hips” → “sip”: Remove the first letter “h”, then move the last letter "s" to the front → "sip"
+      (For this, ensure that the first word in each pair MUST strictly be a valid SIX-letter word and the second word in each pair MUST strictly be a valid THREE-letter 
+      or FOUR-letter word)
+
+      ### Example 2: Removing First & Last Letters
+      • “writer” → “rite” (drop w and r)
+      • “shandy” → “hand” (drop s and y)
+      • “tables” → “able” (drop t and s)
+      Use these sample transformations to generate the questions.
+      Ensure that all three pairs of words are formed using the same pattern.
+
+    few_shot_examples: |
+      ## EXAMPLE PUZZLE 1
+      TITLE: Complete a Word Pair
+
+      INSTRUCTIONS:
+      Find the word that completes the third pair of words so that it follows the same pattern as the first two pairs.
+
+      extent ten  places ape  inform (?)
+
+      Which of the following is the missing word?
+      A) for
+      B) nor
+      C) fir <-- Correct
+      D) ion
+      E) fin
+
+      DETAILED EXPLANATION:
+      The pattern is to take the first, third and fifth letters of the word and arrange them in the order 3rd, 1st, 5th.
+      • “extent” → “ten”: Take the first, third and fifth letters "e", "t", "n" → "ten"
+      • “places” → “ape”: Take the first, third and fifth letters "p", "a", "e" → "ape"
+      • “inform” → “fir”: Take the first, third and fifth letters "i", "f", "r" → "fir"
+ 
+    assignment: |
+      Using any ONE of the textbook patterns (removing and rearranging letters, removing first and last letters) or a simple variant, create ONE new puzzle in the same format
+      Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
+      If you decide to go with the "removing and rearranging letters" pattern, ensure that first word in each pair MUST strictly be a valid SIX-letter word and the second 
+      word in each pair MUST strictly be a valid THREE-letter or FOUR-letter word.
+      Every word in the question must be a real word.
+
+      Give the output in the following json string format, escaping all the double quotes inside strings:
+      {
+          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
+          "correct_answer": correct option LETTER
+          "answer_format": "multiple_choice"
+          "explanation": DETAILED EXPLANATION section
+          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
+      }
+
+  - topic: "word_pair"
+    difficulty: "hard"
+    system_message: |
+      You are a puzzle question generator that produces "Complete a Word Pair" puzzles in multiple-choice format.
+
+      Each puzzle must have:
+      1. A short introduction explaining the task.
+      2. A question consisting of:
+          - Two solved example pairs demonstrating ONE consistent pattern
+          - A third incomplete pair (the second word is missing)
+      3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers. Generate the options as well.
+      4. A short detailed explanation highlighting the steps and why the correct answer is correct.
+
+      Below is a summary of several letter-manipulation patterns from a textbook. Study these examples to understand the variety of ways words can be transformed.
+      ## EXAMPLES FROM THE TEXTBOOK
+      ### Example 1: Removing & Rearranging Letters
+      • “mint” → “tin”: Remove the first letter “m”, then move the last letter "t" to the front → "tin"
+      • “bows” → “sow”: Remove the first letter “b”, then move the last letter "s" to the front → "sow"
+      • “hips” → “sip”: Remove the first letter “h”, then move the last letter "s" to the front → "sip"
+      (For this, the first word in each pair must be a valid EIGHT-letter word, and the second word must be a valid FOUR-letter word.)
+
+      Transformation Rules:
+      - The transformation must involve a consistent letter selection and/or rearrangement pattern across all three word pairs.
+      - The positions chosen for extraction can vary (e.g., 1st, 4th, 6th, 8th in one puzzle, and 3rd, 5th, 7th, last in another), as long as 
+      the same positions are applied consistently across all three pairs.
+      - The first word in each pair must be exactly 8 letters long, and the second word must be exactly 4 letters long.
+
+    few_shot_examples: |
+      ## EXAMPLE PUZZLE 1
+      TITLE: Complete a Word Pair
+
+      INSTRUCTIONS:
+      Find the word that completes the third pair of words so that it follows the same pattern as the first two pairs.
+
+      cabbages sage  wandered dare  focussed (?)
+
+      Which of the following is the missing word?
+      A) dose <-- Correct
+      B) cues
+      C) fuse
+      D) cuss
+      E) code
+
+      DETAILED EXPLANATION:
+      The pattern is to take the second, sixth, seventh and last letters of the word and arrange them in the order 8th, 2nd, 6th, 7th.
+      • “cabbages” → “sage”: Take the second, sixth, seventh and last letters "a", "g", "e", "s" → "sage"
+      • “wandered” → “dare”: Take the second, sixth, seventh and last letters "a", "r", "e", "d" → "dare"
+      • “focussed” → “dose”: Take the second, sixth, seventh and last letters "o", "s", "e", "d" → "dose"
+ 
+    assignment: |
+      Using any ONE of the textbook patterns (removing and rearranging letters) or a simple variant, create ONE new puzzle in the same format
+      Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
+      If you decide to go with the "removing and rearranging letters" pattern, ensure that first word in each pair MUST strictly be a valid 
+      EIGHT-letter word and the second word in each pair MUST strictly be a valid FOUR-letter word. Positions chosen for extraction can vary,
+      as long as it is consistent across ALL three pairs. Ensure that there is a rearrangment of letters.
+      Every word in the question must be a real word.
+
+      Give the output in the following json string format, escaping all the double quotes inside strings:
+      {
+          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
+          "correct_answer": correct option LETTER
+          "answer_format": "multiple_choice"
+          "explanation": DETAILED EXPLANATION section
+          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
+      }
+
+
+      
