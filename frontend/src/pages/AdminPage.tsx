@@ -204,6 +204,7 @@ const AdminPage: React.FC = () => {
 
 	// ---------- Edit Modal ----------
 	const handleSaveEdit = () => {
+		// Open confirm edit modal before sending changes
 		setShowConfirmEditModal(true);
 	};
 
@@ -213,26 +214,36 @@ const AdminPage: React.FC = () => {
 	};
 
 	const confirmSaveEdit = async () => {
-		try {
-			const updateData = {
-				question_text: editData.question_text,
-				answer_format: "multiple_choice",
-				correct_answer: editData.correct_answer,
-				distractors: editData.distractors,
-				topic_id: 1,
-				difficulty_id: 1,
-				explanation: editData.explanation,
-			};
+		// Client-side validation: make sure no required field is empty
+		if (
+			!editData.question_text.trim() ||
+			!editData.correct_answer.trim() ||
+			!editData.explanation.trim() ||
+			editData.distractors.some((d) => !d.trim())
+		) {
+			alert("All fields are required. Please fill in every field.");
+			return;
+		}
 
+		const updateData = {
+			question_text: editData.question_text,
+			answer_format: "multiple_choice",
+			correct_answer: editData.correct_answer,
+			distractors: editData.distractors,
+			// If needed, you could also let the user update topic_id and difficulty_id
+			topic_id: 1,
+			difficulty_id: 1,
+			explanation: editData.explanation,
+		};
+
+		try {
 			await adminAPI.updatePendingQuestion(
 				editData.pending_question_id,
 				updateData,
 				token
 			);
-
 			alert("Question updated successfully!");
 			await fetchPendingQuestions();
-
 			setShowConfirmEditModal(false);
 			setShowEditModal(false);
 		} catch (error) {

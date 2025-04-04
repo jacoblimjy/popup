@@ -1,28 +1,29 @@
 const db = require("../db");
 
+
 const createQuestion = async (question) => {
-  try {
-    const {
-      question_text,
-      answer_format,
-      correct_answer,
-      distractors,
-      topic_id,
-      difficulty_id,
-      explanation,
-      is_llm_generated = false,
-    } = question;
+	try {
+		const {
+			question_text,
+			answer_format,
+			correct_answer,
+			distractors,
+			topic_id,
+			difficulty_id,
+			explanation,
+			is_llm_generated = false,
+		} = question;
 
-    const distractorsJson = Array.isArray(distractors)
-      ? JSON.stringify(distractors)
-      : JSON.stringify([distractors]);
+		const distractorsJson = Array.isArray(distractors)
+			? JSON.stringify(distractors)
+			: JSON.stringify([distractors]);
 
-    const [result] = await db.execute(
-      `INSERT INTO Questions (
+		const [result] = await db.execute(
+			`INSERT INTO Questions (
         question_text,
         answer_format,
         correct_answer,
-        distractorsJson,
+        distractors,
         topic_id,
         difficulty_id,
         explanation,
@@ -30,22 +31,22 @@ const createQuestion = async (question) => {
         date_created,
         last_modified
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-      [
-        question_text,
-        answer_format,
-        correct_answer,
-        distractorsJson,
-        topic_id,
-        difficulty_id,
-        explanation,
-        is_llm_generated,
-      ]
-    );
+			[
+				question_text,
+				answer_format,
+				correct_answer,
+				distractorsJson,
+				topic_id,
+				difficulty_id,
+				explanation,
+				is_llm_generated,
+			]
+		);
 
-    return result.insertId;
-  } catch (error) {
-    throw error;
-  }
+		return result.insertId;
+	} catch (error) {
+		throw error;
+	}
 };
 
 const createQuestionsBulk = async (questions) => {
