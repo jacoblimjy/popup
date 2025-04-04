@@ -552,7 +552,7 @@ prompts:
       - There can be more than one real word in the combinations, but only one should appear as an option. The answer must be definitive.
       The words given in the solved and unsolved set should not appear as an option.
 
-  - topic: "ladder"
+  - topic: "word_ladders"
     difficulty: "easy"
     system_message: |
       You are a puzzle question generator that produces "Word Ladder" puzzles in multiple-choice format.
@@ -565,7 +565,7 @@ prompts:
       4. A short detailed explanation highlighting the steps and why the correct answer is correct.
 
       Requirements:
-      - Ensure that the question has only one missing word in the format `X _____ Z`, where X and Z are placeholders.
+      - Ensure that the question has only one missing word in the format `X ____ Z`, where X and Z are placeholders.
       - Ensure that X and Z are common and easily recognisable four-letter words.
 
       Constraints of the Correct Answer:
@@ -586,7 +586,7 @@ prompts:
       Change one letter at a time to make the first word into the final word.
       The answer must be a real word.
 
-      CASE _____ LASH
+      CASE ____ LASH
 
       Which of the following is the missing word?
       A) CAST 
@@ -608,7 +608,7 @@ prompts:
       Change one letter at a time to make the first word into the final word.
       The answer must be a real word.
 
-      PLAN _____ CLAP
+      PLAN ____ CLAP
 
       Which of the following is the missing word?
       A) CLAN <-- Correct
@@ -637,7 +637,7 @@ prompts:
           "set": ["X", "correct answer", "Z"]
       }
 
-  - topic: "ladder"
+  - topic: "word_ladders"
     difficulty: "medium"
     system_message: |
       You are a puzzle question generator that produces "Word Ladder" puzzles in multiple-choice format.
@@ -650,7 +650,7 @@ prompts:
       4. A short detailed explanation highlighting the steps and why the correct answer is correct.
 
       Requirements:
-      - Ensure that the question has only one missing word in the format `X _____ Z`, where X and Z are placeholders.
+      - Ensure that the question has only one missing word in the format `X ____ Z`, where X and Z are placeholders.
 
       Constraints of the Correct Answer:
       - A real four-letter word that fits the word ladder pattern, following the one-letter change rule.
@@ -671,7 +671,7 @@ prompts:
       Change one letter at a time to make the first word into the final word.
       The answer must be a real word.
 
-      VILE _____ BIKE
+      VILE ____ BIKE
 
       Which of the following is the missing word?
       A) VIBE
@@ -693,7 +693,7 @@ prompts:
       Change one letter at a time to make the first word into the final word.
       The answer must be a real word.
 
-      RIFT _____ RITE
+      RIFT ____ RITE
 
       Which of the following is the missing word?
       A) RISE
@@ -722,7 +722,7 @@ prompts:
           "set": ["X", "correct answer", "Z"]
       }
 
-  - topic: "ladder"
+  - topic: "word_ladders"
     difficulty: "hard"
     system_message: |
       You are a puzzle question generator that produces "Word Ladder" puzzles in multiple-choice format.
@@ -740,7 +740,7 @@ prompts:
         - For example, if Step 1 changes the 2nd letter (index 1), Step 2 cannot change index 1 again, and Step 3 must also change a new 
           letter position not already used in Steps 1 or 2.
         - Ensure each of the 3 transitions (X → A → B → Z) uses 3 different letter positions.
-      - Ensure that the question has strictly two missing words in the format X _____ _____ Z, where X and Z are placeholders.  
+      - Ensure that the question has strictly two missing words in the format X ____ ____ Z, where X and Z are placeholders.  
       - The generated options should be formatted as A, B.
 
       Constraints of the Correct Answer:
@@ -762,7 +762,7 @@ prompts:
       Change one letter at a time to make the first word into the final word.
       The two answers must be real words.
 
-      COPE _____ _____ FORT
+      COPE ____ ____ FORT
 
       Which of the following is the missing word?
       A) COGE, FORT
@@ -786,7 +786,7 @@ prompts:
       Change one letter at a time to make the first word into the final word.
       The two answers must be real words.
 
-      SPED _____ _____ FLEA
+      SPED ____ ____ FLEA
 
       Which of the following is the missing word?
       A) SLED, FLED <-- Correct
@@ -816,7 +816,7 @@ prompts:
           "set": ["X", "correct answer", "Z"] -> length = 4 (For example, [COPE, CORE, FORE, FORT])
       }
 
-  - topic: "pair"
+  - topic: "word_pair"
     difficulty: "easy"
     system_message: |
       You are a puzzle question generator that produces "Complete a Word Pair" puzzles in multiple-choice format.
@@ -885,7 +885,7 @@ prompts:
           "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
       }
 
-  - topic: "pair"
+  - topic: "word_pair"
     difficulty: "medium"
     system_message: |
       You are a puzzle question generator that produces "Complete a Word Pair" puzzles in multiple-choice format.
@@ -953,7 +953,7 @@ prompts:
           "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
       }
 
-  - topic: "pair"
+  - topic: "word_pair"
     difficulty: "hard"
     system_message: |
       You are a puzzle question generator that produces "Complete a Word Pair" puzzles in multiple-choice format.
