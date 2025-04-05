@@ -49,33 +49,123 @@ const createQuestion = async (question) => {
 };
 
 const createQuestionsBulk = async (questions) => {
-  const createdQuestions = [];
-  const errors = [];
+  try {
+    if (questions.length === 0) {
+      return {
+        successful: [],
+        failed: [],
+        totalProcessed: 0,
+        successCount: 0,
+        failureCount: 0,
+      };
+    }
 
-  for (let i = 0; i < questions.length; i++) {
-    try {
-      const questionId = await createQuestion(questions[i]);
-      createdQuestions.push({
-        index: i,
-        questionId,
+    const placeholders = [];
+    const values = [];
+    const questionIndexMap = new Map();
+
+    questions.forEach((question, index) => {
+      const {
+        question_text,
+        answer_format,
+        correct_answer,
+        distractors,
+        topic_id,
+        difficulty_id,
+        explanation,
+        is_llm_generated = false,
+      } = question;
+
+      const distractorsJson = Array.isArray(distractors)
+        ? JSON.stringify(distractors)
+        : JSON.stringify([distractors]);
+
+      placeholders.push("(?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
+      values.push(
+        question_text,
+        answer_format,
+        correct_answer,
+        distractorsJson,
+        topic_id,
+        difficulty_id,
+        explanation,
+        is_llm_generated
+      );
+
+      questionIndexMap.set(values.length / 8 - 1, index);
+    });
+
+    // Execute bulk insert
+    const query = `
+      INSERT INTO Questions (
+        question_text,
+        answer_format,
+        correct_answer,
+        distractors,
+        topic_id,
+        difficulty_id,
+        explanation,
+        is_llm_generated,
+        date_created,
+        last_modified
+      ) VALUES ${placeholders.join(", ")}
+    `;
+
+    const [result] = await db.execute(query, values);
+
+    const successful = [];
+    const insertId = result.insertId;
+
+    for (let i = 0; i < result.affectedRows; i++) {
+      const originalIndex = questionIndexMap.get(i);
+      successful.push({
+        index: originalIndex,
+        questionId: insertId + i,
         status: "success",
       });
-    } catch (error) {
-      errors.push({
-        index: i,
-        question: questions[i],
-        error: error.message,
-      });
     }
-  }
 
-  return {
-    successful: createdQuestions,
-    failed: errors,
-    totalProcessed: questions.length,
-    successCount: createdQuestions.length,
-    failureCount: errors.length,
-  };
+    return {
+      successful,
+      failed: [],
+      totalProcessed: questions.length,
+      successCount: successful.length,
+      failureCount: 0,
+    };
+  } catch (error) {
+    console.error(
+      "Bulk insert failed, falling back to individual inserts:",
+      error.message
+    );
+
+    const createdQuestions = [];
+    const errors = [];
+
+    for (let i = 0; i < questions.length; i++) {
+      try {
+        const questionId = await createQuestion(questions[i]);
+        createdQuestions.push({
+          index: i,
+          questionId,
+          status: "success",
+        });
+      } catch (error) {
+        errors.push({
+          index: i,
+          question: questions[i],
+          error: error.message,
+        });
+      }
+    }
+
+    return {
+      successful: createdQuestions,
+      failed: errors,
+      totalProcessed: questions.length,
+      successCount: createdQuestions.length,
+      failureCount: errors.length,
+    };
+  }
 };
 
 const getQuestions = async (filters = {}, limit = 10, offset = 0) => {
