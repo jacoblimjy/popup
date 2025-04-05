@@ -123,7 +123,7 @@ const convertPendingQuestionToQuestion = async (pendingQuestionId) => {
 //   }
 // };
 
-const getPendingQuestions = async (filters = {}, limit = 10, offset = 0) => {
+const getPendingQuestions = async (filters = {}, limit = 200, offset = 0) => {
   try {
     const { topic_id, difficulty_id } = filters;
     let query = "SELECT * FROM Pending_Questions";
@@ -244,9 +244,10 @@ const deletePendingQuestion = async (pendingQuestionId) => {
       throw new Error("Pending Question not found");
     }
 
-    await db.execute("DELETE FROM Pending_Questions WHERE pending_question_id = ?", [
-      pendingQuestionId,
-    ]);
+    await db.execute(
+      "DELETE FROM Pending_Questions WHERE pending_question_id = ?",
+      [pendingQuestionId]
+    );
 
     return true;
   } catch (error) {
