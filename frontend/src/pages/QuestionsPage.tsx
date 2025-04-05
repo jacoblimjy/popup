@@ -15,17 +15,24 @@ import AttemptedQuestionsApi from "../api/AttemptedQuestionsApi";
 const QuestionsPage = () => {
   const navigate = useNavigate();
   const { activeChild } = useChildrenList();
-  const { topic_id, difficulty_id } = useParams();
+  const { topic_id, difficulty_id, set_id } = useParams();
   const [questionList, setQuestionList] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [childAnswer, setChildAnswer] = useState<string>("");
   const [elapsedTime, setElapsedTime] = useState(0); // Stopwatch state
   const [totalElapsedTime, setTotalElapsedTime] = useState(0);
+  const [topicId, setTopicId] = useState<string | null>(null); 
   const totalStopwatchRef = useRef<number | null>(null); // Ref to store the interval ID
 
   useEffect(() => {
-    getQuestions();
+    if (set_id) {
+      getQuestionsBySetId();
+    }
+
+    if (topic_id && difficulty_id) {
+      getQuestionsByTopicAndDifficulty();
+    }
   }, []);
 
   useEffect(() => {
@@ -38,7 +45,7 @@ const QuestionsPage = () => {
     return () => clearInterval(timer);
   }, [currentQuestionIndex]);
 
-  const getQuestions = async () => {
+  const getQuestionsByTopicAndDifficulty = async () => {
     if (!topic_id || !difficulty_id) {
       console.error("Missing topic_id or difficulty_id");
       return;
@@ -50,7 +57,7 @@ const QuestionsPage = () => {
     setIsLoading(true);
 
     setTimeout(async () => {
-      const apiResponse = await QuestionApi.getPracticeQuestions(
+      const apiResponse = await QuestionApi.getQuestionsByTopicAndDifficulty(
         topic_id,
         difficulty_id
       );
@@ -80,6 +87,47 @@ const QuestionsPage = () => {
       startTotalStopwatch(); // Start total stopwatch after questions are set
       setIsLoading(false);
     }, 1000);
+  };
+
+  const getQuestionsBySetId = async () => {
+    if (!set_id) {
+      console.error("Missing set_id");
+      return;
+    }
+    console.log(`Call getQuestionsBySetId API with set_id: ${set_id}`);
+    setIsLoading(true);
+    setTimeout(async () => {
+      const apiResponse = await QuestionApi.getQuestionsBySetId(set_id);
+
+      const questions: Question[] = apiResponse.map((question: QuestionApiResponse) => {
+        if (!topicId) {
+          setTopicId(question.topic_id.toString());
+        }
+        return {
+          question_id: question.question_id,
+          question_text: question.question_text,
+          answer_format: question.answer_format,
+          correct_answer: question.correct_answer,
+          options: insertAnswerAtRandomIndex(
+            question.distractors,
+            question.correct_answer
+          ),
+          explanation: question.explanation,
+          topic_id: question.topic_id,
+          difficulty_id: question.difficulty_id,
+          selectedOption: null,
+          time_taken: 0,
+        };
+      });
+
+      setQuestionList(questions);
+      setCurrentQuestionIndex(0);
+      setElapsedTime(0); // Reset stopwatch
+      setTotalElapsedTime(0); // Reset total time
+      startTotalStopwatch(); // Start total stopwatch after questions are set
+      setIsLoading(false);
+    }
+    , 1000);
   };
 
   const startTotalStopwatch = () => {
@@ -140,7 +188,7 @@ const QuestionsPage = () => {
       const score = (correct_answers / total_questions * 100).toFixed(2);
       const {set_id} : CreateAttemptedSetResponse = await AttemptedSetsApi.createAttemptedSet({
         child_id: activeChild!.child_id,
-        topic_id: parseInt(topic_id || ""),
+        topic_id: parseInt(topic_id || topicId || ""),
         total_questions: total_questions,
         correct_answers: correct_answers,
         score: parseFloat(score),

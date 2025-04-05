@@ -66,6 +66,12 @@ const HistoryPage = () => {
     console.log(`Reviewing attempt ${setId}`);
     navigate(`/results/${setId}?review=true`);
   };
+
+  const handleRedoAttempt = (setId: number) => {
+    console.log(`Redoing attempt ${setId}`);
+    navigate(`/redo/${setId}`);
+  };
+
   return (
     <div className="relative h-full">
       {isLoading || isAuthLoading ? <Loader loading={isLoading || isAuthLoading} /> :
@@ -110,16 +116,24 @@ const HistoryPage = () => {
                         <p>Topic: {topicName}</p>
                         <p>Attempted On: {attempt.attempt_timestamp}</p>
                       </div>
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-1 items-center">
                         <p>
                           Score: {attempt.correct_answers}/{attempt.total_questions}
                         </p>
-                        <button
-                          onClick={() => handleReviewAttempt(attempt.set_id)}
-                          className="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none w-24"
-                        >
-                          Review
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            className="py-2 px-1 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none w-20"
+                            onClick={() => handleRedoAttempt(attempt.set_id)}
+                          >
+                            Redo
+                          </button>
+                          <button
+                            onClick={() => handleReviewAttempt(attempt.set_id)}
+                            className="py-2 px-1 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none w-20"
+                          >
+                            Review
+                          </button>
+                        </div>
                       </div>
                     </div>
                     {index != attempts.length - 1 && <hr className="border-gray-200 w-4/5 m-auto" />}

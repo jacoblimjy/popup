@@ -1,5 +1,5 @@
 import { Question } from "../types/QuestionTypes";
-import apiClient from "./ApiClient";
+import apiClient from "./apiClient";
 
 const BASE_URL = "http://localhost:8000/api/attempted_questions";
 

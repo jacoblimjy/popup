@@ -1,6 +1,6 @@
 import { Child, DetailedChild } from "../types/UserTypes";
 import { getUserId } from "../utils";
-import apiClient from "./ApiClient";
+import apiClient from "./apiClient";
 const BASE_URL = "http://localhost:8000/api/children";
 
 const createChild = async (child : Child) => {

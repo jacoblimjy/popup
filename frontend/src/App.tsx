@@ -26,6 +26,7 @@ function App() {
     { path: '/analytics', element: <AnalyticsPage /> },
     { path: '/admin', element: <AdminPage /> },
     { path: '/practice/:topic_id/:difficulty_id', element: <QuestionsPage /> },
+    { path: '/redo/:set_id', element: <QuestionsPage /> },
     { path: '/results/:set_id', element: <ResultsPage /> },
   ];
 
