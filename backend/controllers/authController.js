@@ -3,95 +3,79 @@ const db = require("../db");
 const authService = require("../services/authService");
 const { createChildrenBatch } = require("../services/childrenService");
 const { ROLES } = require("../config/roles");
+const { asyncHandler, ApiError } = require("../utils/errorHandler");
 
-const signup = async (req, res) => {
+const signup = asyncHandler(async (req, res) => {
+  const { username, email, children, password } = req.body;
+
+  if (!username || !email || !password) {
+    throw new ApiError(400, "Username, email, and password are required");
+  }
+
+  const [existingUsers] = await db.execute(
+    "SELECT * FROM Users WHERE email = ?",
+    [email]
+  );
+
+  if (existingUsers.length > 0) {
+    throw new ApiError(400, "Email already registered");
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const [result] = await db.execute(
+    "INSERT INTO Users (username, email, password_hash, role_id, date_created) VALUES (?, ?, ?, ?, NOW())",
+    [username, email, hashedPassword, ROLES.PARENT]
+  );
+
+  if (children && children.length > 0) {
+    await createChildrenBatch(result.insertId, children);
+  }
+
+  const [users] = await db.execute("SELECT * FROM Users WHERE user_id = ?", [
+    result.insertId,
+  ]);
+
+  const user = users[0];
+  const token = authService.generateToken(user);
+
+  res.status(201).json({
+    success: true,
+    message: "User created successfully",
+    userId: result.insertId,
+    username,
+    email,
+    token,
+  });
+});
+
+const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    throw new ApiError(400, "Email and password are required");
+  }
+
   try {
-    const { username, email, children, password } = req.body;
+    const userData = await authService.loginUser(email, password);
 
-    if (!username || !email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Username, email, and password are required" });
-    }
-
-    const [existingUsers] = await db.execute(
-      "SELECT * FROM Users WHERE email = ?",
-      [email]
-    );
-
-    if (existingUsers.length > 0) {
-      return res.status(400).json({ message: "Email already registered" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const [result] = await db.execute(
-      "INSERT INTO Users (username, email, password_hash, role_id, date_created) VALUES (?, ?, ?, ?, NOW())",
-      [username, email, hashedPassword, ROLES.PARENT]
-    );
-
-    if (children && children.length > 0) {
-      await createChildrenBatch(result.insertId, children);
-    }
-
-    const [users] = await db.execute("SELECT * FROM Users WHERE user_id = ?", [
-      result.insertId,
-    ]);
-
-    const user = users[0];
-    const token = authService.generateToken(user);
-
-    res.status(201).json({
-      message: "User created successfully",
-      userId: result.insertId,
-      username,
-      email,
-      token,
+    res.json({
+      success: true,
+      message: "Login successful",
+      ...userData,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+    throw new ApiError(401, error.message);
   }
-};
+});
 
-const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
-    }
-
-    try {
-      const userData = await authService.loginUser(email, password);
-
-      res.json({
-        message: "Login successful",
-        ...userData,
-      });
-    } catch (error) {
-      return res.status(401).json({ message: error.message });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-const refreshToken = (req, res) => {
-  try {
-    const token = authService.refreshToken(req.user);
-    res.json({ token });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+const refreshToken = asyncHandler(async (req, res) => {
+  const token = authService.refreshToken(req.user);
+  res.json({
+    success: true,
+    token,
+  });
+});
 
 module.exports = {
   signup,
