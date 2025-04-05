@@ -50,6 +50,19 @@ const getQuestions = async (req, res) => {
       filters.difficulty_id = parseInt(req.query.difficulty_id);
     }
 
+    // Add child_id to filters if provided to exclude already seen questions
+    if (req.query.child_id && !isNaN(parseInt(req.query.child_id))) {
+      filters.child_id = parseInt(req.query.child_id);
+    }
+
+    // Add exclude_seen parameter (true/false)
+    if (req.query.exclude_seen === "true") {
+      filters.exclude_seen = true;
+    }
+
+    // Add recycle parameter (true/false) to control recycling of questions
+    filters.recycle = req.query.recycle !== "false"; // Default to true if not explicitly set to false
+
     const questions = await questionService.getQuestions(
       filters,
       limit,
@@ -101,7 +114,7 @@ const updateQuestion = async (req, res) => {
       "distractors",
       "topic_id",
       "difficulty_id",
-      "explanation"
+      "explanation",
     ];
     const missingFields = requiredFields.filter((field) => !req.body[field]);
 

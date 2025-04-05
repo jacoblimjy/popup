@@ -113,16 +113,6 @@ const convertPendingQuestionToQuestion = async (pendingQuestionId) => {
   }
 };
 
-// Parsing is not required because it is already type Object when retrieved from db
-// const parseDistractors = (distractor) => {
-//   if (!distractor) return [];
-//   try {
-//     return JSON.parse(distractor);
-//   } catch (error) {
-//     return [];
-//   }
-// };
-
 const getPendingQuestions = async (filters = {}, limit = 200, offset = 0) => {
   try {
     const { topic_id, difficulty_id } = filters;
