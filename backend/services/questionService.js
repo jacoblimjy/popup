@@ -78,7 +78,7 @@ const createQuestionsBulk = async (questions) => {
   };
 };
 
-// Parsing is not required because the distractors are already in Object type when retrieved from db 
+// Parsing is not required because the distractors are already in Object type when retrieved from db
 // const parseDistractors = (distractor) => {
 //   if (!distractor) return [];
 //   try {
@@ -114,7 +114,27 @@ const getQuestions = async (filters = {}, limit = 10, offset = 0) => {
     const [questions] = await db.execute(query, params);
 
     return questions;
+  } catch (error) {
+    throw error;
+  }
+};
 
+const getRedoQuestions = async (setId) => {
+  try {
+    // Fetch questions directly by joining Attempted_Questions and Questions tables
+    const [questions] = await db.execute(
+      `SELECT q.* 
+        FROM Questions q
+        INNER JOIN Attempted_Questions aq ON q.question_id = aq.question_id
+        WHERE aq.set_id = ?`,
+      [setId]
+    );
+
+    if (questions.length === 0) {
+      throw new Error("No questions found for the provided set ID");
+    }
+
+    return questions;
   } catch (error) {
     throw error;
   }
@@ -224,6 +244,7 @@ module.exports = {
   createQuestion,
   createQuestionsBulk,
   getQuestions,
+  getRedoQuestions,
   getQuestionById,
   updateQuestion,
   deleteQuestion,
