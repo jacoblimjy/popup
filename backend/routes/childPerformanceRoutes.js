@@ -12,6 +12,11 @@ router.get(
   authenticateToken,
   childPerformanceController.getChildPerformanceByFilters
 );
+router.get(
+  "/overall/:child_id",
+  authenticateToken,
+  childPerformanceController.getOverallChildPerformance
+);
 router.delete(
   "/:up_id",
   authenticateToken,
