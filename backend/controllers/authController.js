@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const db = require("../db");
 const authService = require("../services/authService");
 const { createChildrenBatch } = require("../services/childrenService");
+const { ROLES } = require("../config/roles");
 
 const signup = async (req, res) => {
   try {
@@ -22,21 +23,11 @@ const signup = async (req, res) => {
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    const [roles] = await db.execute(
-      "SELECT role_id FROM Roles WHERE role_id = 1"
-    );
-
-    if (roles.length === 0) {
-      await db.execute(
-        "INSERT INTO Roles (role_id, role_name) VALUES (1, 'parent')"
-      );
-    }
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const [result] = await db.execute(
-      "INSERT INTO Users (username, email, password_hash, role_id, date_created) VALUES (?, ?, ?, 2, NOW())",
-      [username, email, hashedPassword]
+      "INSERT INTO Users (username, email, password_hash, role_id, date_created) VALUES (?, ?, ?, ?, NOW())",
+      [username, email, hashedPassword, ROLES.PARENT]
     );
 
     if (children && children.length > 0) {

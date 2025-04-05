@@ -1,19 +1,13 @@
 CREATE DATABASE IF NOT EXISTS vrc;
 USE vrc;
 
-CREATE TABLE Roles (
-    role_id INTEGER PRIMARY KEY,
-    role_name VARCHAR(255)
-);
-
 CREATE TABLE Users (
     user_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     role_id INTEGER,
     username VARCHAR(255),
     email VARCHAR(255),
     password_hash VARCHAR(255),
-    date_created TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES Roles(role_id)
+    date_created TIMESTAMP
 );
 
 CREATE TABLE Children (
@@ -177,12 +171,6 @@ DELIMITER ;
 -- Seed Tables for testing, you can comment out if not needed
 -- Its here because I need this to run after init, but docker-compose runs both at the same time, and Im lazy to write a script to run them in order
 -- TODO: Refactor this elsewhere
-
--- Seed Roles table
-INSERT INTO Roles (role_id, role_name) VALUES 
-(1, 'admin'),
-(2, 'parent'), 
-(3, 'other');
 
 -- Seed Users table
 INSERT INTO Users (username, email, password_hash, role_id, date_created) VALUES 
