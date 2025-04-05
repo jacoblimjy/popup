@@ -90,30 +90,43 @@ const HistoryPage = () => {
           </div>
           <div className="flex flex-col gap-3 mt-6 w-4/5">
             <h3 className="font-semibold">Attempt History</h3>
-            {attempts.length > 0 ? attempts.map((attempt, index) => (
-              <div key={index} className="flex flex-col gap-3">
-                <p>Attempt #{index + 1}</p>
-                <div className="flex justify-between">
-                  <div className="flex flex-col gap-1 text-sm text-gray-500">
-                    <p>Difficulty: Hard</p>
-                    <p>Topic: {topics[attempt.topic_id as keyof typeof topics]}</p>
-                    <p>Attempted On: {attempt.attempt_timestamp}</p>
+            {attempts.length > 0 ? (() => {
+              const topicCounters: { [key: string]: number } = {}; // Object to track counters for each topic
+
+              return attempts.map((attempt, index) => {
+                const topicName = topics[attempt.topic_id as keyof typeof topics];
+                if (!topicCounters[topicName]) {
+                  topicCounters[topicName] = 1; // Initialize counter for the topic
+                } else {
+                  topicCounters[topicName] += 1; // Increment counter for the topic
+                }
+
+                return (
+                  <div key={index} className="flex flex-col gap-3">
+                    <p>{topicName} #{topicCounters[topicName]}</p> {/* Unique numbering per topic */}
+                    <div className="flex justify-between">
+                      <div className="flex flex-col gap-1 text-sm text-gray-500">
+                        <p>Difficulty: Hard</p>
+                        <p>Topic: {topicName}</p>
+                        <p>Attempted On: {attempt.attempt_timestamp}</p>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <p>
+                          Score: {attempt.correct_answers}/{attempt.total_questions}
+                        </p>
+                        <button
+                          onClick={() => handleReviewAttempt(attempt.set_id)}
+                          className="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none w-24"
+                        >
+                          Review
+                        </button>
+                      </div>
+                    </div>
+                    {index != attempts.length - 1 && <hr className="border-gray-200 w-4/5 m-auto" />}
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <p>
-                      Score: {attempt.correct_answers}/{attempt.total_questions}
-                    </p>
-                    <button
-                      onClick={() => handleReviewAttempt(attempt.set_id)}
-                      className="py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none w-24"
-                    >
-                      Review
-                    </button>
-                  </div>
-                </div>
-                {index != attempts.length - 1 && <hr className="border-gray-200 w-4/5 m-auto" />}
-              </div>
-            )) :
+                );
+              });
+            })() :
               <p>No attempts yet</p>
             }
           </div>
