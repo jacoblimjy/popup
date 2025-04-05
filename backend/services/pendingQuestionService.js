@@ -80,38 +80,48 @@ const createPendingQuestionsBulk = async (questions) => {
 };
 
 const convertPendingQuestionToQuestion = async (pendingQuestionId) => {
-  try {
-    const [result] = await db.execute(
-      "SELECT * FROM Pending_Questions WHERE pending_question_id = ?",
-      [pendingQuestionId]
-    );
+	try {
+		const [result] = await db.execute(
+			"SELECT * FROM Pending_Questions WHERE pending_question_id = ?",
+			[pendingQuestionId]
+		);
 
-    if (result.length === 0) {
-      throw new Error("Pending Question not found");
-    }
-    const existingPendingQuestion = result[0];
-    // Create a new question using the questionService
-    const questionData = {
-      question_text: existingPendingQuestion.question_text,
-      answer_format: existingPendingQuestion.answer_format,
-      correct_answer: existingPendingQuestion.correct_answer,
-      distractors: existingPendingQuestion.distractors,
-      topic_id: existingPendingQuestion.topic_id,
-      difficulty_id: existingPendingQuestion.difficulty_id,
-      explanation: existingPendingQuestion.explanation,
-      is_llm_generated: existingPendingQuestion.is_llm_generated,
-    };
+		if (result.length === 0) {
+			throw new Error("Pending Question not found");
+		}
+		const existingPendingQuestion = result[0];
 
-    const questionId = await questionService.createQuestion(questionData);
+		// Fix: Parse distractors if they are stored as a JSON string; otherwise, use directly
+		let parsedDistractors;
+		if (typeof existingPendingQuestion.distractors === "string") {
+			parsedDistractors = JSON.parse(existingPendingQuestion.distractors);
+		} else {
+			parsedDistractors = existingPendingQuestion.distractors;
+		}
 
-    // Delete the pending question
-    await deletePendingQuestion(pendingQuestionId);
+		const questionData = {
+			question_text: existingPendingQuestion.question_text,
+			answer_format: existingPendingQuestion.answer_format,
+			correct_answer: existingPendingQuestion.correct_answer,
+			distractors: parsedDistractors,
+			topic_id: existingPendingQuestion.topic_id,
+			difficulty_id: existingPendingQuestion.difficulty_id,
+			explanation: existingPendingQuestion.explanation,
+			is_llm_generated: existingPendingQuestion.is_llm_generated,
+		};
 
-    return questionId;
-  } catch (error) {
-    throw error;
-  }
+		const questionId = await questionService.createQuestion(questionData);
+		await deletePendingQuestion(pendingQuestionId);
+		return questionId;
+	} catch (error) {
+		console.error(
+			`Conversion failed for question ${pendingQuestionId}:`,
+			error
+		);
+		throw new Error(`Conversion failed: ${error.message}`);
+	}
 };
+
 
 const getPendingQuestions = async (filters = {}, limit = 200, offset = 0) => {
   try {

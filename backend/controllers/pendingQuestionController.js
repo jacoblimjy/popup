@@ -2,9 +2,23 @@ const pendingQuestionService = require("../services/pendingQuestionService");
 const { asyncHandler, ApiError } = require("../utils/errorHandler");
 
 const createPendingQuestion = asyncHandler(async (req, res) => {
-  const pendingQuestionId = await pendingQuestionService.createPendingQuestion(
-    req.body
-  );
+  // Validate required fields (keeping the validation from develop branch)
+  const requiredFields = [
+    "question_text",
+    "answer_format", // Ensure this is required
+    "correct_answer",
+    "distractors",
+    "topic_id",
+    "difficulty_id",
+    "explanation",
+  ];
+
+  const missingFields = requiredFields.filter((field) => !req.body[field]);
+  if (missingFields.length > 0) {
+    throw new ApiError(400, "Missing required fields", { missingFields });
+  }
+
+  const pendingQuestionId = await pendingQuestionService.createPendingQuestion(req.body);
   res.status(201).json({
     success: true,
     pendingQuestionId,
@@ -33,9 +47,8 @@ const convertPendingQuestionToQuestion = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid pending question ID");
   }
 
-  const questionId =
-    await pendingQuestionService.convertPendingQuestionToQuestion(id);
-
+  const questionId = await pendingQuestionService.convertPendingQuestionToQuestion(id);
+  
   res.json({
     success: true,
     questionId,
@@ -44,7 +57,8 @@ const convertPendingQuestionToQuestion = asyncHandler(async (req, res) => {
 });
 
 const getPendingQuestions = asyncHandler(async (req, res) => {
-  const limit = Math.max(1, Math.min(100, parseInt(req.query.limit) || 10));
+  // Using the higher limit from develop branch (200 instead of 100)
+  const limit = Math.max(1, Math.min(200, parseInt(req.query.limit) || 200));
   const offset = Math.max(0, parseInt(req.query.offset) || 0);
 
   const filters = {};
