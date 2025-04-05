@@ -1,18 +1,38 @@
 const pendingQuestionService = require("../services/pendingQuestionService");
 
 const createPendingQuestion = async (req, res) => {
-  try {
-    const pendingQuestionId = await pendingQuestionService.createPendingQuestion(req.body);
-    res.status(201).json({
-      pendingQuestionId,
-      message: "Pending Question created successfully",
-    });
-  } catch (error) {
-    res.status(400).json({
-      message: "Failed to create pending question",
-      error: error.message,
-    });
-  }
+	try {
+		// Validate required fields
+		const requiredFields = [
+			"question_text",
+			"answer_format", // 👈 Ensure this is required
+			"correct_answer",
+			"distractors",
+			"topic_id",
+			"difficulty_id",
+			"explanation",
+		];
+
+		const missingFields = requiredFields.filter((field) => !req.body[field]);
+		if (missingFields.length > 0) {
+			return res.status(400).json({
+				message: "Missing required fields",
+				missingFields,
+			});
+		}
+
+		const pendingQuestionId =
+			await pendingQuestionService.createPendingQuestion(req.body);
+		res.status(201).json({
+			pendingQuestionId,
+			message: "Pending Question created successfully",
+		});
+	} catch (error) {
+		res.status(400).json({
+			message: "Failed to create pending question",
+			error: error.message,
+		});
+	}
 };
 
 const createPendingQuestionsBulk = async (req, res) => {
@@ -63,7 +83,7 @@ const convertPendingQuestionToQuestion = async (req, res) => {
 
 const getPendingQuestions = async (req, res) => {
   try {
-    const limit = Math.max(1, Math.min(100, parseInt(req.query.limit) || 10));
+    const limit = Math.max(1, Math.min(200, parseInt(req.query.limit) || 200));
     const offset = Math.max(0, parseInt(req.query.offset) || 0);
 
     const filters = {};

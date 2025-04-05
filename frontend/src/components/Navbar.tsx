@@ -111,12 +111,18 @@ const Navbar: React.FC = () => {
 									>
 										History
 									</Link>
-									{isAdmin && <Link
+									{/* {isAdmin && <Link
 										to="/admin"
 										className="text-gray-600 hover:text-blue-600 transition"
 									>
 										Admin
-									</Link>}
+									</Link>} */}
+									<Link
+										to="/admin"
+										className="text-gray-600 hover:text-blue-600 transition"
+									>
+										Admin
+									</Link>
 								</>
 							)}
 						</div>
@@ -282,13 +288,15 @@ const Navbar: React.FC = () => {
 							>
 								History
 							</Link>
-							{isAdmin && <Link
-								to="/admin"
-								className="block text-gray-600 hover:text-blue-600 transition"
-								onClick={() => setIsMobileMenuOpen(false)}
-							>
-								Admin
-							</Link>}
+							{isAdmin && (
+								<Link
+									to="/admin"
+									className="block text-gray-600 hover:text-blue-600 transition"
+									onClick={() => setIsMobileMenuOpen(false)}
+								>
+									Admin
+								</Link>
+							)}
 						</>
 					)}
 				</div>
