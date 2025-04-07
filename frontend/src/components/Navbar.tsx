@@ -205,6 +205,7 @@ const Navbar: React.FC = () => {
 										</div>
 										<Link
 											to="/profile"
+											onClick={() => setIsUserMenuOpen(false)}
 											className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
 										>
 											<User className="w-4 h-4" />
@@ -212,6 +213,7 @@ const Navbar: React.FC = () => {
 										</Link>
 										<Link
 											to="/manage-children"
+											onClick={() => setIsUserMenuOpen(false)}
 											className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
 										>
 											<Users className="w-4 h-4" />
