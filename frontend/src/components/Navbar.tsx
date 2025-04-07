@@ -93,7 +93,8 @@ const Navbar: React.FC = () => {
 						<div className="hidden md:flex space-x-6">
 							<Link
 								to="/courses"
-								className="text-gray-600 hover:text-blue-600 transition"
+								className={`text-gray-600 hover:text-blue-600 transition ${location.pathname === "/courses" ? "font-bold" : ""
+									}`}
 							>
 								Courses
 							</Link>
@@ -101,22 +102,27 @@ const Navbar: React.FC = () => {
 								<>
 									<Link
 										to="/analytics"
-										className="text-gray-600 hover:text-blue-600 transition"
+										className={`text-gray-600 hover:text-blue-600 transition ${location.pathname === "/analytics" ? "font-bold" : ""
+											}`}
 									>
 										Analytics
 									</Link>
 									<Link
 										to="/history"
-										className="text-gray-600 hover:text-blue-600 transition"
+										className={`text-gray-600 hover:text-blue-600 transition ${location.pathname === "/history" ? "font-bold" : ""
+											}`}
 									>
 										History
 									</Link>
-									{isAdmin && <Link
-										to="/admin"
-										className="text-gray-600 hover:text-blue-600 transition"
-									>
-										Admin
-									</Link>}
+									{isAdmin && (
+										<Link
+											to="/admin"
+											className={`text-gray-600 hover:text-blue-600 transition ${location.pathname === "/admin" ? "font-bold" : ""
+												}`}
+										>
+											Admin
+										</Link>
+									)}
 								</>
 							)}
 						</div>
