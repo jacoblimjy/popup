@@ -40,23 +40,23 @@ const HistoryPage = () => {
     try {
       setIsMoreLoading(true);
       setIsNoChildModalOpen(false);
-    
+
       if (activeChild && !fetchedPages.current.has(page)) {
         fetchedPages.current.add(page); // Mark the page as fetched
-  
+
         const child_id = activeChild.child_id;
         const attemptedSetResponse = await AttemptedSetsApi.getAttemptedSets(child_id as number, page);
-  
+
         if (attemptedSetResponse.length < 10) {
           setHasMore(false);
         }
-  
+
         const formattedResponse = attemptedSetResponse.map((attempt) => ({
           ...attempt,
           attempt_timestamp: formatDetailedDate(attempt.attempt_timestamp),
           attempted_questions: formatAttemptedQuestions(attempt.attempted_questions),
         }));
-  
+
         console.log("next page", formattedResponse);
         setAttempts(prev => [...prev, ...formattedResponse]);
       } else if (!activeChild) {
@@ -138,19 +138,19 @@ const HistoryPage = () => {
     <div className="relative h-full">
       {isLoading || isAuthLoading ? <Loader loading={isLoading || isAuthLoading} /> :
         <div className="flex flex-col items-center p-6 h-full w-full">
-          <div className="flex flex-col items-center gap-3 border border-gray-200 rounded-lg p-8 w-xl">
+          <div className="flex flex-col items-center gap-3 border border-gray-200 rounded-lg p-8 w-xl bg-white">
             <div className="size-14 rounded-full ring-2 ring-white bg-[#f1c40e] text-center text-white flex items-center justify-center">
               <p className="text-lg">{activeChild?.child_name.charAt(0)}</p>
             </div>
             <p className="text-base text-center">{activeChild?.child_name}</p>
             <hr className="border-gray-300 w-full" />
             <div className="flex gap-3 w-3/4 justify-around items-center">
-              <div className="flex flex-col">
+              <div className="flex flex-col items-center w-1/3">
                 <p className="text-base font-medium">{overallPerformance?.total_questions_completed}</p>
                 <p className="text-sm text-gray-500">Attempted</p>
               </div>
-              <div className="border-l-1 border-gray-300 h-3/4"></div>
-              <div className="flex flex-col">
+              <div className="border-l border-gray-300 h-3/4"></div>
+              <div className="flex flex-col items-center w-1/3">
                 <p className="text-base font-medium">{overallPerformance?.overall_score}%</p>
                 <p className="text-sm text-gray-500">Average Score</p>
               </div>
@@ -174,7 +174,7 @@ const HistoryPage = () => {
                 return (
                   <div
                     key={index}
-                    className="flex flex-col gap-3"
+                    className="flex flex-col gap-3 bg-white border border-gray-200 rounded-lg p-2"
                     ref={isLastElement ? lastPostElementRef : null} // Attach ref to the last element
                   >
                     <p>{topicName} #{topicCounters[topicName]}</p> {/* Unique numbering per topic */}
@@ -204,7 +204,6 @@ const HistoryPage = () => {
                         </div>
                       </div>
                     </div>
-                    {index !== attempts.length - 1 && <hr className="border-gray-200 w-4/5 m-auto" />}
                   </div>
                 );
               });
