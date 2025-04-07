@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useChildrenList } from "../hooks/useChildrenList";
 import { AttemptedSet } from "../types/AttemptTypes";
 import AttemptedSetsApi from "../api/AttemptedSetsApi";
-import { formatAttemptedQuestions, formatDetailedDate, topics } from "../utils";
+import { difficulty_levels, formatAttemptedQuestions, formatDetailedDate, topics } from "../utils";
 import Loader from "../components/Loader";
 import NoChildModal from "../components/NoChildModal";
 import { useAuth } from "../hooks/useAuth";
@@ -121,6 +121,19 @@ const HistoryPage = () => {
     navigate(`/redo/${setId}`);
   };
 
+  const getDifficultyTagCSS = (difficultyId: number) => {
+    switch (difficultyId) {
+      case 1:
+        return "bg-green-100 text-green-800";
+      case 2:
+        return "bg-yellow-100 text-yellow-800";
+      case 3:
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  }
+
   return (
     <div className="relative h-full">
       {isLoading || isAuthLoading ? <Loader loading={isLoading || isAuthLoading} /> :
@@ -167,7 +180,7 @@ const HistoryPage = () => {
                     <p>{topicName} #{topicCounters[topicName]}</p> {/* Unique numbering per topic */}
                     <div className="flex justify-between">
                       <div className="flex flex-col gap-1 text-sm text-gray-500">
-                        <p>Difficulty: Hard</p>
+                        <div>Difficulty: <span className={`${getDifficultyTagCSS(attempt.difficulty_id)} px-1 rounded`}>{difficulty_levels[attempt.difficulty_id as keyof typeof difficulty_levels]}</span></div>
                         <p>Topic: {topicName}</p>
                         <p>Attempted On: {attempt.attempt_timestamp}</p>
                       </div>

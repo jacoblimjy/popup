@@ -23,6 +23,7 @@ export interface GetAttemptedSetResponse {
   correct_answers: number;
   score: string;
   time_spent: number;
+  difficulty_id: number;
   attempt_timestamp: string;
   attempted_questions: AttemptedQuestionResponse[];
 }
@@ -35,6 +36,7 @@ export interface AttemptedSet {
   correct_answers: number;
   score: string;
   time_spent: number;
+  difficulty_id: number;
   attempt_timestamp: string;
   attempted_questions: AttemptedQuestion[];
 }

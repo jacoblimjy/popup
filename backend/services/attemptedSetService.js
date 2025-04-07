@@ -43,6 +43,7 @@ const getAttemptedSetsByFilters = async (filters = {}, page = 1, limit = 10) => 
       ats.score,
       ats.attempt_timestamp,
       ats.time_spent,
+      MAX(qs.difficulty_id) AS difficulty_id,
       JSON_ARRAYAGG(
         JSON_OBJECT(
           'aq_id', aq.aq_id,
