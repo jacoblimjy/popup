@@ -111,18 +111,12 @@ const Navbar: React.FC = () => {
 									>
 										History
 									</Link>
-									{/* {isAdmin && <Link
+									{isAdmin && <Link
 										to="/admin"
 										className="text-gray-600 hover:text-blue-600 transition"
 									>
 										Admin
-									</Link>} */}
-									<Link
-										to="/admin"
-										className="text-gray-600 hover:text-blue-600 transition"
-									>
-										Admin
-									</Link>
+									</Link>}
 								</>
 							)}
 						</div>
