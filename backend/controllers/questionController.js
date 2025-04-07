@@ -64,6 +64,24 @@ const getQuestions = async (req, res) => {
   }
 };
 
+const getRedoQuestions = async (req, res) => {
+  try {
+    const { set_id } = req.params;
+
+    if (!set_id || isNaN(set_id)) {
+      return res.status(400).json({ message: "Invalid set ID" });
+    }
+
+    const questions = await questionService.getRedoQuestions(parseInt(set_id));
+    res.json(questions);
+  } catch (error) {
+    res.status(400).json({
+      message: "Failed to fetch redo questions",
+      error: error.message,
+    });
+  }
+}
+
 const getQuestionById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -156,6 +174,7 @@ module.exports = {
   createQuestion,
   createQuestionsBulk,
   getQuestions,
+  getRedoQuestions,
   getQuestionById,
   updateQuestion,
   deleteQuestion,
