@@ -174,35 +174,31 @@ const HistoryPage = () => {
                 return (
                   <div
                     key={index}
-                    className="flex flex-col gap-3 bg-white border border-gray-200 rounded-lg p-2"
+                    className="flex lg:flex-row flex-col justify-between lg:items-center lg:gap-8 gap-3 bg-white border border-gray-200 rounded-lg p-2"
                     ref={isLastElement ? lastPostElementRef : null} // Attach ref to the last element
                   >
-                    <p>{topicName} #{topicCounters[topicName]}</p> {/* Unique numbering per topic */}
-                    <div className="flex justify-between">
-                      <div className="flex flex-col gap-1 text-sm text-gray-500">
-                        <div>Difficulty: <span className={`${getDifficultyTagCSS(attempt.difficulty_id)} px-1 rounded`}>{difficulty_levels[attempt.difficulty_id as keyof typeof difficulty_levels]}</span></div>
-                        <p>Topic: {topicName}</p>
-                        <p>Attempted On: {attempt.attempt_timestamp}</p>
+                    <div className="flex grow items-center justify-between">
+                      <div className="flex flex-col">
+                        <p><span className={`${getDifficultyTagCSS(attempt.difficulty_id)} px-1 rounded`}>{difficulty_levels[attempt.difficulty_id as keyof typeof difficulty_levels]}</span> {topicName}</p>
+                        <p className="text-sm text-gray-500">{attempt.attempt_timestamp}</p>
                       </div>
-                      <div className="flex flex-col gap-1 items-center">
-                        <p>
-                          Score: {attempt.correct_answers}/{attempt.total_questions}
-                        </p>
-                        <div className="flex gap-2">
-                          <button
-                            className="py-2 px-1 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none w-20"
-                            onClick={() => handleRedoAttempt(attempt.set_id)}
-                          >
-                            Redo
-                          </button>
-                          <button
-                            onClick={() => handleReviewAttempt(attempt.set_id)}
-                            className="py-2 px-1 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none w-20"
-                          >
-                            Review
-                          </button>
-                        </div>
+                      <div className="flex items-center justify-center text-lg border border-gray-200 rounded-lg p-2 text-center w-20 h-10">
+                        <p>{attempt.correct_answers}/{attempt.total_questions}</p>
                       </div>
+                    </div>
+                    <div className="flex gap-2 h-3/4">
+                      <button
+                        className="py-1 px-1.5 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none flex-1"
+                        onClick={() => handleRedoAttempt(attempt.set_id)}
+                      >
+                        Redo
+                      </button>
+                      <button
+                        onClick={() => handleReviewAttempt(attempt.set_id)}
+                        className="py-1 px-1.5 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none flex-1"
+                      >
+                        Review
+                      </button>
                     </div>
                   </div>
                 );
