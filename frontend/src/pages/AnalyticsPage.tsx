@@ -277,6 +277,7 @@ const AnalyticsPage = () => {
   const CustomPolarAngleTick: React.FC<CustomPolarAngleProps> = ({ x, y, payload, textAnchor }) => {
     const text = payload.value;
     // Function to split text into lines without breaking words, with a max line length of 10
+    console.log("Payload:", payload);
     const splitText = (text: string, maxLength: number) => {
       const words = text.split(" ");
       const lines: string[] = [];
@@ -303,7 +304,7 @@ const AnalyticsPage = () => {
         y={y}
         textAnchor={textAnchor}
         fill="#666"
-        fontSize={12}
+        className="md:text-sm text-[10px]"
       >
         {lines.map((line, index) => (
           <tspan key={index} x={x} dy={index === 0 ? 0 : 12}>
@@ -402,10 +403,10 @@ const AnalyticsPage = () => {
               </div>
               <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px] bg-white">
                 <p className="font-medium">Questions Attempted</p>
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart margin={{ left: 100, right: 100 }} data={questionsCompletedData}>
+                <ResponsiveContainer width="100%" height="80%">
+                  <RadarChart margin={{left: 10, right: 10}} data={questionsCompletedData} outerRadius={80}>
                     <PolarGrid />
-                    <PolarAngleAxis dataKey="name" tick={(props) => <CustomPolarAngleTick {...props} />} />
+                    <PolarAngleAxis dataKey="name" tick={(props) => <CustomPolarAngleTick {...props} />}/>
                     <PolarRadiusAxis domain={[0, getMaxAttemptedQuestions()]} />
                     <Tooltip />
                     <Radar dataKey="questions" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
