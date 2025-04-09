@@ -232,9 +232,9 @@ const Navbar: React.FC = () => {
 						</div>
 					) : (
 						// If not authenticated
-						<div className="hidden md:flex items-center gap-4 ml-auto pr-6">
+						<div className="flex items-center gap-4 ml-auto pr-6">
 							<button
-								className="py-2 px-4 inline-flex justify-center items-center text-sm font-medium rounded-lg border border-transparent bg-[#f1c40e] text-white hover:bg-[#e7c53b] focus:outline-none"
+								className="md:inline-flex hidden py-2 px-4 justify-center items-center text-sm font-medium rounded-lg border border-transparent bg-[#f1c40e] text-white hover:bg-[#e7c53b] focus:outline-none"
 								onClick={() => {
 									navigate("/signup");
 								}}

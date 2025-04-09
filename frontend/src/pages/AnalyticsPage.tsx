@@ -277,7 +277,6 @@ const AnalyticsPage = () => {
   const CustomPolarAngleTick: React.FC<CustomPolarAngleProps> = ({ x, y, payload, textAnchor }) => {
     const text = payload.value;
     // Function to split text into lines without breaking words, with a max line length of 10
-    console.log("Payload:", payload);
     const splitText = (text: string, maxLength: number) => {
       const words = text.split(" ");
       const lines: string[] = [];
