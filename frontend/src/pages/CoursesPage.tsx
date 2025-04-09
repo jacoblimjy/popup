@@ -17,7 +17,7 @@ const CoursesPage = () => {
             setIsNoChildModalOpen(true);
             return;
         }
-        
+
         if (chosenTopic && difficulty) {
             navigate(`/practice/${chosenTopic}/${difficulty}/`);
         }
@@ -40,7 +40,7 @@ const CoursesPage = () => {
     }
 
     return (
-        <div className="flex flex-grow flex-col items-center justify-center bg-white p-6">
+        <div className="flex flex-grow flex-col items-center justify-center p-6">
             <h1 className="text-4xl font-bold text-center">
                 Choose your Topic and Difficulty
             </h1>
@@ -53,7 +53,7 @@ const CoursesPage = () => {
                 Recommended for you: Word Ladders — Medium
             </p>
 
-            <div className="bg-gray-100 p-10 mt-12 rounded-lg w-[600px] h-[300px] flex flex-col justify-between">
+            <div className="bg-gray-100 p-10 mt-12 rounded-lg w-[600px] h-[300px] flex flex-col justify-between ">
                 <div className="grid grid-cols-2 gap-4">
                     {Object.entries(topics).map(([key, topic]) => (
                         <button key={key} className={`py-2 px-2 rounded-lg text-white text-center transition-all ${chosenTopic === key ? "bg-yellow-600" : "bg-yellow-400 hover:bg-yellow-600"} border-4 ${chosenTopic === key ? "border-black" : "border-transparent"}`}
@@ -93,7 +93,7 @@ const CoursesPage = () => {
                 disabled={!chosenTopic || !difficulty}> Start Practice
             </button>
 
-            <NoChildModal isOpen={isNoChildModalOpen} onClose={() => {setIsNoChildModalOpen(false)}}/>
+            <NoChildModal isOpen={isNoChildModalOpen} onClose={() => { setIsNoChildModalOpen(false) }} />
         </div>
     )
 }
