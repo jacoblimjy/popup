@@ -52,7 +52,7 @@ const CoursesPage = () => {
         Recommended for you: Word Ladders — Medium
       </p>
 
-      <div className="bg-gray-100 mt-12 rounded-lg flex flex-col lg:px-0 p-2">
+      <div className="bg-gray-100 mt-12 rounded-lg flex flex-col lg:px-0 p-2 pb-8">
         <div className="grid md:grid-cols-2 gap-4 m-6">
           {Object.entries(topics).map(([key, topic]) => (
             <button key={key} className={`py-2 px-2 rounded-lg text-white text-center transition-all ${chosenTopic === key ? "bg-yellow-600" : "bg-yellow-400 hover:bg-yellow-600"} border-4 ${chosenTopic === key ? "border-black" : "border-transparent"}`}
@@ -64,7 +64,7 @@ const CoursesPage = () => {
 
         <div className="mt-6 flex md:flex-row flex-col items-center md:gap-8 gap-2 justify-center">
           <h3 className="text-base">Difficulty Level:</h3>
-          <div className="flex md:gap-10 gap-2">
+          <div className="flex md:gap-7 gap-2">
             {Object.entries(difficulty_levels).map(([key, level]) => (
               <button key={key} className={`md:w-22 w-18 md:text-[16px] text-[12px] py-3 px-2 rounded-lg text-white text-center transition-all ${difficulty === key
                 ? level === "Easy"
