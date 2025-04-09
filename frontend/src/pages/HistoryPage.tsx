@@ -138,13 +138,13 @@ const HistoryPage = () => {
     <div className="relative h-full">
       {isLoading || isAuthLoading ? <Loader loading={isLoading || isAuthLoading} /> :
         <div className="flex flex-col items-center p-6 h-full w-full">
-          <div className="flex flex-col items-center gap-3 border border-gray-200 rounded-lg p-8 w-xl bg-white">
+          <div className="flex flex-col items-center gap-3 border border-gray-200 rounded-lg p-8 w-xl bg-white max-w-screen">
             <div className="size-14 rounded-full ring-2 ring-white bg-[#f1c40e] text-center text-white flex items-center justify-center">
               <p className="text-lg">{activeChild?.child_name.charAt(0)}</p>
             </div>
             <p className="text-base text-center">{activeChild?.child_name}</p>
             <hr className="border-gray-300 w-full" />
-            <div className="flex gap-3 w-3/4 justify-around items-center">
+            <div className="flex gap-3 lg:w-3/4 w-full justify-around items-center">
               <div className="flex flex-col items-center w-1/3">
                 <p className="text-base font-medium">{overallPerformance?.total_questions_completed}</p>
                 <p className="text-sm text-gray-500">Attempted</p>

@@ -131,7 +131,7 @@ const Navbar: React.FC = () => {
 					{/* Right Section:
               Keep child & user menus visible on mobile. */}
 					{isAuthenticated ? (
-						<div className="flex items-center space-x-3 ml-auto pr-6">
+						<div className="flex items-center space-x-3 ml-auto md:pr-6">
 							{/* Children Dropdown */}
 							<div className="relative" ref={childrenMenuRef}>
 								{childrenList && childrenList.length > 0 ? (
