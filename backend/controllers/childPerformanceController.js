@@ -102,6 +102,51 @@ const getOverallChildPerformance = async (req, res) => {
   }
 };
 
+const getChildPerformanceRecommendation = async (req, res) => {
+  try {
+    const { child_id } = req.params;
+
+    if (!child_id) {
+      return res.status(400).json({
+        message: "child_id is required",
+      });
+    }
+
+    const child = await childrenService.getChildById(child_id);
+    if (!child) {
+      return res.status(404).json({
+        message: "Child not found",
+      });
+    }
+
+    const recommendation =
+      await childPerformanceService.getChildPerformanceRecommendation(child_id);
+
+    if (!recommendation) {
+      return res.json({
+        success: true,
+        data: {
+          child_id: parseInt(child_id),
+          recommended_topic: null,
+          recommended_difficulty_level: null,
+        },
+      });
+    }
+
+    res.json({
+      success: true,
+      data: recommendation,
+    });
+  } catch (error) {
+    console.error("Error fetching child performance recommendation: ", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+}
+
 const deleteChildPerformanceByUpId = async (req, res) => {
   try {
     const { up_id } = req.params;
@@ -145,6 +190,7 @@ const deleteChildPerformanceByChildId = async (req, res) => {
 
 module.exports = {
   getChildPerformanceByFilters,
+  getChildPerformanceRecommendation,
   getOverallChildPerformance,
   deleteChildPerformanceByUpId,
   deleteChildPerformanceByChildId,
