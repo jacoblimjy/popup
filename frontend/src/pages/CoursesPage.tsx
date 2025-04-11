@@ -25,20 +25,15 @@ const CoursesPage = () => {
 
     try {
       const child_id = activeChild.child_id;
-      console.log("Fetching recommendation for child_id:", child_id);
       const response = await ChildPerformanceApi.getChildPerformanceRecommendation(child_id);
-      console.log("Recommendation response:", response);
       if (!response.success) return;
       const data = response.data;
       if (data.topic_id && data.difficulty_id) {
-        console.log("Fetched recommendation data:", data);
         setRecommendation({
           topic_id: data.topic_id,
           difficulty_id: data.difficulty_id
         });
       }
-
-      console.log(recommendation)
     } catch (error) {
       console.error("Error fetching recommendation:", error);
     }
