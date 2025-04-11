@@ -125,11 +125,7 @@ const getChildPerformanceRecommendation = async (req, res) => {
     if (!recommendation) {
       return res.json({
         success: true,
-        data: {
-          child_id: parseInt(child_id),
-          recommended_topic: null,
-          recommended_difficulty_level: null,
-        },
+        data: {},
       });
     }
 

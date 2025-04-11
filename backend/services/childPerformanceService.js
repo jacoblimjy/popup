@@ -82,7 +82,7 @@ const getChildPerformanceRecommendation = async (child_id) => {
     [child_id]
   );
 
-  return performance;
+  return performance.length > 0 ? performance[0] : null;
 
 }
 

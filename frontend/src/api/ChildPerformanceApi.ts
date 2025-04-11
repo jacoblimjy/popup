@@ -20,7 +20,17 @@ const getOverallPerformanceByChildId = async (child_id: number) => {
   });
 }
 
+const getChildPerformanceRecommendation = async (child_id: number) => {
+  return apiClient(BASE_URL + `/recommendation/${child_id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
 export default {
   getChildPerformanceByChildId,
-  getOverallPerformanceByChildId
+  getOverallPerformanceByChildId,
+  getChildPerformanceRecommendation,
 }
