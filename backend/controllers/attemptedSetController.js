@@ -1,134 +1,100 @@
 const attemptedSetService = require("../services/attemptedSetService");
 const childrenService = require("../services/childrenService");
+const { asyncHandler, ApiError } = require("../utils/errorHandler");
 
-const createAttemptedSet = async (req, res) => {
-  try {
-    const attemptedSet = req.body;
-    const set_id = await attemptedSetService.createAttemptedSet(attemptedSet);
-    res.status(201).json({
-      set_id,
-      message: "Attempted set created successfully",
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+const createAttemptedSet = asyncHandler(async (req, res) => {
+  const attemptedSet = req.body;
+  const set_id = await attemptedSetService.createAttemptedSet(attemptedSet);
+  res.status(201).json({
+    success: true,
+    set_id,
+    message: "Attempted set created successfully",
+  });
+});
+
+const updateAttemptedSet = asyncHandler(async (req, res) => {
+  const updates = req.body;
+  const { id } = req.params;
+
+  const attemptedSet = await attemptedSetService.getAttemptedSetById(id);
+
+  if (!attemptedSet || attemptedSet.length < 1) {
+    throw new ApiError(404, "Attempted set not found");
   }
-};
 
-const updateAttemptedSet = async (req, res) => {
-  try {
+  await attemptedSetService.updateAttemptedSet(id, updates);
+  res.json({
+    success: true,
+    message: "Attempted set updated successfully",
+  });
+});
 
-    const updates = req.body;
-    const { id } = req.params;
+const getAttemptedSetsByFilters = asyncHandler(async (req, res) => {
+  const { child_id, topic_id, set_id, difficulty_id } = req.query;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
 
-    const attemptedSet = await attemptedSetService.getAttemptedSetById(req.params.id);
+  const filters = { child_id, topic_id, set_id, difficulty_id };
 
-    // TODO: Check if exists, return 404 if not
-    if (attemptedSet.length < 1) {
-      return res.status(404).json({
-        message: "Attempted set not found",
-      });
-    }
+  Object.keys(filters).forEach((key) => {
+    if (!filters[key]) delete filters[key];
+  });
 
-    await attemptedSetService.updateAttemptedSet(id, updates);
-    res.json({
-      message: "Attempted set updated successfully",
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+  const attemptedSets = await attemptedSetService.getAttemptedSetsByFilters(
+    filters,
+    page,
+    limit
+  );
+  res.status(200).json({
+    success: true,
+    data: attemptedSets,
+  });
+});
+
+const getAttemptedSetBySetId = asyncHandler(async (req, res) => {
+  const { set_id } = req.params;
+  const attemptedSet = await attemptedSetService.getAttemptedSetById(set_id);
+
+  if (!attemptedSet) {
+    throw new ApiError(404, "Attempted set not found");
   }
-};
 
-const getAttemptedSetsByFilters = async (req, res) => {
-  try {
-    const { child_id, topic_id, set_id, difficulty_id } = req.query;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+  res.status(200).json({
+    success: true,
+    data: attemptedSet,
+  });
+});
 
-    const filters = { child_id, topic_id, set_id, difficulty_id };
+const deleteAttemptedSetById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
 
-    Object.keys(filters).forEach(key => {
-      if (!filters[key]) delete filters[key];
-    });
+  const attemptedSet = await attemptedSetService.getAttemptedSetById(id);
 
-    const attemptedSets = await attemptedSetService.getAttemptedSetsByFilters(filters, page, limit);
-    res.status(200).json(attemptedSets);
-
-  } catch (error) {
-    console.error("Error fetching attempted sets with questions:", error.message);
-    res.status(500).json({ message: "Failed to fetch attempted sets with questions" });
+  if (!attemptedSet || attemptedSet.length < 1) {
+    throw new ApiError(404, "Attempted set not found");
   }
-};
 
-const getAttemptedSetBySetId = async (req, res) => {
-  try {
-    const {set_id} = req.params;
-    const attemptedSet = await attemptedSetService.getAttemptedSetById(set_id);
-    res.status(200).json(attemptedSet);
-  } catch (error) {
-    console.error("Error fetching attempted set with questions:", error.message);
-    res.status(500).json({ message: "Failed to fetch attempted set with questions" });
+  await attemptedSetService.deleteAttemptedSetById(id);
+  res.json({
+    success: true,
+    message: "Attempted set deleted successfully",
+  });
+});
+
+const deleteAttemptedSetsByChildId = asyncHandler(async (req, res) => {
+  const { child_id } = req.params;
+
+  const child = await childrenService.getChildById(child_id);
+  if (!child || child.length < 1) {
+    throw new ApiError(404, "Child not found");
   }
-};
 
-const deleteAttemptedSetById = async (req, res) => {
-  try {
-
-    const { id } = req.params;
-
-    const attemptedSet = await attemptedSetService.getAttemptedSetById(req.params.id);
-
-    // TODO: Check if exists, return 404 if not
-    if (attemptedSet.length < 1) {
-        return res.status(404).json({
-          message: "Attempted set not found",
-        });
-    }
-
-    await attemptedSetService.deleteAttemptedSetById(id);
-    res.json({
-      message: "Attempted set deleted successfully",
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
-  }
-};
-
-const deleteAttemptedSetsByChildId = async (req, res) => {
-  try {
-    const { child_id } = req.params;
-
-    // Check if Child exists, return 404 if not
-    const child = await childrenService.getChildById(child_id);
-    if (child.length < 1) {
-      return res.status(404).json({
-        message: "Child not found",
-      });
-    }
-
-    await attemptedSetService.deleteAttemptedSetsByChildId(child_id);
-    res.json({
-      message: "All attempted sets for the child deleted successfully",
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
-  }
-};
+  await attemptedSetService.deleteAttemptedSetsByChildId(child_id);
+  res.json({
+    success: true,
+    message: "All attempted sets for the child deleted successfully",
+  });
+});
 
 module.exports = {
   createAttemptedSet,
