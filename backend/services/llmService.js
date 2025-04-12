@@ -3,6 +3,10 @@ const db = require("../db");
 const yaml = require("js-yaml");
 const fs = require("fs");
 const path = require("path");
+const { exec } = require("child_process");
+const util = require("util");
+const execPromise = util.promisify(exec);
+const os = require("os");
 const pendingQuestionService = require("./pendingQuestionService");
 const { WordNet } = require("natural");
 const {
@@ -52,6 +56,178 @@ function calculateTextSimilarity(text1, text2) {
 
   // Jaccard similarity = size of intersection / size of union
   return union.size === 0 ? 0 : intersection.size / union.size;
+}
+
+/**
+ * Execute a Python evaluator script with the given input data
+ * @param {string} scriptName - Name of the Python script without extension
+ * @param {Object} inputData - Data to pass to the script
+ * @returns {Promise<Object>} - Processed result from the script
+ */
+async function runPythonEvaluator(scriptName, inputData) {
+  try {
+    // Create temporary input file
+    const tempFile = path.join(os.tmpdir(), `${Date.now()}_input.json`);
+    fs.writeFileSync(tempFile, JSON.stringify(inputData));
+
+    // Path to Python script
+    const scriptPath = path.join(__dirname, "..", "utils", `${scriptName}.py`);
+
+    // Execute Python script with input file
+    const command = `python ${scriptPath} ${tempFile}`;
+    console.log(`Executing: ${command}`);
+
+    const { stdout, stderr } = await execPromise(command);
+
+    // Clean up temp file
+    fs.unlinkSync(tempFile);
+
+    if (stderr && !stderr.includes("Warning")) {
+      console.error(`Python script error (${scriptName}.py):`, stderr);
+      throw new Error(`Error in Python evaluator: ${stderr}`);
+    }
+
+    // Parse and return the result
+    return JSON.parse(stdout);
+  } catch (error) {
+    console.error(`Failed to run Python evaluator ${scriptName}.py:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Extract anagram data from question
+ * @param {Object} question - Question object
+ * @returns {Object} - Data needed for anagram.py
+ */
+function extractAnagramData(question) {
+  // Find the capitalized word in the question text
+  const capitalWordMatch = question.question_text.match(/\b([A-Z]{6,})\b/);
+  const capitalizedWord = capitalWordMatch ? capitalWordMatch[1] : null;
+
+  if (!capitalizedWord) {
+    throw new Error("No capitalized word found in anagram question");
+  }
+
+  return {
+    question_text: question.question_text,
+    correct_answer: question.correct_answer,
+    distractors: question.distractors,
+    explanation: question.explanation,
+    answer_format: question.answer_format,
+  };
+}
+
+/**
+ * Extract word ladder data from question
+ * @param {Object} question - Question object
+ * @returns {Object} - Data for ladder_eval.py
+ */
+function extractWordLadderData(question) {
+  // This is highly dependent on question format
+  // Example implementation for "WORD ____ LAST" format:
+  let set = [];
+
+  const match = question.question_text.match(
+    /([A-Z]{4})\s+(?:____|\?)\s+([A-Z]{4})/i
+  );
+  if (match) {
+    set = [
+      match[1].toUpperCase(),
+      question.correct_answer.toUpperCase(),
+      match[2].toUpperCase(),
+    ];
+  } else {
+    // Try alternative format: "FIRST → ____ → LAST"
+    const arrowMatch = question.question_text.match(
+      /([A-Z]{4})\s*→\s*(?:____|\?)\s*→\s*([A-Z]{4})/i
+    );
+    if (arrowMatch) {
+      set = [
+        arrowMatch[1].toUpperCase(),
+        question.correct_answer.toUpperCase(),
+        arrowMatch[2].toUpperCase(),
+      ];
+    }
+  }
+
+  if (set.length !== 3) {
+    throw new Error("Could not extract word ladder set from question");
+  }
+
+  return { set };
+}
+
+/**
+ * Extract word pair data from question
+ * @param {Object} question - Question object
+ * @returns {Object} - Data for pair_eval.py
+ */
+function extractWordPairData(question) {
+  // Format: "first1 second1   first2 second2   first3 ?"
+  const questionText = question.question_text;
+  const words = questionText
+    .split(/\s+/)
+    .filter((word) => word && word !== "?" && word !== "(?)");
+
+  if (words.length < 5) {
+    throw new Error("Not enough words in word pair question");
+  }
+
+  // Extract the pairs
+  const set = [];
+  for (let i = 0; i < words.length - 1; i += 2) {
+    if (i + 1 < words.length) {
+      set.push(words[i]);
+      if (i === words.length - 2) {
+        // Last pair, add correct answer
+        set.push(question.correct_answer);
+      } else {
+        set.push(words[i + 1]);
+      }
+    }
+  }
+
+  if (set.length !== 6) {
+    throw new Error(`Invalid word pair set length: ${set.length}`);
+  }
+
+  return { set };
+}
+
+/**
+ * Extract rule data from question
+ * @param {Object} question - Question object
+ * @returns {Object} - Data for rule_eval.py
+ */
+function extractRuleData(question) {
+  // Look for solved and unsolved sets
+  // Example: "cat (cot) dog       pen (?) rat"
+  const text = question.question_text;
+
+  // Extract solved set
+  const solvedMatch = text.match(/([a-z]+)\s+\(([a-z]+)\)\s+([a-z]+)/i);
+  if (!solvedMatch) {
+    throw new Error("Could not extract solved set from rule question");
+  }
+  const solvedSet = [solvedMatch[1], solvedMatch[2], solvedMatch[3]];
+
+  // Extract unsolved set
+  const unsolvedMatch = text.match(/([a-z]+)\s+\(\?\)\s+([a-z]+)/i);
+  if (!unsolvedMatch) {
+    throw new Error("Could not extract unsolved set from rule question");
+  }
+
+  const unsolvedSet = [
+    unsolvedMatch[1],
+    question.correct_answer,
+    unsolvedMatch[2],
+  ];
+
+  return {
+    solved_set: solvedSet,
+    unsolved_set: unsolvedSet,
+  };
 }
 
 /**
@@ -228,6 +404,9 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
   const skippedQuestions = []; // Track skipped questions for reporting
   const wordnet = new WordNet();
 
+  // Get the topic type based on I
+  const topicType = TOPIC_MAPPINGS[topic_id];
+
   // Helper function to check if a word exists using WordNet
   const wordExists = async (word) => {
     return new Promise((resolve) => {
@@ -238,7 +417,7 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
   };
 
   console.log(
-    `Processing ${questions.length} generated questions for topic ID ${topic_id}, difficulty ID ${difficulty_id}`
+    `Processing ${questions.length} generated questions for topic ID ${topic_id} (${topicType}), difficulty ID ${difficulty_id}`
   );
 
   // Validate each question
@@ -276,33 +455,69 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
         continue;
       }
 
-      // 3. Validate the correct answer is a real word/phrase
-      const words = question.correct_answer.split(/\s+/);
-      let allWordsValid = true;
+      // 3. Validate the correct answer is a real word/phrase (if not a multiple-choice letter)
+      if (!question.correct_answer.match(/^[A-E]$/)) {
+        const words = question.correct_answer.split(/\s+/);
+        let allWordsValid = true;
 
-      for (const word of words) {
-        // Skip very short words, punctuation, numbers, etc.
-        if (word.length <= 1 || !isNaN(word) || /[^\w]/.test(word)) continue;
+        for (const word of words) {
+          // Skip very short words, punctuation, numbers, etc.
+          if (word.length <= 1 || !isNaN(word) || /[^\w]/.test(word)) continue;
 
-        const isValid = await wordExists(word);
-        if (!isValid) {
-          validationInfo.status = "rejected";
-          validationInfo.reason = `Invalid word detected in answer: "${word}"`;
-          allWordsValid = false;
-          break;
+          const isValid = await wordExists(word);
+          if (!isValid) {
+            validationInfo.status = "rejected";
+            validationInfo.reason = `Invalid word detected in answer: "${word}"`;
+            allWordsValid = false;
+            break;
+          }
+        }
+
+        if (!allWordsValid) {
+          skippedQuestions.push(validationInfo);
+          console.warn(`Skipping question - invalid word detected in answer`);
+          continue;
         }
       }
 
-      if (!allWordsValid) {
+      // 4. Process based on question type
+      let processedQuestion = { ...question };
+
+      try {
+        if (topicType === "anagram") {
+          // Process anagram with Python script
+          const anagramData = extractAnagramData(question);
+          processedQuestion = await runPythonEvaluator("anagram", anagramData);
+          console.log("Anagram question processed successfully");
+        } else if (topicType === "word_ladders") {
+          // Validate word ladder with Python script
+          const ladderData = extractWordLadderData(question);
+          await runPythonEvaluator("ladder_eval", ladderData);
+          console.log("Word ladder validated successfully");
+        } else if (topicType === "word_pair") {
+          // Validate word pair with Python script
+          const pairData = extractWordPairData(question);
+          await runPythonEvaluator("pair_eval", pairData);
+          console.log("Word pair validated successfully");
+        } else if (topicType === "rule") {
+          // Validate rule with Python script
+          const ruleData = extractRuleData(question);
+          await runPythonEvaluator("rule_eval", ruleData);
+          console.log("Rule question validated successfully");
+        }
+      } catch (evalError) {
+        console.error(`${topicType} evaluation failed:`, evalError);
+        validationInfo.status = "rejected";
+        validationInfo.reason = `${topicType} evaluation failed: ${evalError.message}`;
         skippedQuestions.push(validationInfo);
-        console.warn(`Skipping question - invalid word detected in answer`);
+        console.warn(`Skipping question - ${topicType} evaluation failed`);
         continue;
       }
 
-      // 4. Check for duplicate questions based on answer and question similarity
+      // 5. Check for duplicate questions based on answer and question similarity
       const questionToCheck = {
-        question_text: question.question_text,
-        correct_answer: question.correct_answer,
+        question_text: processedQuestion.question_text,
+        correct_answer: processedQuestion.correct_answer,
         topic_id: topic_id,
       };
 
@@ -317,21 +532,23 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
         continue;
       }
 
-      // 5. Format the question for database insertion
+      // 6. Format the question for database insertion
       validQuestions.push({
-        question_text: question.question_text,
-        answer_format: question.answer_format || "multiple_choice",
-        correct_answer: question.correct_answer,
-        distractors: distractors,
+        question_text: processedQuestion.question_text,
+        answer_format: processedQuestion.answer_format || "multiple_choice",
+        correct_answer: processedQuestion.correct_answer,
+        distractors: Array.isArray(processedQuestion.distractors)
+          ? processedQuestion.distractors
+          : [processedQuestion.distractors],
         topic_id: topic_id,
         difficulty_id: difficulty_id,
-        explanation: question.explanation || "No explanation provided",
+        explanation: processedQuestion.explanation || "No explanation provided",
         is_llm_generated: true,
       });
 
       validationInfo.status = "accepted";
       console.log(
-        `Question validated and accepted: "${question.question_text.substring(
+        `Question validated and accepted: "${processedQuestion.question_text.substring(
           0,
           50
         )}..."`
@@ -531,6 +748,19 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
                         type: "array",
                         items: { type: "string" },
                       },
+                      // Add additional fields needed for python evaluators
+                      set: {
+                        type: "array",
+                        items: { type: "string" },
+                      },
+                      solved_set: {
+                        type: "array",
+                        items: { type: "string" },
+                      },
+                      unsolved_set: {
+                        type: "array",
+                        items: { type: "string" },
+                      },
                     },
                     required: [
                       "question_text",
@@ -539,7 +769,7 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
                       "explanation",
                       "distractors",
                     ],
-                    additionalProperties: false,
+                    additionalProperties: true,
                   },
                 },
               },
