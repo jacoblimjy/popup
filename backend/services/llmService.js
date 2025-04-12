@@ -605,7 +605,7 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
     const { maxQuestionsPerBatch } = getQuestionGenConfig();
 
     // Cap number of questions
-    const questionCount = Math.min(
+    const requestedCount = Math.min(
       Math.max(1, parseInt(num_questions)),
       maxQuestionsPerBatch
     );
@@ -615,7 +615,7 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
     const difficultyInfo = await getDifficultyInfo(difficulty_id);
 
     console.log(
-      `Generating ${questionCount} ${difficultyInfo.label} questions for topic: ${topicInfo.topic_name}`
+      `Generating ${requestedCount} ${difficultyInfo.label} questions for topic: ${topicInfo.topic_name}`
     );
 
     // 3. Get the topic and difficulty keys for the YAML prompt
@@ -641,42 +641,97 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
     // 4. Get the appropriate prompt template
     const prompt = await getPromptFromYaml(topicKey, difficultyKey);
 
-    // 5. Generate questions (either with API or mock data)
-    let rawQuestions;
+    // Track our results
+    let validQuestions = [];
+    let allSkippedQuestions = [];
+    let totalGenerated = 0;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 5; // Limit the number of attempts to prevent infinite loops
 
-    // Check if we have an API key for OpenAI
-    if (hasOpenAIAPIKey()) {
-      console.log("Using OpenAI API for question generation");
-      rawQuestions = await generateQuestionsWithOpenAI(prompt, questionCount);
-    } else {
-      console.log("Using mock data for question generation");
-      rawQuestions = await generateQuestionsMock(topicKey, questionCount);
+    // 5. Generate and validate questions in batches until we have enough or reach max attempts
+    while (validQuestions.length < requestedCount && attempts < MAX_ATTEMPTS) {
+      attempts++;
+
+      // Calculate how many more questions we need
+      const remainingCount = requestedCount - validQuestions.length;
+      // Generate more than we need to account for rejections (2x as many)
+      const batchSize = Math.min(remainingCount * 2, maxQuestionsPerBatch);
+
+      console.log(
+        `Attempt ${attempts}: Generating batch of ${batchSize} questions (need ${remainingCount} more)`
+      );
+
+      // Generate questions (either with API or mock data)
+      let rawQuestions;
+      if (hasOpenAIAPIKey()) {
+        console.log("Using OpenAI API for question generation");
+        rawQuestions = await generateQuestionsWithOpenAI(prompt, batchSize);
+      } else {
+        console.log("Using mock data for question generation");
+        rawQuestions = await generateQuestionsMock(topicKey, batchSize);
+      }
+
+      totalGenerated += rawQuestions.length;
+
+      // Validate and process questions
+      const processedQuestions = await processAndValidateQuestions(
+        rawQuestions,
+        topic_id,
+        difficulty_id
+      );
+
+      // Add valid questions to our running total
+      validQuestions = validQuestions.concat(processedQuestions.validQuestions);
+      allSkippedQuestions = allSkippedQuestions.concat(
+        processedQuestions.skippedQuestions
+      );
+
+      console.log(
+        `After attempt ${attempts}: Have ${validQuestions.length}/${requestedCount} valid questions`
+      );
+
+      // If we have enough valid questions, or we didn't get any valid questions in this batch
+      if (
+        validQuestions.length >= requestedCount ||
+        processedQuestions.validQuestions.length === 0
+      ) {
+        break;
+      }
     }
 
-    // 6. Validate and process questions
-    const processedQuestions = await processAndValidateQuestions(
-      rawQuestions,
-      topic_id,
-      difficulty_id
-    );
-
-    if (processedQuestions.validQuestions.length === 0) {
-      throw new Error("No valid questions could be generated");
+    // Trim to the requested count if we have more
+    if (validQuestions.length > requestedCount) {
+      validQuestions = validQuestions.slice(0, requestedCount);
     }
-    // 7. Save to pending questions collection
+
+    if (validQuestions.length === 0) {
+      throw new Error(
+        "No valid questions could be generated after multiple attempts"
+      );
+    }
+
+    // 6. Save to pending questions collection
     const result = await pendingQuestionService.createPendingQuestionsBulk(
-      processedQuestions.validQuestions
+      validQuestions
     );
 
     return {
       successful: result.successful,
       failed: result.failed,
-      totalRequested: questionCount,
+      totalRequested: requestedCount,
+      totalGenerated: totalGenerated,
       totalProcessed: result.totalProcessed,
       successCount: result.successCount,
       failureCount: result.failureCount,
-      validationStats: processedQuestions.stats,
-      skippedQuestions: processedQuestions.skippedQuestions,
+      validationStats: {
+        total: totalGenerated,
+        accepted: validQuestions.length,
+        rejected: allSkippedQuestions.length,
+        duplicates: allSkippedQuestions.filter((q) => q.status === "duplicate")
+          .length,
+      },
+      skippedQuestions: allSkippedQuestions,
+      attempts: attempts,
     };
   } catch (error) {
     console.error("Error generating questions:", error);
