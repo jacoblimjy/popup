@@ -1,16 +1,44 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChildrenList } from "../hooks/useChildrenList";
 import { difficulty_levels, topics } from "../utils";
 import NoChildModal from "../components/NoChildModal";
+import ChildPerformanceApi from "../api/ChildPerformanceApi";
+import { Recommendation } from "../types/ChildPerformanceTypes";
+import { Play } from "lucide-react";
 
 const CoursesPage = () => {
   const navigate = useNavigate();
-  const { childrenList } = useChildrenList();
+  const { childrenList, activeChild } = useChildrenList();
 
   const [chosenTopic, setChosenTopic] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState<string | null>(null);
   const [isNoChildModalOpen, setIsNoChildModalOpen] = useState(false);
+  const [recommendation, setRecommendation] = useState<Recommendation | null>({topic_id: 1, difficulty_id: 1});
+
+  useEffect(() => {
+    fetchRecommendation();
+  },[]);
+
+  const fetchRecommendation = async () => {
+    if (!activeChild) return;
+
+    try {
+      const child_id = activeChild.child_id;
+      const response = await ChildPerformanceApi.getChildPerformanceRecommendation(child_id);
+      if (!response.success) return;
+      const data = response.data;
+      if (data.topic_id && data.difficulty_id) {
+        setRecommendation({
+          topic_id: data.topic_id,
+          difficulty_id: data.difficulty_id
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching recommendation:", error);
+    }
+
+  }
 
   const handleStartPractice = () => {
     if (!childrenList || childrenList.length === 0) {
@@ -39,6 +67,14 @@ const CoursesPage = () => {
     setDifficulty(level);
   }
 
+  const handleStartRecommendation = () => {
+    if (recommendation) {
+      const topic = recommendation.topic_id;
+      const difficulty = recommendation.difficulty_id;
+      navigate(`/practice/${topic}/${difficulty}/`);
+    }
+  }
+
   return (
     <div className="flex flex-col items-center md:justify-center p-6 md:h-full">
       <h1 className="text-4xl font-bold text-center">
@@ -48,9 +84,18 @@ const CoursesPage = () => {
         Select a topic and difficulty level to start practising!
       </p>
 
-      <p className="md:mt-16 mt-4 text-lg text-center">
-        Recommended for you: Word Ladders — Medium
-      </p>
+      <div className="flex md:flex-row flex-col md:mt-16 mt-4 gap-2 items-center">
+        <p className="text-lg text-center">
+          Recommended for you: {topics[recommendation?.topic_id as keyof typeof topics]} — {difficulty_levels[recommendation?.difficulty_id as keyof typeof difficulty_levels]}
+        </p>
+        <button 
+          className="bg-[#f1c40e] py-1 px-4 md:rounded-full rounded-lg hover:bg-yellow-600"
+          onClick={handleStartRecommendation}
+        >
+          <Play size={16} strokeWidth={2} color="white"/>
+        </button>
+      </div>
+
 
       <div className="bg-gray-100 mt-12 rounded-lg flex flex-col lg:px-0 p-2 pb-8">
         <div className="grid md:grid-cols-2 gap-4 m-6">
