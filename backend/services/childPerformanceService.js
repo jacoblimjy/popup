@@ -67,6 +67,25 @@ const getOverallChildPerformance = async (child_id) => {
   return performance.length > 0 ? performance[0] : null;
 };
 
+const getChildPerformanceRecommendation = async (child_id) => {
+  const [performance] = await db.execute(
+    `
+    SELECT
+      child_id,
+      topic_id,
+      difficulty_id
+    FROM Child_Performance
+    WHERE child_id = ?
+    ORDER BY accuracy_score ASC, average_time_spent DESC
+    LIMIT 1
+    `,
+    [child_id]
+  );
+
+  return performance.length > 0 ? performance[0] : null;
+
+}
+
 const deleteChildPerformanceByUpId = async (up_id) => {
   const [existingPerformance] = await db.execute(
     "SELECT * FROM Child_Performance WHERE up_id = ?",
@@ -90,6 +109,7 @@ module.exports = {
   getChildPerformanceByChildIdAndTopicId,
   getChildPerformanceByChildIdTopicIdAndDifficultyLevel,
   getOverallChildPerformance,
+  getChildPerformanceRecommendation,
   deleteChildPerformanceByUpId,
   deleteChildPerformanceByChildId,
   getChildPerformanceByChildId,

@@ -1,5 +1,5 @@
 import { Attempt, CreateAttemptedSetRequest, GetAttemptedSetResponse } from "../types/AttemptTypes";
-import apiClient from "./ApiClient";
+import apiClient from "./apiClient";
 const BASE_URL = "http://localhost:8000/api/attempted_sets";
 
 const createAttemptedSet = async (attemptedSet : CreateAttemptedSetRequest) => {

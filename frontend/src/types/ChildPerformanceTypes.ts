@@ -12,3 +12,8 @@ export interface OverallPerformance {
   overall_score: number;
   average_time_per_question: number;
 }
+
+export interface Recommendation {
+  topic_id: number;
+  difficulty_id: number;
+}

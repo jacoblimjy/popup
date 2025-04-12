@@ -13,12 +13,19 @@ const formatDate = (date: string) : string => {
   return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
 }
 
-const formatDetailedDate = (date: string) : string => {
+const formatDetailedDate = (date: string): string => {
   const dateObj = new Date(date);
   const day = dateObj.getDate();
   const month = dateObj.toLocaleString('en-US', { month: 'long' });
   const year = dateObj.getFullYear();
-  const daySuffix = (day : number) => {
+  const hours = dateObj.getHours();
+  const minutes = dateObj.getMinutes();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+
+  const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+
+  const daySuffix = (day: number) => {
     if (day > 3 && day < 21) return 'th';
     switch (day % 10) {
       case 1: return 'st';
@@ -27,8 +34,9 @@ const formatDetailedDate = (date: string) : string => {
       default: return 'th';
     }
   };
-  return `${day}${daySuffix(day)} ${month} ${year}`;
-}
+
+  return `${day}${daySuffix(day)} ${month} ${year}, ${formattedHours}:${formattedMinutes} ${ampm}`;
+};
 
 const formatAttemptSetTimestamp = (date: string): string => {
   console.log(date)

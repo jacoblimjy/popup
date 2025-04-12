@@ -4,19 +4,15 @@ const { asyncHandler, ApiError } = require("../utils/errorHandler");
 
 const getChildPerformanceByFilters = asyncHandler(async (req, res) => {
   const { child_id, topic_id, difficulty_id } = req.query;
-
   if (!child_id) {
     throw new ApiError(400, "child_id is required");
   }
-
   // Call ChildService to check if child exists
   const child = await childrenService.getChildById(child_id);
   if (!child) {
     throw new ApiError(404, "Child not found");
   }
-
   let performances;
-
   if (topic_id) {
     if (difficulty_id) {
       performances =
@@ -37,7 +33,6 @@ const getChildPerformanceByFilters = asyncHandler(async (req, res) => {
       child_id
     );
   }
-
   res.json({
     success: true,
     data: performances,
@@ -46,20 +41,16 @@ const getChildPerformanceByFilters = asyncHandler(async (req, res) => {
 
 const getOverallChildPerformance = asyncHandler(async (req, res) => {
   const { child_id } = req.params;
-
   if (!child_id) {
     throw new ApiError(400, "child_id is required");
   }
-
   const child = await childrenService.getChildById(child_id);
   if (!child) {
     throw new ApiError(404, "Child not found");
   }
-
   const performance = await childPerformanceService.getOverallChildPerformance(
     child_id
   );
-
   if (!performance) {
     return res.json({
       success: true,
@@ -71,16 +62,37 @@ const getOverallChildPerformance = asyncHandler(async (req, res) => {
       },
     });
   }
-
   res.json({
     success: true,
     data: performance,
   });
 });
 
+const getChildPerformanceRecommendation = asyncHandler(async (req, res) => {
+  const { child_id } = req.params;
+  if (!child_id) {
+    throw new ApiError(400, "child_id is required");
+  }
+  const child = await childrenService.getChildById(child_id);
+  if (!child) {
+    throw new ApiError(404, "Child not found");
+  }
+  const recommendation =
+    await childPerformanceService.getChildPerformanceRecommendation(child_id);
+  if (!recommendation) {
+    return res.json({
+      success: true,
+      data: {},
+    });
+  }
+  res.json({
+    success: true,
+    data: recommendation,
+  });
+});
+
 const deleteChildPerformanceByUpId = asyncHandler(async (req, res) => {
   const { up_id } = req.params;
-
   await childPerformanceService.deleteChildPerformanceByUpId(up_id);
   res.json({
     success: true,
@@ -90,12 +102,10 @@ const deleteChildPerformanceByUpId = asyncHandler(async (req, res) => {
 
 const deleteChildPerformanceByChildId = asyncHandler(async (req, res) => {
   const { child_id } = req.params;
-
   const child = await childrenService.getChildById(child_id);
   if (!child) {
     throw new ApiError(404, "Child not found");
   }
-
   await childPerformanceService.deleteChildPerformanceByChildId(child_id);
   res.json({
     success: true,
@@ -105,6 +115,7 @@ const deleteChildPerformanceByChildId = asyncHandler(async (req, res) => {
 
 module.exports = {
   getChildPerformanceByFilters,
+  getChildPerformanceRecommendation,
   getOverallChildPerformance,
   deleteChildPerformanceByUpId,
   deleteChildPerformanceByChildId,

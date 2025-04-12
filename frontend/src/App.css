@@ -14,6 +14,10 @@
     @apply font-sans;
   }
 
+  body {
+    background-color: #FCFDFE;
+  }
+
   button {
     cursor: pointer;
   }

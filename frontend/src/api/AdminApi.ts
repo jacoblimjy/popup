@@ -1,5 +1,5 @@
 // src/api/adminAPI.ts
-import apiClient from "./ApiClient";
+import apiClient from "./apiClient";
 import { PendingQuestion } from "../types/AdminTypes";
 
 // Hard-code the base URL for your admin endpoints

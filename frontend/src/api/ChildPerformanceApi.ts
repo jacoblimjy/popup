@@ -1,4 +1,4 @@
-import apiClient from "./ApiClient";
+import apiClient from "./apiClient";
 
 const BASE_URL = "http://localhost:8000/api/child_performances";
 
@@ -20,7 +20,17 @@ const getOverallPerformanceByChildId = async (child_id: number) => {
   });
 }
 
+const getChildPerformanceRecommendation = async (child_id: number) => {
+  return apiClient(BASE_URL + `/recommendation/${child_id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
 export default {
   getChildPerformanceByChildId,
-  getOverallPerformanceByChildId
+  getOverallPerformanceByChildId,
+  getChildPerformanceRecommendation,
 }

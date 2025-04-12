@@ -23,7 +23,7 @@ router.post(
 );
 
 router.get("/", authenticateToken, questionController.getQuestions);
-
+router.get("/redo/:set_id", authenticateToken, questionController.getRedoQuestions);
 router.get("/:id", authenticateToken, questionController.getQuestionById);
 
 router.put(

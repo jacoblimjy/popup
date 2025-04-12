@@ -93,7 +93,8 @@ const Navbar: React.FC = () => {
 						<div className="hidden md:flex space-x-6">
 							<Link
 								to="/courses"
-								className="text-gray-600 hover:text-blue-600 transition"
+								className={`text-gray-600 hover:text-blue-600 transition ${location.pathname === "/courses" ? "font-bold" : ""
+									}`}
 							>
 								Courses
 							</Link>
@@ -101,28 +102,27 @@ const Navbar: React.FC = () => {
 								<>
 									<Link
 										to="/analytics"
-										className="text-gray-600 hover:text-blue-600 transition"
+										className={`text-gray-600 hover:text-blue-600 transition ${location.pathname === "/analytics" ? "font-bold" : ""
+											}`}
 									>
 										Analytics
 									</Link>
 									<Link
 										to="/history"
-										className="text-gray-600 hover:text-blue-600 transition"
+										className={`text-gray-600 hover:text-blue-600 transition ${location.pathname === "/history" ? "font-bold" : ""
+											}`}
 									>
 										History
 									</Link>
-									{/* {isAdmin && <Link
-										to="/admin"
-										className="text-gray-600 hover:text-blue-600 transition"
-									>
-										Admin
-									</Link>} */}
-									<Link
-										to="/admin"
-										className="text-gray-600 hover:text-blue-600 transition"
-									>
-										Admin
-									</Link>
+									{isAdmin && (
+										<Link
+											to="/admin"
+											className={`text-gray-600 hover:text-blue-600 transition ${location.pathname === "/admin" ? "font-bold" : ""
+												}`}
+										>
+											Admin
+										</Link>
+									)}
 								</>
 							)}
 						</div>
@@ -131,7 +131,7 @@ const Navbar: React.FC = () => {
 					{/* Right Section:
               Keep child & user menus visible on mobile. */}
 					{isAuthenticated ? (
-						<div className="flex items-center space-x-3 ml-auto pr-6">
+						<div className="flex items-center space-x-3 ml-auto md:pr-6">
 							{/* Children Dropdown */}
 							<div className="relative" ref={childrenMenuRef}>
 								{childrenList && childrenList.length > 0 ? (
@@ -205,6 +205,7 @@ const Navbar: React.FC = () => {
 										</div>
 										<Link
 											to="/profile"
+											onClick={() => setIsUserMenuOpen(false)}
 											className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
 										>
 											<User className="w-4 h-4" />
@@ -212,6 +213,7 @@ const Navbar: React.FC = () => {
 										</Link>
 										<Link
 											to="/manage-children"
+											onClick={() => setIsUserMenuOpen(false)}
 											className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
 										>
 											<Users className="w-4 h-4" />
@@ -230,9 +232,9 @@ const Navbar: React.FC = () => {
 						</div>
 					) : (
 						// If not authenticated
-						<div className="hidden md:flex items-center gap-4 ml-auto pr-6">
+						<div className="flex items-center gap-4 ml-auto pr-6">
 							<button
-								className="py-2 px-4 inline-flex justify-center items-center text-sm font-medium rounded-lg border border-transparent bg-[#f1c40e] text-white hover:bg-[#e7c53b] focus:outline-none"
+								className="md:inline-flex hidden py-2 px-4 justify-center items-center text-sm font-medium rounded-lg border border-transparent bg-[#f1c40e] text-white hover:bg-[#e7c53b] focus:outline-none"
 								onClick={() => {
 									navigate("/signup");
 								}}

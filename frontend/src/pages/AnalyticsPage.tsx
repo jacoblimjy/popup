@@ -303,7 +303,7 @@ const AnalyticsPage = () => {
         y={y}
         textAnchor={textAnchor}
         fill="#666"
-        fontSize={12}
+        className="md:text-sm text-[10px]"
       >
         {lines.map((line, index) => (
           <tspan key={index} x={x} dy={index === 0 ? 0 : 12}>
@@ -325,28 +325,28 @@ const AnalyticsPage = () => {
             <h1 className="text-3xl font-bold mb-5">Overall Accuracy: {overallPerformance?.overall_score}%</h1>
             <p className="text-gray-400">{getPerformanceMessage(overallPerformance?.overall_score)}</p>
             <div className="grid xl:grid-cols-3 grid-cols-1 gap-8 h-full">
-              <div className="flex flex-col rounded shadow-md p-5 gap-4">
+              <div className="flex flex-col rounded shadow-md p-5 gap-4 bg-white">
                 <div className="bg-[#f1c40e] text-white rounded-lg w-12 h-12 flex items-center justify-center">
                   <Zap />
                 </div>
                 <h3 className="my-3 font-semibold text-lg">Fastest Category</h3>
                 <p className="text-gray-400">You're quickest at solving <span className="font-bold underline">{topics[fastestCategory?.topic_id as keyof typeof topics]}</span>! You answered time in an average of {fastestCategory?.average_time_per_question} seconds.</p>
               </div>
-              <div className="flex flex-col rounded shadow-md p-5 gap-4">
+              <div className="flex flex-col rounded shadow-md p-5 gap-4 bg-white">
                 <div className="bg-[#f1c40e] text-white rounded-lg w-12 h-12 flex items-center justify-center">
                   <AlertTriangle />
                 </div>
                 <h3 className="my-3 font-semibold text-lg">Most Challenging Question Type</h3>
                 <p className="text-gray-400"><span className="font-bold underline">{topics[challengingCategory?.topic_id as keyof typeof topics]}</span> were tricky! You got <span className="font-bold underline">{challengingCategory?.average_accuracy_score}%</span> correct - keep practicing!</p>
               </div>
-              <div className="flex flex-col rounded shadow-md p-5 gap-4">
+              <div className="flex flex-col rounded shadow-md p-5 gap-4 bg-white">
                 <div className="bg-[#f1c40e] text-white rounded-lg w-12 h-12 flex items-center justify-center">
                   <Timer />
                 </div>
                 <h3 className="my-3 font-semibold text-lg">Best Scoring Question Type</h3>
                 <p className="text-gray-400">You excelled at solving <span className="font-bold underline">{topics[bestCategory?.topic_id as keyof typeof topics]}</span>! You got <span className="font-bold underline">{bestCategory?.average_accuracy_score}%</span> correct - amazing work!</p>
               </div>
-              <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px]">
+              <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px] bg-white">
                 <p className="font-medium">Accuracy by Question Type</p>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart layout="horizontal" data={accuracyBarChartData}>
@@ -371,7 +371,7 @@ const AnalyticsPage = () => {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px]">
+              <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px] bg-white">
                 <p className="font-medium">Average Time Spent Per Question Type</p>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -400,12 +400,12 @@ const AnalyticsPage = () => {
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px]">
+              <div className="flex flex-col rounded shadow-md p-5 gap-4 xl:h-full h-[400px] bg-white">
                 <p className="font-medium">Questions Attempted</p>
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart margin={{ left: 100, right: 100 }} data={questionsCompletedData}>
+                <ResponsiveContainer width="100%" height="80%">
+                  <RadarChart margin={{left: 10, right: 10}} data={questionsCompletedData} outerRadius={80}>
                     <PolarGrid />
-                    <PolarAngleAxis dataKey="name" tick={(props) => <CustomPolarAngleTick {...props} />} />
+                    <PolarAngleAxis dataKey="name" tick={(props) => <CustomPolarAngleTick {...props} />}/>
                     <PolarRadiusAxis domain={[0, getMaxAttemptedQuestions()]} />
                     <Tooltip />
                     <Radar dataKey="questions" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />

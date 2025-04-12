@@ -50,6 +50,20 @@ const getQuestions = asyncHandler(async (req, res) => {
   });
 });
 
+const getRedoQuestions = asyncHandler(async (req, res) => {
+  const { set_id } = req.params;
+
+  if (!set_id || isNaN(set_id)) {
+    throw new ApiError(400, "Invalid set ID");
+  }
+
+  const questions = await questionService.getRedoQuestions(parseInt(set_id));
+  res.json({
+    success: true,
+    data: questions,
+  });
+});
+
 const getQuestionById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
@@ -113,6 +127,7 @@ module.exports = {
   createQuestion,
   createQuestionsBulk,
   getQuestions,
+  getRedoQuestions,
   getQuestionById,
   updateQuestion,
   deleteQuestion,
