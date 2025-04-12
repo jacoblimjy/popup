@@ -28,6 +28,20 @@ const DIFFICULTY_MAPPINGS = {
   3: "hard",
 };
 
+function cleanText(text) {
+  if (!text) return "";
+  // Replace all \n with spaces
+  return (
+    text
+      .replace(/\\n/g, " ")
+      // Also replace actual newlines
+      .replace(/\n/g, " ")
+      // Remove excess spaces
+      .replace(/\s+/g, " ")
+      .trim()
+  );
+}
+
 /**
  * Calculate text similarity between two strings using Jaccard similarity
  * @param {string} text1
@@ -534,7 +548,7 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
 
       // 6. Format the question for database insertion
       validQuestions.push({
-        question_text: processedQuestion.question_text,
+        question_text: cleanText(processedQuestion.question_text),
         answer_format: processedQuestion.answer_format || "multiple_choice",
         correct_answer: processedQuestion.correct_answer,
         distractors: Array.isArray(processedQuestion.distractors)
@@ -542,7 +556,9 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
           : [processedQuestion.distractors],
         topic_id: topic_id,
         difficulty_id: difficulty_id,
-        explanation: processedQuestion.explanation || "No explanation provided",
+        explanation: cleanText(
+          processedQuestion.explanation || "No explanation provided"
+        ),
         is_llm_generated: true,
       });
 
