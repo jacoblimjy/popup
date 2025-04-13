@@ -99,7 +99,8 @@ prompts:
 
     few_shot_examples: |
       ## EXAMPLE PUZZLE 1
-      Question Text: I was SHOUTING when I lost my voice.
+      Question Text: 
+      I was SHOUTING when I lost my voice.
 
       Explanation:
       Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
@@ -837,6 +838,7 @@ prompts:
       If you decide to go with the "removing and rearranging letters" pattern, ensure that first word in each pair MUST strictly be a valid FIVE-letter word and the second 
       word in each pair MUST strictly be a valid THREE-letter word.
       Ensure that ALL SIX words in the question are real words.
+      Ensure that the question output is in the exact format specified in the example given (eg. marks arm   ready ear   glove (?)).
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
@@ -905,6 +907,7 @@ prompts:
       If you decide to go with the "removing and rearranging letters" pattern, ensure that first word in each pair MUST strictly be a valid SIX-letter word and the second 
       word in each pair MUST strictly be a valid THREE-letter or FOUR-letter word.
       Every word in the question must be a real word.
+      Ensure that the question output is in the exact format specified in the example given (eg. extent ten  places ape  inform (?)).
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
@@ -972,6 +975,7 @@ prompts:
       EIGHT-letter word and the second word in each pair MUST strictly be a valid FOUR-letter word. Positions chosen for extraction can vary,
       as long as it is consistent across ALL three pairs. Ensure that there is a rearrangment of letters.
       Every word in the question must be a real word.
+      Ensure that the question output is in the exact format specified in the example given (eg. cabbages sage  wandered dare  focussed (?)).
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
