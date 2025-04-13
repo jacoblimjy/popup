@@ -15,11 +15,11 @@ prompts:
 
       Refer to the examples given and return the output as a json as follows.
       {
-         "question_text":
-         "answer_format": "multiple_choice"
-         "correct_answer":
-         "explanation":
-         "distractors":
+        "question_text":
+        "answer_format": "multiple_choice"
+        "correct_answer":
+        "explanation":
+        "distractors":
       }
 
     few_shot_examples: |
@@ -262,13 +262,15 @@ prompts:
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
         "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer
-        "correct_answer": correct option LETTER
+        "correct_answer": correct option WORD
         "answer_format": "multiple_choice"
         "explanation": DETAILED EXPLANATION section
-        "distractors": list of incorrect option LETTERS (there should strictly be 4)
-        "solved_set": list of strings in the same order (length = 3)
-        "unsolved_set": list of strings in the same order and include the correct answer in within the brackets (length = 3)
+        "distractors": list of incorrect option WORDS (there should strictly be 4)
       }
+
+      Reminder: 
+      - Ensure that all words in the solved and unsolved set are real.
+      - Ensure that no word (front, back, or answer) in the solved example appears anywhere in the unsolved set, and vice versa.
 
   - topic: "rule"
     difficulty: "medium"
@@ -377,13 +379,15 @@ prompts:
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
         "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer
-        "correct_answer": correct option LETTER
+        "correct_answer": correct option WORD
         "answer_format": "multiple_choice"
         "explanation": DETAILED EXPLANATION section
-        "distractors": list of incorrect option LETTERS (there should strictly be 4)
-        "solved_set": list of strings in the same order (length = 3)
-        "unsolved_set": list of strings in the same order and include the correct answer in within the brackets (length = 3)
+        "distractors": list of incorrect option WORDS (there should strictly be 4)
       }
+
+      Reminder: 
+      - Ensure that all words in the solved and unsolved set are real.
+      - Ensure that no word (front, back, or answer) in the solved example appears anywhere in the unsolved set, and vice versa.
 
   - topic: "rule"
     difficulty: "hard"
@@ -535,12 +539,10 @@ prompts:
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
         "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer
-        "correct_answer": correct option LETTER
+        "correct_answer": correct option WORD
         "answer_format": "multiple_choice"
         "explanation": DETAILED EXPLANATION section
-        "distractors": list of incorrect option LETTERS (there should strictly be 4)
-        "solved_set": list of strings in the same order (length = 3)
-        "unsolved_set": list of strings in the same order and include the correct answer in within the brackets (length = 3)
+        "distractors": list of incorrect option WORDS (there should strictly be 4)
       }
 
       Reminder: 
@@ -630,10 +632,10 @@ prompts:
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
           "question_text": TITLE and INSTRUCTIONS section WITHOUT identifying which is the correct answer
-          "correct_answer": correct option LETTER
+          "correct_answer": correct option WORD
           "answer_format": "multiple_choice"
           "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "distractors": ["list of incorrect option WORDS (strictly 4)"]
           "set": ["X", "correct answer", "Z"]
       }
 
@@ -715,10 +717,10 @@ prompts:
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
           "question_text": TITLE and INSTRUCTIONS section WITHOUT identifying which is the correct answer
-          "correct_answer": correct option LETTER
+          "correct_answer": correct option WORD
           "answer_format": "multiple_choice"
           "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "distractors": ["list of incorrect option WORDS (strictly 4)"]
           "set": ["X", "correct answer", "Z"]
       }
 
@@ -809,10 +811,10 @@ prompts:
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
           "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
-          "correct_answer": correct option LETTER
+          "correct_answer": correct option WORD
           "answer_format": "multiple_choice"
           "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "distractors": ["list of incorrect option WORDS (strictly 4)"]
           "set": ["X", "correct answer", "Z"] -> length = 4 (For example, [COPE, CORE, FORE, FORT])
       }
 
@@ -878,10 +880,10 @@ prompts:
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
           "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
-          "correct_answer": correct option LETTER
+          "correct_answer": correct option WORD
           "answer_format": "multiple_choice"
           "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "distractors": ["list of incorrect option WORDS (strictly 4)"]
           "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
       }
 
@@ -946,10 +948,10 @@ prompts:
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
           "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
-          "correct_answer": correct option LETTER
+          "correct_answer": correct option WORD
           "answer_format": "multiple_choice"
           "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "distractors": ["list of incorrect option WORDS (strictly 4)"]
           "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
       }
 
@@ -1013,10 +1015,10 @@ prompts:
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
           "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
-          "correct_answer": correct option LETTER
+          "correct_answer": correct option WORD
           "answer_format": "multiple_choice"
           "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "distractors": ["list of incorrect option WORDS (strictly 4)"]
           "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
       }
 
