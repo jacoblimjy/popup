@@ -85,7 +85,7 @@ async function runPythonEvaluator(scriptName, inputData) {
     fs.writeFileSync(tempFile, JSON.stringify(inputData));
 
     // Path to Python script
-    const scriptPath = path.join(__dirname, "..", "utils", `${scriptName}.py`);
+    const scriptPath = path.join(__dirname, "..", "llm_prompts", `${scriptName}.py`);
 
     // Execute Python script with input file
     const command = `python ${scriptPath} ${tempFile}`;
@@ -96,6 +96,7 @@ async function runPythonEvaluator(scriptName, inputData) {
     // Clean up temp file
     fs.unlinkSync(tempFile);
 
+    // This seems to never catch the error at all, its always caught in the catch block
     if (stderr && !stderr.includes("Warning")) {
       console.error(`Python script error (${scriptName}.py):`, stderr);
       throw new Error(`Error in Python evaluator: ${stderr}`);
@@ -104,6 +105,8 @@ async function runPythonEvaluator(scriptName, inputData) {
     // Parse and return the result
     return JSON.parse(stdout);
   } catch (error) {
+
+    // TODO: Improve error message handling
     console.error(`Failed to run Python evaluator ${scriptName}.py:`, error);
     throw error;
   }
@@ -787,11 +790,12 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
               `\n\nGenerate exactly ${numQuestions} questions in JSON format.`,
           },
         ],
-        temperature: llmConfig.temperature,
-        max_tokens: llmConfig.maxTokens,
+        // temperature: llmConfig.temperature,
+        max_completion_tokens: llmConfig.maxTokens,
         top_p: llmConfig.topP,
         frequency_penalty: llmConfig.frequencyPenalty,
         presence_penalty: llmConfig.presencePenalty,
+        reasoning_effort: llmConfig.reasoningEffort,
         response_format: {
           // TODO: We can refactor this schema to another file
           type: "json_schema",
@@ -820,18 +824,18 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
                         items: { type: "string" },
                       },
                       // Add additional fields needed for python evaluators
-                      set: {
-                        type: "array",
-                        items: { type: "string" },
-                      },
-                      solved_set: {
-                        type: "array",
-                        items: { type: "string" },
-                      },
-                      unsolved_set: {
-                        type: "array",
-                        items: { type: "string" },
-                      },
+                      // set: {
+                      //   type: "array",
+                      //   items: { type: "string" },
+                      // },
+                      // solved_set: {
+                      //   type: "array",
+                      //   items: { type: "string" },
+                      // },
+                      // unsolved_set: {
+                      //   type: "array",
+                      //   items: { type: "string" },
+                      // },
                     },
                     required: [
                       "question_text",
@@ -839,8 +843,11 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
                       "correct_answer",
                       "explanation",
                       "distractors",
+                      // "set",
+                      // "solved_set",
+                      // "unsolved_set",
                     ],
-                    additionalProperties: true,
+                    additionalProperties: false,
                   },
                 },
               },
@@ -895,29 +902,29 @@ async function generateQuestionsMock(topicKey, numQuestions) {
     rule: [
       {
         question_text:
-          "The words in the second set follow the same pattern as the first set. What word completes the second set? cat (cot) dog       pen (?) rat",
+          "The words in the second set follow the same pattern as the first set. What word completes the second set? tap (pod) nod       son (?) rib",
         answer_format: "multiple_choice",
-        correct_answer: "pot",
+        correct_answer: "nib",
         explanation:
-          "Take the first letter of the first word and the last two letters of the second word. c + ot = cot, and p + ot = pot",
-        distractors: ["pat", "per", "pog", "pan"],
+          "Take the last letter of the first word and the last two letters of the back word. p + od = pod, and n + ib = nib",
+        distractors: ["sob", "bin", "rob", "sin"],
       },
       {
         question_text:
-          "The words in the second set follow the same pattern as the first set. What word completes the second set? fox (fit) ten       bed (?) sun",
+          "The words in the second set follow the same pattern as the first set. What word completes the second set? fox (fit) tit       bed (?) sun",
         answer_format: "multiple_choice",
-        correct_answer: "bin",
+        correct_answer: "bun",
         explanation:
-          "Take the first letter of the first word and the last two letters of the second word. f + it = fit, and b + in = bin",
+          "Take the first letter of the first word and the last two letters of the back word. f + it = fit, and b + un = bun",
         distractors: ["but", "bat", "bot", "bus"],
       },
       {
         question_text:
-          "The words in the second set follow the same pattern as the first set. What word completes the second set? red (rim) man       top (?) sit",
+          "The words in the second set follow the same pattern as the first set. What word completes the second set? red (ran) man       top (?) sit",
         answer_format: "multiple_choice",
         correct_answer: "tit",
         explanation:
-          "Take the first letter of the first word and the last two letters of the second word. r + im = rim, and t + it = tit",
+          "Take the first letter of the first word and the last two letters of the back word. r + an = ran, and t + it = tit",
         distractors: ["tip", "tap", "tom", "ten"],
       },
     ],
