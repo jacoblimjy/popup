@@ -179,31 +179,24 @@ function extractWordLadderData(question) {
  * Extract word pair data from question
  * @param {Object} question - Question object
  * @returns {Object} - Data for pair_eval.py
- */
+ */ 
 function extractWordPairData(question) {
-  // Format: "first1 second1   first2 second2   first3 ?"
   const questionText = question.question_text;
-  const words = questionText
-    .split(/\s+/)
-    .filter((word) => word && word !== "?" && word !== "(?)");
 
-  if (words.length < 5) {
-    throw new Error("Not enough words in word pair question");
-  }
+  // Match all word-like tokens including "(?)"
+  const tokens = questionText.match(/\b\w+\b|\(\?\)/g);
+  if (!tokens) throw new Error("No tokens found in question");
 
-  // Extract the pairs
-  const set = [];
-  for (let i = 0; i < words.length - 1; i += 2) {
-    if (i + 1 < words.length) {
-      set.push(words[i]);
-      if (i === words.length - 2) {
-        // Last pair, add correct answer
-        set.push(question.correct_answer);
-      } else {
-        set.push(words[i + 1]);
-      }
-    }
+  // Find index of "(?)" only
+  const questionMarkIndex = tokens.findIndex((token) => token === '(?)');
+  if (questionMarkIndex < 5) {
+    throw new Error("Not enough words before (?) in word pair question");
   }
+  // Get the 5 words before "(?)"
+  const wordsBefore = tokens.slice(questionMarkIndex - 5, questionMarkIndex);
+
+  // Append correct answer as the missing word
+  const set = [...wordsBefore, question.correct_answer];
 
   if (set.length !== 6) {
     throw new Error(`Invalid word pair set length: ${set.length}`);
@@ -865,6 +858,7 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
       }
     );
 
+
     const content = response.data.choices[0]?.message?.content || "{}";
 
     console.log(content);
@@ -930,19 +924,18 @@ async function generateQuestionsMock(topicKey, numQuestions) {
     ],
     word_pair: [
       {
-        question_text: "Complete the pair: Hot is to Cold as Happy is to _____",
+        question_text: "Find the word that completes the third pair of words so that it follows the same pattern as the first two pairs. marks arm   ready ear   glove (?) Which of the following is the missing word?",
         answer_format: "multiple_choice",
-        correct_answer: "Sad",
-        explanation:
-          "Hot and Cold are opposites, so Happy and Sad are also opposites",
-        distractors: ["Warm", "Joy", "Excited", "Smile"],
+        correct_answer: "log",
+        explanation: "The pattern is to remove the last two letters, then move the first letter to end of the word",
+        distractors: ["vex", "goy", "gel", "vex"]
       },
       {
-        question_text: "Complete the pair: Car is to Road as Train is to _____",
+        question_text: "Find the word that completes the third pair of words so that it follows the same pattern as the first two pairs. extent ten  places ape  inform (?) Which of the following is the missing word?",
         answer_format: "multiple_choice",
-        correct_answer: "Track",
-        explanation: "Cars travel on roads, and trains travel on tracks",
-        distractors: ["Station", "Conductor", "Engine", "Wheel"],
+        correct_answer: "fir",
+        explanation: "The pattern is to take the first, third and fifth letters of the word and arrange them in the order 3rd, 1st, 5th.",
+        distractors: ["for", "nor", "fin", "ion"]
       },
     ],
     anagram: [
