@@ -85,10 +85,15 @@ async function runPythonEvaluator(scriptName, inputData) {
     fs.writeFileSync(tempFile, JSON.stringify(inputData));
 
     // Path to Python script
-    const scriptPath = path.join(__dirname, "..", "llm_prompts", `${scriptName}.py`);
+    const scriptPath = path.join(
+      __dirname,
+      "..",
+      "llm_prompts",
+      `${scriptName}.py`
+    );
 
     // Execute Python script with input file
-    const command = `python ${scriptPath} ${tempFile}`;
+    const command = `python "${scriptPath}" "${tempFile}"`;
     console.log(`Executing: ${command}`);
 
     const { stdout, stderr } = await execPromise(command);
@@ -105,7 +110,6 @@ async function runPythonEvaluator(scriptName, inputData) {
     // Parse and return the result
     return JSON.parse(stdout);
   } catch (error) {
-
     // TODO: Improve error message handling
     console.error(`Failed to run Python evaluator ${scriptName}.py:`, error);
     throw error;
@@ -143,6 +147,14 @@ function extractAnagramData(question) {
 function extractWordLadderData(question) {
   // This is highly dependent on question format
   // Example implementation for "WORD ____ LAST" format:
+  if (
+    question.set &&
+    Array.isArray(question.set) &&
+    question.set.length === 3
+  ) {
+    return { set: question.set.map((word) => word.toUpperCase()) };
+  }
+
   let set = [];
 
   const match = question.question_text.match(
@@ -179,7 +191,7 @@ function extractWordLadderData(question) {
  * Extract word pair data from question
  * @param {Object} question - Question object
  * @returns {Object} - Data for pair_eval.py
- */ 
+ */
 function extractWordPairData(question) {
   const questionText = question.question_text;
 
@@ -188,7 +200,7 @@ function extractWordPairData(question) {
   if (!tokens) throw new Error("No tokens found in question");
 
   // Find index of "(?)" only
-  const questionMarkIndex = tokens.findIndex((token) => token === '(?)');
+  const questionMarkIndex = tokens.findIndex((token) => token === "(?)");
   if (questionMarkIndex < 5) {
     throw new Error("Not enough words before (?) in word pair question");
   }
@@ -858,7 +870,6 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
       }
     );
 
-
     const content = response.data.choices[0]?.message?.content || "{}";
 
     console.log(content);
@@ -924,18 +935,22 @@ async function generateQuestionsMock(topicKey, numQuestions) {
     ],
     word_pair: [
       {
-        question_text: "Find the word that completes the third pair of words so that it follows the same pattern as the first two pairs. marks arm   ready ear   glove (?) Which of the following is the missing word?",
+        question_text:
+          "Find the word that completes the third pair of words so that it follows the same pattern as the first two pairs. marks arm   ready ear   glove (?) Which of the following is the missing word?",
         answer_format: "multiple_choice",
         correct_answer: "log",
-        explanation: "The pattern is to remove the last two letters, then move the first letter to end of the word",
-        distractors: ["vex", "goy", "gel", "vex"]
+        explanation:
+          "The pattern is to remove the last two letters, then move the first letter to end of the word",
+        distractors: ["vex", "goy", "gel", "vex"],
       },
       {
-        question_text: "Find the word that completes the third pair of words so that it follows the same pattern as the first two pairs. extent ten  places ape  inform (?) Which of the following is the missing word?",
+        question_text:
+          "Find the word that completes the third pair of words so that it follows the same pattern as the first two pairs. extent ten  places ape  inform (?) Which of the following is the missing word?",
         answer_format: "multiple_choice",
         correct_answer: "fir",
-        explanation: "The pattern is to take the first, third and fifth letters of the word and arrange them in the order 3rd, 1st, 5th.",
-        distractors: ["for", "nor", "fin", "ion"]
+        explanation:
+          "The pattern is to take the first, third and fifth letters of the word and arrange them in the order 3rd, 1st, 5th.",
+        distractors: ["for", "nor", "fin", "ion"],
       },
     ],
     anagram: [
@@ -961,12 +976,12 @@ async function generateQuestionsMock(topicKey, numQuestions) {
     word_ladders: [
       {
         question_text:
-          "Complete this word ladder from COLD to WARM: COLD → CORD → CARD → _____ → WARM",
+          "Change one letter at a time to make the first word into the final word. The answer must be a real word. CASE ____ LASH",
         answer_format: "multiple_choice",
-        correct_answer: "WARD",
+        correct_answer: "CASH",
         explanation:
-          "In a word ladder, you change one letter at a time to make a new word. CARD → WARD (change C to W)",
-        distractors: ["WARP", "WART", "WORD", "WORM"],
+          "      CASE → CASH: Change the last letter from 'E' to 'H' to form CASH CASH → LASH: Change the first letter from 'C' to 'L' to form LASH",
+        distractors: ["CAST", "LUSH", "LACK", "LASS"],
       },
       {
         question_text:

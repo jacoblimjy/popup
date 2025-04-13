@@ -525,7 +525,7 @@ prompts:
       Step 6: Out of all these possible combinations, only "seat" is a real word, so "seat" is the answer.
 
       The correct answer is "seat".
- 
+
     assignment: |
       Now, create ONE brand new "Use a Rule to Make a Word" puzzle in the exact same format. Follow these guidelines:
       1. Provide the title: "Use a Rule to Make a Word".
@@ -622,7 +622,7 @@ prompts:
       DETAILED EXPLANATION:
       PLAN → CLAN: Change the first letter from 'P' to 'C' to form "CLAN"  
       CLAN → CLAP: Change the last letter from 'N' to 'P' to form "CLAP"
- 
+
     assignment: |
       Ensure that all words in the ladder are exactly four letters long, and are simple and commonly known words.
       There should be only ONE missing word that needs to be filled in.
@@ -707,7 +707,7 @@ prompts:
       DETAILED EXPLANATION:
       RIFT → RIFE: Change the last letter from 'T' to 'E' to form "RIFE"  
       RIFE → RITE: Change the third letter from 'F' to 'T' to form "RITE"
- 
+
     assignment: |
       Ensure that all words in the ladder are exactly four letters long, and more complex or less commonly known word.
       There should be only ONE missing word that needs to be filled in.
@@ -801,8 +801,8 @@ prompts:
       First, identify the letter that appears in both the first and last word in the same position.
       SPED → SLED: Change the second letter from 'P' to 'L' to form "SLED"  
       SLED → FLED: Change the first letter from 'S' to 'F' to form "FLED" 
-      FLED → FLEA: Change the last letter from 'D' to 'A' to form "FLEA"  
- 
+      FLED → FLEA: Change the last letter from 'D' to 'A' to form "FLEA"
+
     assignment: |
       Ensure that all words in the ladder are exactly four letters long. There should have two missing words that need to be filled in.
       Each word in the sequence should differ from the next by only one letter. Ensure the position that the letter changes differ each step.
@@ -815,7 +815,7 @@ prompts:
           "answer_format": "multiple_choice"
           "explanation": DETAILED EXPLANATION section
           "distractors": ["list of incorrect option WORDS (strictly 4)"]
-          "set": ["X", "correct answer", "Z"] -> length = 4 (For example, [COPE, CORE, FORE, FORT])
+          "set": ["X", "first correct answer", "second correct answer", "Z"] -> length = 4 (For example, [COPE, CORE, FORE, FORT])
       }
 
   - topic: "word_pair"
@@ -869,7 +869,7 @@ prompts:
       • “marks” → “arm”: Remove the last two letters “ks”, then move “m” to the end of “ar” → “arm”
       • “ready” → “ear”: Remove the last two letters “dy”, then move “r” to the end of “ea” → “ear”
       • “glove” → “log”: Remove the last two letters “ve”, then move “g” to the end of “lo” → “log”
- 
+
     assignment: |
       Using any ONE of the textbook patterns (removing and rearranging letters, reversing) or a simple variant, create ONE new puzzle in the same format
       Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
@@ -937,7 +937,7 @@ prompts:
       • “extent” → “ten”: Take the first, third and fifth letters "e", "t", "n" → "ten"
       • “places” → “ape”: Take the first, third and fifth letters "p", "a", "e" → "ape"
       • “inform” → “fir”: Take the first, third and fifth letters "i", "f", "r" → "fir"
- 
+
     assignment: |
       Using any ONE of the textbook patterns (removing and rearranging letters, removing first and last letters) or a simple variant, create ONE new puzzle in the same format
       Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
@@ -1003,7 +1003,7 @@ prompts:
       • “cabbages” → “sage”: Take the second, sixth, seventh and last letters "a", "g", "e", "s" → "sage"
       • “wandered” → “dare”: Take the second, sixth, seventh and last letters "a", "r", "e", "d" → "dare"
       • “focussed” → “dose”: Take the second, sixth, seventh and last letters "o", "s", "e", "d" → "dose"
- 
+
     assignment: |
       Using any ONE of the textbook patterns (removing and rearranging letters) or a simple variant, create ONE new puzzle in the same format
       Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
@@ -1021,6 +1021,3 @@ prompts:
           "distractors": ["list of incorrect option WORDS (strictly 4)"]
           "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
       }
-
-
-      
