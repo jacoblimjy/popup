@@ -220,10 +220,11 @@ prompts:
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-        "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer
+        "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer (follow the format strictly
+        without introducing words like "Solved Example" and strictly ends at "Which of the following is the missing word?")
         "correct_answer": correct option WORD
         "answer_format": "multiple_choice"
-        "explanation": DETAILED EXPLANATION section
+        "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
         "distractors": list of incorrect option WORDS (there should strictly be 4)
       }
 
@@ -330,10 +331,11 @@ prompts:
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-        "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer
+        "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer (follow the format strictly
+        without introducing words like "Solved Example" and strictly ends at "Which of the following is the missing word?")
         "correct_answer": correct option WORD
         "answer_format": "multiple_choice"
-        "explanation": DETAILED EXPLANATION section
+        "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
         "distractors": list of incorrect option WORDS (there should strictly be 4)
       }
 
@@ -487,10 +489,11 @@ prompts:
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-        "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer
+        "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer (follow the format strictly
+        without introducing words like "Solved Example" and strictly ends at "Which of the following is the missing word?")
         "correct_answer": correct option WORD
         "answer_format": "multiple_choice"
-        "explanation": DETAILED EXPLANATION section
+        "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
         "distractors": list of incorrect option WORDS (there should strictly be 4)
       }
 
