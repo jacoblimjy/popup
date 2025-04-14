@@ -521,10 +521,38 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
           await runPythonEvaluator("pair_eval", pairData);
           console.log("Word pair validated successfully");
         } else if (topicType === "rule") {
-          // Validate rule with Python script
           const ruleData = extractRuleData(question);
-          await runPythonEvaluator("rule_eval", ruleData);
+          let processedOutput = await runPythonEvaluator("rule_eval", ruleData);
           console.log("Rule question validated successfully");
+          const correctAnswerRaw = processedOutput.correct_answer;
+          const distractors = processedOutput.distractors;
+          const options = distractors.concat([correctAnswerRaw]);
+
+          for (let i = options.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [options[i], options[j]] = [options[j], options[i]];
+          }
+
+          let correctLetter = null;
+          const formattedOptions = options
+            .map((opt, index) => {
+              const letter = String.fromCharCode(65 + index);
+              if (opt === correctAnswerRaw) {
+                correctLetter = letter;
+              }
+              return `${letter}) ${opt}`;
+            })
+            .join("\n");
+
+          if (!correctLetter) {
+            throw new Error(
+              "Could not determine the correct answer's option label"
+            );
+          }
+          const finalQuestionText = `${processedOutput.question_text}\n\nWhich of the following is the correct answer?\n${formattedOptions}`;
+          processedOutput.question_text = finalQuestionText;
+          processedOutput.correct_answer = correctLetter;
+          processedQuestion = processedOutput;
         }
       } catch (evalError) {
         console.error(`${topicType} evaluation failed:`, evalError);
