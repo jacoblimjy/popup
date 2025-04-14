@@ -1,4 +1,4 @@
-import { Attempt, CreateAttemptedSetRequest, GetAttemptedSetResponse } from "../types/AttemptTypes";
+import { Attempt, CreateAttemptedSetRequest } from "../types/AttemptTypes";
 import apiClient from "./apiClient";
 const BASE_URL = "http://localhost:8000/api/attempted_sets";
 
@@ -30,7 +30,7 @@ const updateAttemptedSet = async (updated_attempt : Attempt, set_id: number) => 
   });
 }
 
-const getAttemptedSets = async (child_id : number, page_id: number = 1) : Promise<GetAttemptedSetResponse[]> => {
+const getAttemptedSets = async (child_id : number, page_id: number = 1) => {
   return apiClient(BASE_URL + `?child_id=${child_id}&page=${page_id}`, {
     method: "GET",
     headers: {
@@ -39,7 +39,7 @@ const getAttemptedSets = async (child_id : number, page_id: number = 1) : Promis
   });
 }
 
-const getAttemptedSetBySetId = async (set_id : string) : Promise<GetAttemptedSetResponse> => {
+const getAttemptedSetBySetId = async (set_id : string) => {
   return apiClient(BASE_URL + `/${set_id}`, {
     method: "GET",
     headers: {

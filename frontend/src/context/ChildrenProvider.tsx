@@ -25,7 +25,7 @@ export const ChildrenProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await ChildrenApi.getChildrenByUserId();
       console.log(response);
-      setChildrenList(response);
+      setChildrenList(response.data);
       
       if (activeChild === null || !activeChild || refresh) {
         setActiveChild(response[0]);

@@ -3,7 +3,7 @@ import QuestionReview from "../components/QuestionReview";
 import { formatAttemptedQuestions, formatAttemptSetTimestamp, formatTime } from "../utils";
 import { useEffect, useState } from "react";
 import AttemptedSetsApi from "../api/AttemptedSetsApi";
-import { AttemptedSet, GetAttemptedSetResponse } from "../types/AttemptTypes";
+import { AttemptedSet } from "../types/AttemptTypes";
 import Loader from "../components/Loader";
 
 const ResultsPage = () => {
@@ -18,10 +18,11 @@ const ResultsPage = () => {
 
   const fetchAttemptedSet = async () => {
     setIsLoading(true);
-    const response : GetAttemptedSetResponse = await AttemptedSetsApi.getAttemptedSetBySetId(set_id!);
+    const response = await AttemptedSetsApi.getAttemptedSetBySetId(set_id!);
+    const data = response.data;
     const formattedResponse : AttemptedSet = {
-      ...response,
-      attempted_questions: formatAttemptedQuestions(response.attempted_questions)
+      ...data,
+      attempted_questions: formatAttemptedQuestions(data.attempted_questions)
     }
     setAttemptedSet(formattedResponse);
     setIsLoading(false);

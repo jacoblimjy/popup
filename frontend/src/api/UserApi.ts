@@ -30,7 +30,7 @@ const updateProfile = async (
 	password?: string
 ) => {
 	// We do a PUT /api/users/:id
-	const url = `${BASE_URL}/${userId}`;
+	const url = `http://localhost:8000/api/users/${userId}`;
 	return apiClient(url, {
 		method: "PUT",
 		headers: { "Content-Type": "application/json" },
