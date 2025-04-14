@@ -428,9 +428,9 @@ const AdminPage: React.FC = () => {
 											: q.topic_id === 2
 											? "Complete a Word Pair"
 											: q.topic_id === 3
-											? "Word Ladders"
-											: q.topic_id === 4
 											? "Anagram in a Sentence"
+											: q.topic_id === 4
+											? "Word Ladders"
 											: "Unknown Topic"}
 									</div>
 									<div

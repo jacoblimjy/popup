@@ -9,6 +9,7 @@ const {
   getLLMConfig,
   getQuestionGenConfig,
   hasOpenAIAPIKey,
+  getModelForTopic,
 } = require("../config/llmSettings");
 
 const TOPIC_MAPPINGS = {
@@ -430,7 +431,12 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
     // Check if we have an API key for OpenAI
     if (hasOpenAIAPIKey()) {
       console.log("Using OpenAI API for question generation");
-      rawQuestions = await generateQuestionsWithOpenAI(prompt, questionCount);
+      // Pass the topicKey to the generateQuestionsWithOpenAI function
+      rawQuestions = await generateQuestionsWithOpenAI(
+        prompt,
+        questionCount,
+        topicKey
+      );
     } else {
       console.log("Using mock data for question generation");
       rawQuestions = await generateQuestionsMock(topicKey, questionCount);
@@ -473,19 +479,24 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
  *
  * @param {string} prompt - The prompt to send to the API
  * @param {number} numQuestions - Number of questions to generate
+ * @param {string} topicKey - The topic key to determine which model to use
  * @returns {Array} - Array of generated question objects
  */
-async function generateQuestionsWithOpenAI(prompt, numQuestions) {
+async function generateQuestionsWithOpenAI(prompt, numQuestions, topicKey) {
   try {
-    console.log("Calling OpenAI API...");
+    console.log(`Calling OpenAI API for topic: ${topicKey}...`);
 
     // Get LLM configuration
     const llmConfig = getLLMConfig();
 
+    // Get the specific model for this topic type
+    const model = getModelForTopic(topicKey);
+    console.log(`Using model ${model} for topic ${topicKey}`);
+
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: llmConfig.model,
+        model: model,
         messages: [
           {
             role: "system",
@@ -505,7 +516,6 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
         frequency_penalty: llmConfig.frequencyPenalty,
         presence_penalty: llmConfig.presencePenalty,
         response_format: {
-          // TODO: We can refactor this schema to another file
           type: "json_schema",
           json_schema: {
             name: "questions",
@@ -521,8 +531,6 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions) {
                       question_text: { type: "string" },
                       answer_format: {
                         type: "string",
-                        // Enum values for answer format
-                        // We can edit the prompts yaml later on
                         enum: ["multiple_choice"],
                       },
                       correct_answer: { type: "string" },
