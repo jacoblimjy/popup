@@ -216,6 +216,7 @@ prompts:
       - For each set, ensure that the front and back words are exactly THREE letters each.
       - Ensure that all words in the solved and unsolved set are real.
       - Ensure that no word (front, back, or answer) in the solved example appears anywhere in the unsolved set, and vice versa.
+      - Ensure that the answer is definitive. There should be no alternative correct answer in the options.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
@@ -325,6 +326,7 @@ prompts:
       - For each set, ensure that the front and back words are exactly FOUR letters each, with exactly EIGHT distinct letters in total.
       - Ensure that all words in the solved and unsolved set are real.
       - Ensure that no word (front, back, or answer) in the solved example appears anywhere in the unsolved set, and vice versa.
+      - Ensure that the answer is definitive. There should be no alternative correct answer in the options.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
@@ -481,6 +483,7 @@ prompts:
       - For each set, ensure that the front and back words are exactly FOUR letters each, with strictly less than EIGHT distinct letters in total.
       - Ensure that all words in the solved and unsolved set are real.
       - Ensure that no word (front, back, or answer) in the solved example appears anywhere in the unsolved set, and vice versa.
+      - Ensure that the answer is definitive. There should be no alternative correct answer in the options.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
