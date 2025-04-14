@@ -106,11 +106,15 @@ def process_json(input_data):
     return output
 
 if __name__ == "__main__":
-    # Allow user to paste JSON input.
-    print("Please paste your JSON input (end with Ctrl+D on Unix/Mac or Ctrl+Z then Enter on Windows):")
-    
     try:
-        input_str = sys.stdin.read()
+        # If an argument is provided, read from the file; otherwise, read from STDIN.
+        if len(sys.argv) > 1:
+            input_path = sys.argv[1]
+            with open(input_path, 'r') as f:
+                input_str = f.read()
+        else:
+            print("Please paste your JSON input (end with Ctrl+D on Unix/Mac or Ctrl+Z then Enter on Windows):")
+            input_str = sys.stdin.read()
         input_data = json.loads(input_str)
     except Exception as e:
         print(f"Error reading input JSON: {e}")
@@ -118,7 +122,7 @@ if __name__ == "__main__":
     
     try:
         result = process_json(input_data)
-        print("\nProcessed Output:")
         print(json.dumps(result, indent=2))
     except Exception as err:
         print(f"Error processing input: {err}")
+        sys.exit(1)
