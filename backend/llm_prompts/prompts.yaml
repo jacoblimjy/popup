@@ -212,14 +212,10 @@ prompts:
       Step 3: Combining them, the result is "nib"
 
     assignment: |
-      Now, create ONE brand new "Use a Rule to Make a Word" puzzle in the exact same format. Follow these guidelines:
-      1. Provide the title: "Use a Rule to Make a Word".
-      2. Give brief instructions like the examples above.
-      3. Provide a set of three words with the front and back words being three letters each, and the word in the brackets following a pattern 
-         as an example.
-      4. Provide an incomplete set with a question mark in the brackets.
-      5. Offer five multiple-choice options (A-E), with exactly one correct answer.
-      6. Include a short "DETAILED EXPLANATION" which explains the pattern step by step and why the chosen option is correct.
+      Now, create ONE brand new "Use a Rule to Make a Word" puzzle in the exact same format.
+      - For each set, ensure that the front and back words are exactly THREE letters each.
+      - Ensure that all words in the solved and unsolved set are real.
+      - Ensure that no word (front, back, or answer) in the solved example appears anywhere in the unsolved set, and vice versa.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
@@ -229,10 +225,6 @@ prompts:
         "explanation": DETAILED EXPLANATION section
         "distractors": list of incorrect option WORDS (there should strictly be 4)
       }
-
-      Reminder: 
-      - Ensure that all words in the solved and unsolved set are real.
-      - Ensure that no word (front, back, or answer) in the solved example appears anywhere in the unsolved set, and vice versa.
 
   - topic: "rule"
     difficulty: "medium"
@@ -330,13 +322,9 @@ prompts:
 
     assignment: |
       Now, create ONE brand new "Use a Rule to Make a Word" puzzle in the exact same format. Follow these guidelines:
-      1. Provide the title: "Use a Rule to Make a Word".
-      2. Give brief instructions like the examples above.
-      3. Provide a set of three words with the front and back words being four letters each, and the word in the brackets following a pattern 
-         as an example.
-      4. Provide an incomplete set with a question mark in the brackets.
-      5. Offer five multiple-choice options (A-E), with exactly one correct answer.
-      6. Include a short "DETAILED EXPLANATION" which explains the pattern step by step and why the chosen option is correct.
+      - For each set, ensure that the front and back words are exactly FOUR letters each, with exactly EIGHT distinct letters in total.
+      - Ensure that all words in the solved and unsolved set are real.
+      - Ensure that no word (front, back, or answer) in the solved example appears anywhere in the unsolved set, and vice versa.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
@@ -490,13 +478,9 @@ prompts:
 
     assignment: |
       Now, create ONE brand new "Use a Rule to Make a Word" puzzle in the exact same format. Follow these guidelines:
-      1. Provide the title: "Use a Rule to Make a Word".
-      2. Give brief instructions like the examples above.
-      3. Provide a set of three words with the front and back words being four letters each, and the word in the brackets following a pattern 
-      as an example.
-      4. Provide an incomplete set with a question mark in the brackets.
-      5. Offer five multiple-choice options (A-E), with exactly one correct answer.
-      6. Include a short "DETAILED EXPLANATION" which explains the pattern step by step and why the chosen option is correct.
+      - For each set, ensure that the front and back words are exactly FOUR letters each, with strictly less than EIGHT distinct letters in total.
+      - Ensure that all words in the solved and unsolved set are real.
+      - Ensure that no word (front, back, or answer) in the solved example appears anywhere in the unsolved set, and vice versa.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
