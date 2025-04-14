@@ -133,7 +133,6 @@ function extractAnagramData(question) {
   return {
     question_text: question.question_text,
     correct_answer: question.correct_answer,
-    distractors: question.distractors,
     explanation: question.explanation,
     answer_format: question.answer_format,
   };
