@@ -220,7 +220,7 @@ prompts:
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-        "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer (follow the format strictly
+        "question_text": TITLE and INSTRUCTIONS section without listing the options (follow the format strictly
         without introducing words like "Solved Example" and strictly ends at "Which of the following is the missing word?")
         "correct_answer": correct option WORD
         "answer_format": "multiple_choice"
@@ -331,7 +331,7 @@ prompts:
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-        "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer (follow the format strictly
+        "question_text": TITLE and INSTRUCTIONS section without listing the options (follow the format strictly
         without introducing words like "Solved Example" and strictly ends at "Which of the following is the missing word?")
         "correct_answer": correct option WORD
         "answer_format": "multiple_choice"
@@ -489,7 +489,7 @@ prompts:
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-        "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer (follow the format strictly
+        "question_text": TITLE and INSTRUCTIONS section without listing the options (follow the format strictly
         without introducing words like "Solved Example" and strictly ends at "Which of the following is the missing word?")
         "correct_answer": correct option WORD
         "answer_format": "multiple_choice"
@@ -832,10 +832,10 @@ prompts:
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
+          "question_text": TITLE and INSTRUCTIONS section without listing the options (follow the format strictly and strictly ends at "Which of the following is the missing word?")
           "correct_answer": correct option WORD
           "answer_format": "multiple_choice"
-          "explanation": DETAILED EXPLANATION section
+          "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
           "distractors": ["list of incorrect option WORDS (strictly 4)"]
           "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
       }
@@ -901,10 +901,10 @@ prompts:
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
+          "question_text": TITLE and INSTRUCTIONS section without listing the options (follow the format strictly and strictly ends at "Which of the following is the missing word?")
           "correct_answer": correct option WORD
           "answer_format": "multiple_choice"
-          "explanation": DETAILED EXPLANATION section
+          "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
           "distractors": ["list of incorrect option WORDS (strictly 4)"]
           "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
       }
@@ -959,20 +959,20 @@ prompts:
       • “focussed” → “dose”: Take the second, sixth, seventh and last letters "o", "s", "e", "d" → "dose"
 
     assignment: |
-      Using any ONE of the textbook patterns (removing and rearranging letters) or a simple variant, create ONE new puzzle in the same format
-      Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
-      If you decide to go with the "removing and rearranging letters" pattern, ensure that first word in each pair MUST strictly be a valid 
-      EIGHT-letter word and the second word in each pair MUST strictly be a valid FOUR-letter word. Positions chosen for extraction can vary,
-      as long as it is consistent across ALL three pairs. Ensure that there is a rearrangment of letters.
-      Every word in the question must be a real word.
-      Ensure that the question output is in the exact format specified in the example given (eg. cabbages sage  wandered dare  focussed (?)).
+      Create ONE new puzzle in the same format.
+      - Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
+      - Ensure that first word in each pair MUST strictly be a valid EIGHT-letter word and the second word in each pair MUST strictly be a 
+        valid FOUR-letter word. Positions chosen for extraction can vary, as long as it is consistent across ALL three pairs. 
+      - In each pair, the second word must be formed by rearranging some or all of the letters from the first word.
+      - Every word in the question must be a real word.
+      - Ensure that the question output is in the exact format specified in the example given (eg. cabbages sage  wandered dare  focussed (?)).
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
+          "question_text": TITLE and INSTRUCTIONS section without listing the options (follow the format strictly and strictly ends at "Which of the following is the missing word?")
           "correct_answer": correct option WORD
           "answer_format": "multiple_choice"
-          "explanation": DETAILED EXPLANATION section
+          "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
           "distractors": ["list of incorrect option WORDS (strictly 4)"]
           "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
       }
