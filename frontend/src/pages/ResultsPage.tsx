@@ -3,7 +3,7 @@ import QuestionReview from "../components/QuestionReview";
 import { formatAttemptedQuestions, formatAttemptSetTimestamp, formatTime } from "../utils";
 import { useEffect, useState } from "react";
 import AttemptedSetsApi from "../api/AttemptedSetsApi";
-import { AttemptedSet, GetAttemptedSetResponse } from "../types/AttemptTypes";
+import { AttemptedSet } from "../types/AttemptTypes";
 import Loader from "../components/Loader";
 
 const ResultsPage = () => {
@@ -18,10 +18,11 @@ const ResultsPage = () => {
 
   const fetchAttemptedSet = async () => {
     setIsLoading(true);
-    const response : GetAttemptedSetResponse = await AttemptedSetsApi.getAttemptedSetBySetId(set_id!);
+    const response = await AttemptedSetsApi.getAttemptedSetBySetId(set_id!);
+    const data = response.data;
     const formattedResponse : AttemptedSet = {
-      ...response,
-      attempted_questions: formatAttemptedQuestions(response.attempted_questions)
+      ...data,
+      attempted_questions: formatAttemptedQuestions(data.attempted_questions)
     }
     setAttemptedSet(formattedResponse);
     setIsLoading(false);
@@ -34,7 +35,7 @@ const ResultsPage = () => {
       attemptedSet ? ( // Ensure attemptedSet is defined
         <div className="flex flex-col p-10">
           <p className="text-2xl font-semibold">Review</p>
-          <div className="flex flex-col my-4 border-1 border-gray-300 rounded-md">
+          <div className="flex flex-col my-4 border border-gray-300 rounded-md">
             <div className="flex flex-col p-4 gap-4">
               <div className="flex md:flex-row gap-5 flex-col justify-between">
                 <p className="text-md font-medium">Practice Results</p>

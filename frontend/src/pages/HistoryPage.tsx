@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChildrenList } from "../hooks/useChildrenList";
-import { AttemptedSet } from "../types/AttemptTypes";
+import { AttemptedSet, GetAttemptedSetResponse } from "../types/AttemptTypes";
 import AttemptedSetsApi from "../api/AttemptedSetsApi";
 import { difficulty_levels, formatAttemptedQuestions, formatDetailedDate, topics } from "../utils";
 import Loader from "../components/Loader";
@@ -47,11 +47,11 @@ const HistoryPage = () => {
         const child_id = activeChild.child_id;
         const attemptedSetResponse = await AttemptedSetsApi.getAttemptedSets(child_id as number, page);
 
-        if (attemptedSetResponse.length < 10) {
+        if (attemptedSetResponse.data.length < 10) {
           setHasMore(false);
         }
 
-        const formattedResponse = attemptedSetResponse.map((attempt) => ({
+        const formattedResponse = attemptedSetResponse.data.map((attempt : GetAttemptedSetResponse) => ({
           ...attempt,
           attempt_timestamp: formatDetailedDate(attempt.attempt_timestamp),
           attempted_questions: formatAttemptedQuestions(attempt.attempted_questions),

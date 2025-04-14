@@ -71,8 +71,8 @@ const AdminPage: React.FC = () => {
 	// ---------- Data Fetching ----------
 	const fetchPendingQuestions = async () => {
 		try {
-			const data = await adminAPI.getPendingQuestions(token);
-			setPendingQuestions(data);
+			const response = await adminAPI.getPendingQuestions(token);
+			setPendingQuestions(response.data);
 		} catch (error) {
 			console.error("Failed to fetch pending questions:", error);
 			setPendingQuestions([]);

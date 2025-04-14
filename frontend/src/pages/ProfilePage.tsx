@@ -38,6 +38,7 @@ const ProfilePage: React.FC = () => {
 				userId: user.userId,
 				username: updatedUser.username,
 				email: updatedUser.email,
+				role_id: updatedUser.role_id,
 			});
 
 			setShowConfirmModal(false);
