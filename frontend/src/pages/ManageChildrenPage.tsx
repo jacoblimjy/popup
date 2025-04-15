@@ -79,6 +79,7 @@ const ManageChildrenPage: React.FC = () => {
 											{child.child_name}
 										</p>
 										<p className="text-sm text-gray-500">Age {child.age}</p>
+										{/* <p className="text-sm text-gray-500">Education Level {child.education_level}</p> */}
 										<p className="text-xs text-gray-400">
 											Joined {formatDate(child.date_created)}
 										</p>
