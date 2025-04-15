@@ -1,4 +1,3 @@
-from nltk.corpus import words
 import re
 import json
 import sys
