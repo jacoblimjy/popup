@@ -681,30 +681,28 @@ prompts:
 
       Each puzzle must have:
       1. A short introduction explaining the task.
-      2. A question that demonstrates a letter change in each step (eg. "LOOK" → "LOCK"). 
+      2. A question that demonstrates a letter change in each step (eg. "LOOK" → "LOCK").
+         The ladder consist of four 4-letter English words: START, MISSING1, MISSING2, END
+         The question must show: START ____ ____ END
       3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers. Generate the options as as well.
       4. A short detailed explanation highlighting the steps and why the correct answer is correct.
 
       Requirements (To be enforced strictly):
-      - You can only change one letter at a time.
-      - The position of the letter changed must be different in every step.
-        - That means the first, second, and third steps must each modify a unique letter index (from 0 to 3).
-        - For example, if Step 1 changes the 2nd letter (index 1), Step 2 cannot change index 1 again, and Step 3 must also change a new 
-          letter position not already used in Steps 1 or 2.
-        - Ensure each of the 3 transitions (X → A → B → Z) uses 3 different letter positions.
-      - Ensure that the question has strictly two missing words in the format X ____ ____ Z, where X and Z are placeholders.  
-      - The generated options should be formatted as A, B.
+      - Only one letter changes at each step.
+      - Each position (1st, 2nd, 3rd, 4th) is changed exactly once.
+        - Ensure each of the 3 transitions (START → MISSING1 → MISSING2 → END) uses 3 different letter positions.
+      - All four words must be valid English words.
 
       Constraints of the Correct Answer:
       - Two real four-letter word that fits the word ladder pattern, following the one-letter change rule.
-      - The two words must correctly connect X to Z without skipping an intermediate step.
+      - The two words must correctly connect START to END without skipping an intermediate step.
       - Both A and B must be correct for the option to be considered fully accurate.
 
       Constraints of an Incorrect Answer:
-      - Must be four-letter words, but cannot be X or Z.
-      - May follow the one-letter change rule but in the wrong position
-      - May change more than one letter
-      - May not be a real word
+      - Must be four-letter words, but cannot be START or END.
+      - May follow the one-letter change rule but in the wrong position.
+      - May change more than one letter.
+      - May not be a real word.
 
     few_shot_examples: |
       ## EXAMPLE PUZZLE 1
@@ -761,11 +759,11 @@ prompts:
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
           "question_text": TITLE and INSTRUCTIONS section WITHOUT listing the options (strictly ends at "Which of the following is the missing word?")
-          "correct_answer": correct option WORD without the option letter in CAPITAL LETTERS
+          "correct_answer": "MISSING1, MISSING2"
           "answer_format": "multiple_choice"
           "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
-          "distractors": ["list of incorrect option WORDS without the option letters in CAPITAL LETTERS (strictly 4)"]
-          "set": ["X", "first correct answer", "second correct answer", "Z"] -> length = 4 (For example, [COPE, CORE, FORE, FORT])
+          "distractors": ["WRONG1", "WRONG2", "WRONG3, WRONG4", "WRONG5, WRONG6", "WRONG7, WRONG8"]
+          "set": ["START", "MISSING1", "MISSING2", "END"]
       }
 
   - topic: "word_pair"
