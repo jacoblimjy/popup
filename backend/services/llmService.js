@@ -755,23 +755,27 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
 
     // 5. Generate and validate questions until we get at least one valid question
     //    (Now we only ask for exactly the requested count per attempt.)
-    while (attempts < MAX_ATTEMPTS && validQuestions.length === 0) {
+    while (attempts < MAX_ATTEMPTS && validQuestions.length < requestedCount) {
       attempts++;
 
+      // Calculate how many more questions we need
+      const remainingCount = requestedCount - validQuestions.length;
+
       console.log(
-        `Attempt ${attempts}: Generating ${requestedCount} questions...`
+        `Attempt ${attempts}: Generating ${remainingCount} more questions (${validQuestions.length}/${requestedCount} collected so far)...`
       );
 
       let rawQuestions;
       if (hasOpenAIAPIKey()) {
         console.log("Using OpenAI API for question generation");
+        // Always request the full remaining count to maximize chances of getting valid questions
         rawQuestions = await generateQuestionsWithOpenAI(
           prompt,
-          requestedCount
+          remainingCount
         );
       } else {
         console.log("Using mock data for question generation");
-        rawQuestions = await generateQuestionsMock(topicKey, requestedCount);
+        rawQuestions = await generateQuestionsMock(topicKey, remainingCount);
       }
 
       totalGenerated += rawQuestions.length;
@@ -783,26 +787,42 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
         difficulty_id
       );
 
-      // If any valid questions were produced, add them
+      // Add newly validated questions to our collection
       if (processedQuestions.validQuestions.length > 0) {
         validQuestions = validQuestions.concat(
           processedQuestions.validQuestions
+        );
+        console.log(
+          `Added ${processedQuestions.validQuestions.length} valid questions, total now: ${validQuestions.length}/${requestedCount}`
         );
       } else {
         console.warn(
           `Attempt ${attempts} yielded no valid questions. Trying again...`
         );
       }
+
+      // Track all skipped questions for reporting
+      allSkippedQuestions = allSkippedQuestions.concat(
+        processedQuestions.skippedQuestions
+      );
     }
 
-    // After attempts, if still no valid questions, throw an error
+    // After all attempts, check if we have at least some valid questions
     if (validQuestions.length === 0) {
       throw new Error(
         "No valid questions could be generated after multiple attempts"
       );
     }
 
+    // Log a warning if we couldn't get the full requested count
+    if (validQuestions.length < requestedCount) {
+      console.warn(
+        `Could only generate ${validQuestions.length}/${requestedCount} valid questions after ${attempts} attempts`
+      );
+    }
+
     // 6. Trim to the requested count if we have more valid questions than requested
+    // (This should rarely happen now with the improved logic, but kept as a safety check)
     if (validQuestions.length > requestedCount) {
       validQuestions = validQuestions.slice(0, requestedCount);
     }
