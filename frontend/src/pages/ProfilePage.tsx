@@ -118,7 +118,7 @@ const ProfilePage: React.FC = () => {
 
 			{/* Confirmation Modal */}
 			{showConfirmModal && (
-				<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
+				<div className="fixed inset-0 flex items-center justify-center">
 					<div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200 w-96">
 						<h2 className="text-lg font-semibold text-gray-900">
 							Confirm Changes
