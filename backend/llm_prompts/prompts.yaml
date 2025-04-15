@@ -23,7 +23,6 @@ prompts:
       The GREEDY chicken ate all the corn.
 
       Explanation:
-      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
       The sentence describes a chicken that ate all the corn. A fitting adjective to describe this behaviour would be GREEDY.
 
 
@@ -32,11 +31,11 @@ prompts:
       It was quite CLOUDY and cold when we went to the park.
 
       Explanation:
-      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
       The sentence describes the weather as cold. A fitting adjective to describe the weather as well would be CLOUDY.
 
     assignment: |
-      Ensure that the capitalised word must be EXACTLY SIX letters long.
+      - Ensure that the capitalised word must be EXACTLY SIX letters long.
+      - Write your explanation using the same format as the examples shown.
 
   - topic: "anagram"
     difficulty: "medium"
@@ -62,7 +61,6 @@ prompts:
       I ordered LASAGNA for dinner when I went to the Italian restaurant.
 
       Explanation:
-      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
       The sentence mentions an Italian restaurant and dinner, which suggests the food ordered is a well-known Italian dish. 
       LASAGNA is a fitting noun as it refers to a popular layered pasta dish.
 
@@ -72,12 +70,12 @@ prompts:
       My aunt has five nieces and NEPHEWS.
 
       Explanation:
-      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
       The sentence mentions nieces, which implies a reference to family members. A fitting noun to match 'nieces' in this context is 'NEPHEWS,' 
       which refers to male relatives.
 
     assignment: |
-      Ensure that the capitalised word must be EXACTLY SEVEN letters long.
+      - Ensure that the capitalised word must be EXACTLY SEVEN letters long.
+      - Write your explanation using the same format as the examples shown.
 
   - topic: "anagram"
     difficulty: "hard"
@@ -103,7 +101,6 @@ prompts:
       I was SHOUTING when I lost my voice.
 
       Explanation:
-      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
       The sentence describes someone who has lost their voice. 
       The word SHOUTING is a fitting verb because you lose your voice when you talk a lot or shout.
 
@@ -113,12 +110,12 @@ prompts:
       He walked CAREFULLY on the tightrope.
 
       Explanation:
-      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
       The sentence describes someone walking on a tightrope, which requires caution and precision. 
       The word CAREFULLY is a fitting adverb because it means to do something with caution to avoid mistakes or danger.
 
     assignment: |
-      Ensure that the capitalised word is exactly EIGHT or NINE letters long.
+      - Ensure that the capitalised word is exactly EIGHT or NINE letters long.
+      - Write your explanation using the same format as the examples shown.
 
   - topic: "rule"
     difficulty: "easy"
@@ -576,18 +573,18 @@ prompts:
       CLAN → CLAP: Change the last letter from 'N' to 'P' to form "CLAP"
 
     assignment: |
-      Ensure that all words in the ladder are exactly four letters long, and are simple and commonly known words.
+      Ensure that all words in the ladder are exactly four letters long, and are simple and commonly used everyday words.
       There should be only ONE missing word that needs to be filled in.
       Each word in the sequence should differ from the next by only one letter.
       Every word in the ladder must be a valid English word.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-          "question_text": TITLE and INSTRUCTIONS section WITHOUT identifying which is the correct answer
-          "correct_answer": correct option WORD
+          "question_text": TITLE and INSTRUCTIONS section WITHOUT listing the options (strictly ends at "Which of the following is the missing word?")
+          "correct_answer": correct option WORD without the option letter in CAPITAL LETTERS
           "answer_format": "multiple_choice"
-          "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option WORDS (strictly 4)"]
+          "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
+          "distractors": ["list of incorrect option WORDS without the option letters in CAPITAL LETTERS (strictly 4)"]
           "set": ["X", "correct answer", "Z"]
       }
 
@@ -661,18 +658,19 @@ prompts:
       RIFE → RITE: Change the third letter from 'F' to 'T' to form "RITE"
 
     assignment: |
-      Ensure that all words in the ladder are exactly four letters long, and more complex or less commonly known word.
+      Ensure that all words in the ladder are exactly four letters long.
+      Especially for the missing word, ensure it is more complex or less commonly used word.
       There should be only ONE missing word that needs to be filled in.
       Each word in the sequence should differ from the next by only one letter.
       Every word in the ladder must be a valid English word.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-          "question_text": TITLE and INSTRUCTIONS section WITHOUT identifying which is the correct answer
-          "correct_answer": correct option WORD
+          "question_text": TITLE and INSTRUCTIONS section WITHOUT listing the options (strictly ends at "Which of the following is the missing word?")
+          "correct_answer": correct option WORD without the option letter in CAPITAL LETTERS
           "answer_format": "multiple_choice"
-          "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option WORDS (strictly 4)"]
+          "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
+          "distractors": ["list of incorrect option WORDS without the option letters in CAPITAL LETTERS (strictly 4)"]
           "set": ["X", "correct answer", "Z"]
       }
 
@@ -762,11 +760,11 @@ prompts:
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
-          "correct_answer": correct option WORD
+          "question_text": TITLE and INSTRUCTIONS section WITHOUT listing the options (strictly ends at "Which of the following is the missing word?")
+          "correct_answer": correct option WORD without the option letter in CAPITAL LETTERS
           "answer_format": "multiple_choice"
-          "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option WORDS (strictly 4)"]
+          "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
+          "distractors": ["list of incorrect option WORDS without the option letters in CAPITAL LETTERS (strictly 4)"]
           "set": ["X", "first correct answer", "second correct answer", "Z"] -> length = 4 (For example, [COPE, CORE, FORE, FORT])
       }
 

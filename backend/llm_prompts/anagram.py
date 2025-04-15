@@ -27,7 +27,7 @@ def jumble_word(word, existing_distractors=None):
         if attempts > 100:
             raise ValueError("Unable to generate a unique jumbled word.")
 
-def generate_distractors(word, count=4):
+def generate_distractors(word, count=5):
     """
     Generate a list of 'count' unique jumbled versions of the given word.
     """
@@ -74,17 +74,17 @@ def process_json(input_data):
     if not is_english_word(correct_word):
         raise ValueError(f"The extracted word '{correct_word}' is not recognized as an English word.")
     
-    distractors = generate_distractors(correct_word, count=4)
+    distractors = generate_distractors(correct_word, count=5)
     
     validate_options(correct_word, distractors)
     
     # Replace the original word with the first jumbled version
-    modified_sentence = question_text.replace(correct_word, distractors[0], 1)
+    used_distractor = distractors.pop(0)
+    modified_sentence = question_text.replace(correct_word, used_distractor, 1)
     
     options = distractors + [correct_word]
     random.shuffle(options)
     
-    formatted_options = "\n".join([f"{chr(65 + i)}) {option}" for i, option in enumerate(options)])
     
     final_question_text = (
         "TITLE: Anagram in a Sentence\n\n"
@@ -92,7 +92,6 @@ def process_json(input_data):
         "Rearrange the letters in capitals to form a word that completes the sentence sensibly.\n\n"
         f"{modified_sentence}\n\n"
         "Which of the following is the correct answer?\n"
-        f"{formatted_options}"
     )
     
     output = {
