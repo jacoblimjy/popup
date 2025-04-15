@@ -14,7 +14,7 @@ const QuestionReview = ({ question: { question_text, correct_answer, options, ch
       <div className="bg-[#f1c40e] w-fit rounded-md p-2 text-gray-600 text-sm">
         <p>Time Taken: {formatTime(time_spent)}</p>
       </div>
-      <div className="flex md:flex-row flex-col w-full gap-8 md:h-[200px]">
+      <div className="flex md:flex-row flex-col w-full gap-8 md:h-[250px]">
         <div className="flex flex-col gap-2 rounded-md border border-gray-300 md:w-2/5">
           {options.map((option, index) => (
             <div
