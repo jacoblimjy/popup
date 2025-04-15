@@ -578,24 +578,19 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
           const ruleData = extractRuleData(question);
           let processedOutput = await runPythonEvaluator("rule_eval", ruleData);
           console.log("Rule question validated successfully");
-
           const correctAnswerRaw = processedOutput.correct_answer;
           const distractors = processedOutput.distractors;
+          const options = distractors.concat([correctAnswerRaw]);
 
-          // Combine the correct answer with distractors
-          const options = [...distractors, correctAnswerRaw];
-
-          // Properly shuffle the array to randomize option positions
           for (let i = options.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [options[i], options[j]] = [options[j], options[i]];
           }
 
-          // Find which option letter corresponds to the correct answer after shuffling
           let correctLetter = null;
           const formattedOptions = options
             .map((opt, index) => {
-              const letter = String.fromCharCode(65 + index); // A, B, C, D, E
+              const letter = String.fromCharCode(65 + index);
               if (opt === correctAnswerRaw) {
                 correctLetter = letter;
               }
@@ -608,7 +603,6 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
               "Could not determine the correct answer's option label"
             );
           }
-
           const finalQuestionText = `${processedOutput.question_text}\n\nWhich of the following is the correct answer?\n${formattedOptions}`;
           processedOutput.question_text = finalQuestionText;
           processedOutput.correct_answer = correctLetter;
@@ -680,7 +674,6 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
     `Validation complete. ${validQuestions.length} accepted, ${skippedQuestions.length} rejected.`
   );
 
-  validQuestions = validQuestions.map((q) => formatMultipleChoiceQuestion(q));
   // Return both valid questions and information about skipped questions
   return {
     validQuestions,
@@ -1225,87 +1218,6 @@ async function getDifficultyByLabel(difficultyLabel) {
   return rows[0];
 }
 
-/**
- * Helper function to properly format multiple choice questions
- * Randomizes options and updates the correct answer to the corresponding letter
- * @param {Object} question - Question with correct_answer and distractors
- * @returns {Object} - Updated question with formatted options and correct letter
- */
-function formatMultipleChoiceQuestion(question) {
-  // Skip if not a multiple choice question
-  if (question.answer_format !== "multiple_choice") {
-    return question;
-  }
-
-  // Check if correct_answer is already a letter (A-E)
-  if (/^[A-E]$/.test(question.correct_answer)) {
-    return question; // Already properly formatted
-  }
-
-  const correctAnswerRaw = question.correct_answer;
-  const distractors = Array.isArray(question.distractors)
-    ? question.distractors
-    : question.distractors
-    ? [question.distractors]
-    : [];
-
-  // Create an array of all options (distractors + correct answer)
-  const allOptions = [...distractors];
-
-  // Only add correct answer if it's not already in the options
-  if (!allOptions.includes(correctAnswerRaw)) {
-    allOptions.push(correctAnswerRaw);
-  }
-
-  // Shuffle the options to randomize their positions
-  const shuffledOptions = [...allOptions];
-  for (let i = shuffledOptions.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffledOptions[i], shuffledOptions[j]] = [
-      shuffledOptions[j],
-      shuffledOptions[i],
-    ];
-  }
-
-  // Find which option corresponds to the correct answer
-  let correctLetterIndex = shuffledOptions.findIndex(
-    (opt) => opt === correctAnswerRaw
-  );
-  if (correctLetterIndex === -1) {
-    // Fallback if correct answer isn't found (shouldn't happen)
-    correctLetterIndex = 0;
-    shuffledOptions[0] = correctAnswerRaw;
-  }
-
-  // Convert index to letter (A=0, B=1, etc.)
-  const correctLetter = String.fromCharCode(65 + correctLetterIndex);
-
-  // Format options as A) option1, B) option2, etc.
-  const formattedOptions = shuffledOptions
-    .map((opt, idx) => `${String.fromCharCode(65 + idx)}) ${opt}`)
-    .join("\n");
-
-  // Check if question text already includes options
-  const optionsPattern = /(?:A|B|C|D|E)\)\s*.+/g;
-  const hasOptions = optionsPattern.test(question.question_text);
-
-  // If question text already has options, leave it as is
-  let updatedQuestionText = question.question_text;
-  if (
-    !hasOptions &&
-    !question.question_text.includes("Which of the following")
-  ) {
-    updatedQuestionText = `${question.question_text}\n\nWhich of the following is the correct answer?\n${formattedOptions}`;
-  }
-
-  return {
-    ...question,
-    question_text: updatedQuestionText,
-    correct_answer: correctLetter,
-    distractors: shuffledOptions.filter((opt) => opt !== correctAnswerRaw),
-  };
-}
-
 module.exports = {
   generateQuestions,
   generateQuestionsWithOpenAI,
@@ -1314,5 +1226,4 @@ module.exports = {
   getDifficultyByLabel,
   checkDuplicateQuestion,
   calculateTextSimilarity,
-  formatMultipleChoiceQuestion,
 };
