@@ -144,43 +144,97 @@ function extractAnagramData(question) {
  * @returns {Object} - Data for ladder_eval.py
  */
 function extractWordLadderData(question) {
-  // This is highly dependent on question format
-  // Example implementation for "WORD ____ LAST" format:
-  if (
-    question.set &&
-    Array.isArray(question.set) &&
-    question.set.length === 3
-  ) {
+  // If a "set" is already provided, just normalize and return it.
+  if (question.set && Array.isArray(question.set)) {
     return { set: question.set.map((word) => word.toUpperCase()) };
   }
 
   let set = [];
+  // Attempt to match a two-blank pattern, e.g. "BEND ____ ____ BARK"
+  const twoBlankPattern =
+    /([A-Z]{4})\s*(?:____|\?)\s*(?:____|\?)\s*([A-Z]{4})/i;
+  let matchTwo = question.question_text.match(twoBlankPattern);
 
-  const match = question.question_text.match(
-    /([A-Z]{4})\s+(?:____|\?)\s+([A-Z]{4})/i
-  );
-  if (match) {
-    set = [
-      match[1].toUpperCase(),
-      question.correct_answer.toUpperCase(),
-      match[2].toUpperCase(),
-    ];
+  if (matchTwo) {
+    const firstWord = matchTwo[1].toUpperCase();
+    const lastWord = matchTwo[2].toUpperCase();
+    // Split the correct_answer by comma to obtain the middle words.
+    // For example, "BAND, BARD" becomes ["BAND", "BARD"]
+    let midWords = question.correct_answer
+      .split(",")
+      .map((w) => w.trim().toUpperCase());
+
+    set = [firstWord, ...midWords, lastWord];
   } else {
-    // Try alternative format: "FIRST → ____ → LAST"
-    const arrowMatch = question.question_text.match(
-      /([A-Z]{4})\s*→\s*(?:____|\?)\s*→\s*([A-Z]{4})/i
-    );
-    if (arrowMatch) {
+    // Fallback: try to match a one-blank pattern, e.g. "GAME ____ CODE"
+    const oneBlankPattern = /([A-Z]{4})\s*(?:____|\?)\s*([A-Z]{4})/i;
+    let matchOne = question.question_text.match(oneBlankPattern);
+
+    if (matchOne) {
       set = [
-        arrowMatch[1].toUpperCase(),
+        matchOne[1].toUpperCase(),
         question.correct_answer.toUpperCase(),
-        arrowMatch[2].toUpperCase(),
+        matchOne[2].toUpperCase(),
       ];
     }
   }
 
-  if (set.length !== 3) {
+  // Ensure we successfully extracted a ladder.
+  if (!set || set.length === 0) {
     throw new Error("Could not extract word ladder set from question");
+  }
+
+  // Optionally, enforce that all words are four letters long.
+  if (!set.every((word) => word.length === 4)) {
+    throw new Error("Not all ladder words are 4 letters long");
+  }
+
+  return { set };
+}
+function extractWordLadderData(question) {
+  // If a "set" is already provided, just normalize and return it.
+  if (question.set && Array.isArray(question.set)) {
+    return { set: question.set.map((word) => word.toUpperCase()) };
+  }
+
+  let set = [];
+  // Attempt to match a two-blank pattern, e.g. "BEND ____ ____ BARK"
+  const twoBlankPattern =
+    /([A-Z]{4})\s*(?:____|\?)\s*(?:____|\?)\s*([A-Z]{4})/i;
+  let matchTwo = question.question_text.match(twoBlankPattern);
+
+  if (matchTwo) {
+    const firstWord = matchTwo[1].toUpperCase();
+    const lastWord = matchTwo[2].toUpperCase();
+    // Split the correct_answer by comma to obtain the middle words.
+    // For example, "BAND, BARD" becomes ["BAND", "BARD"]
+    let midWords = question.correct_answer
+      .split(",")
+      .map((w) => w.trim().toUpperCase());
+
+    set = [firstWord, ...midWords, lastWord];
+  } else {
+    // Fallback: try to match a one-blank pattern, e.g. "GAME ____ CODE"
+    const oneBlankPattern = /([A-Z]{4})\s*(?:____|\?)\s*([A-Z]{4})/i;
+    let matchOne = question.question_text.match(oneBlankPattern);
+
+    if (matchOne) {
+      set = [
+        matchOne[1].toUpperCase(),
+        question.correct_answer.toUpperCase(),
+        matchOne[2].toUpperCase(),
+      ];
+    }
+  }
+
+  // Ensure we successfully extracted a ladder.
+  if (!set || set.length === 0) {
+    throw new Error("Could not extract word ladder set from question");
+  }
+
+  // Optionally, enforce that all words are four letters long.
+  if (!set.every((word) => word.length === 4)) {
+    throw new Error("Not all ladder words are 4 letters long");
   }
 
   return { set };
