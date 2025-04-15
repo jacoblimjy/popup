@@ -475,8 +475,8 @@ async function checkDuplicateQuestion(question) {
  * Enhanced with duplicate detection focusing on answer similarity
  */
 async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
-  let validQuestions = [];
-  let skippedQuestions = []; // Track skipped questions for reporting
+  const validQuestions = [];
+  const skippedQuestions = []; // Track skipped questions for reporting
   const wordnet = new WordNet();
 
   // Get the topic type based on I
