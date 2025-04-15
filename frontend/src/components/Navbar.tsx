@@ -27,7 +27,7 @@ const Navbar: React.FC = () => {
 		if (childrenList && childrenList.length > 0 && !activeChild) {
 			setActiveChild(childrenList[0]);
 		}
-	}, [childrenList, activeChild, setActiveChild]);
+	}, [childrenList, setActiveChild]);
 
 	// Close dropdowns if clicking outside
 	useEffect(() => {
@@ -56,8 +56,8 @@ const Navbar: React.FC = () => {
 	};
 
 	const handleLogout = () => {
-		logout();
 		setActiveChild(null);
+		logout();
 		navigate("/", { replace: true });
 		setIsChildrenMenuOpen(false);
 		setIsUserMenuOpen(false);

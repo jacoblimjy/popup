@@ -13,6 +13,7 @@ export const ChildrenProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (activeChild) {
+      console.log("Problem")
       localStorage.setItem("activeChild", JSON.stringify(activeChild));
     }
   }, [activeChild]);
