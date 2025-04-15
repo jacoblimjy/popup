@@ -511,13 +511,13 @@ prompts:
       Each puzzle must have:
       1. A short introduction explaining the task.
       2. A question that demonstrates a letter change in each step. The letter change must occur at different positions in each step.
-        For example, if the first step changes the first letter, the next step must change a different letter.
+         For example, if the first step changes the first letter, the next step must change a different letter.
       3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers.
       4. A short detailed explanation highlighting the steps and why the correct answer is correct.
 
       Requirements:
       - Ensure that the question has only one missing word in the format `X ____ Z`, where X and Z are placeholders.
-      - Ensure that X and Z are common and easily recognisable four-letter words.
+      - Ensure that X, Z and the missing word are common and easily recognisable four-letter words.
 
       Constraints of the Correct Answer:
       - A real four-letter word that fits the word ladder pattern, following the one-letter change rule.
@@ -596,16 +596,16 @@ prompts:
       Each puzzle must have:
       1. A short introduction explaining the task.
       2. A question that demonstrates a letter change in each step. The letter change must occur at different positions in each step.
-        For example, if the first step changes the first letter, the next step must change a different letter.
+         For example, if the first step changes the first letter, the next step must change a different letter.
       3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers.
       4. A short detailed explanation highlighting the steps and why the correct answer is correct.
 
       Requirements:
       - Ensure that the question has only one missing word in the format `X ____ Z`, where X and Z are placeholders.
+      - Ensure that the missing word is a more complex or less commonly known four-letter word.
 
       Constraints of the Correct Answer:
       - A real four-letter word that fits the word ladder pattern, following the one-letter change rule.
-      - Ensure that the correct answer is a more complex or less commonly known four-letter word.
       - The word must correctly connect X to Z without skipping an intermediate step.
 
       Constraints of an Incorrect Answer:
@@ -755,6 +755,7 @@ prompts:
       Ensure that all words in the ladder are exactly four letters long. There should have two missing words that need to be filled in.
       Each word in the sequence should differ from the next by only one letter. Ensure the position that the letter changes differ each step.
       Every word in the ladder must be a valid English word.
+      Ensure that the wrong answers are not the start or end word. They must be a different word.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
