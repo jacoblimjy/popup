@@ -1,202 +1,148 @@
 const pendingQuestionService = require("../services/pendingQuestionService");
+const { asyncHandler, ApiError } = require("../utils/errorHandler");
 
-const createPendingQuestion = async (req, res) => {
-	try {
-		// Validate required fields
-		const requiredFields = [
-			"question_text",
-			"answer_format", // 👈 Ensure this is required
-			"correct_answer",
-			"distractors",
-			"topic_id",
-			"difficulty_id",
-			"explanation",
-		];
+const createPendingQuestion = asyncHandler(async (req, res) => {
+  // Validate required fields (keeping the validation from develop branch)
+  const requiredFields = [
+    "question_text",
+    "answer_format", // Ensure this is required
+    "correct_answer",
+    "distractors",
+    "topic_id",
+    "difficulty_id",
+    "explanation",
+  ];
 
-		const missingFields = requiredFields.filter((field) => !req.body[field]);
-		if (missingFields.length > 0) {
-			return res.status(400).json({
-				message: "Missing required fields",
-				missingFields,
-			});
-		}
-
-		const pendingQuestionId =
-			await pendingQuestionService.createPendingQuestion(req.body);
-		res.status(201).json({
-			pendingQuestionId,
-			message: "Pending Question created successfully",
-		});
-	} catch (error) {
-		res.status(400).json({
-			message: "Failed to create pending question",
-			error: error.message,
-		});
-	}
-};
-
-const createPendingQuestionsBulk = async (req, res) => {
-  try {
-    if (!Array.isArray(req.body.questions)) {
-      return res
-        .status(400)
-        .json({ message: "Pending Questions must be provided as an array" });
-    }
-
-    const result = await pendingQuestionService.createPendingQuestionsBulk(
-      req.body.questions
-    );
-    res.status(201).json(result);
-  } catch (error) {
-    res.status(400).json({
-      message: "Failed to process pending questions",
-      error: error.message,
-    });
+  const missingFields = requiredFields.filter((field) => !req.body[field]);
+  if (missingFields.length > 0) {
+    throw new ApiError(400, "Missing required fields", { missingFields });
   }
-};
 
-const convertPendingQuestionToQuestion = async (req, res) => {
-  try {
-    const { id } = req.params;
+  const pendingQuestionId = await pendingQuestionService.createPendingQuestion(req.body);
+  res.status(201).json({
+    success: true,
+    pendingQuestionId,
+    message: "Pending Question created successfully",
+  });
+});
 
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid pending question ID" });
-    }
-
-    const questionId = await pendingQuestionService.convertPendingQuestionToQuestion(id);
-    
-    res.json({
-      questionId,
-      message: "Pending question converted to approved question successfully",
-    });
-  } catch (error) {
-    if (error.message === "Pending Question not found") {
-      res.status(404).json({ message: error.message });
-    } else {
-      res.status(400).json({
-        message: "Failed to convert pending question to approved question",
-        error: error.message,
-      });
-    }
+const createPendingQuestionsBulk = asyncHandler(async (req, res) => {
+  if (!Array.isArray(req.body.questions)) {
+    throw new ApiError(400, "Pending Questions must be provided as an array");
   }
-};
 
-const getPendingQuestions = async (req, res) => {
-  try {
-    const limit = Math.max(1, Math.min(200, parseInt(req.query.limit) || 200));
-    const offset = Math.max(0, parseInt(req.query.offset) || 0);
+  const result = await pendingQuestionService.createPendingQuestionsBulk(
+    req.body.questions
+  );
+  res.status(201).json({
+    success: true,
+    ...result,
+  });
+});
 
-    const filters = {};
+const convertPendingQuestionToQuestion = asyncHandler(async (req, res) => {
+  const { id } = req.params;
 
-    if (req.query.topic_id && !isNaN(parseInt(req.query.topic_id))) {
-      filters.topic_id = parseInt(req.query.topic_id);
-    }
-
-    if (req.query.difficulty_id && !isNaN(parseInt(req.query.difficulty_id))) {
-      filters.difficulty_id = parseInt(req.query.difficulty_id);
-    }
-
-    const pendingQuestions = await pendingQuestionService.getPendingQuestions(
-      filters,
-      limit,
-      offset
-    );
-    res.json(pendingQuestions);
-  } catch (error) {
-    res.status(400).json({
-      message: "Failed to fetch pending questions",
-      error: error.message,
-    });
+  if (!id || isNaN(id)) {
+    throw new ApiError(400, "Invalid pending question ID");
   }
-};
 
-const getPendingQuestionById = async (req, res) => {
-  try {
-    const { id } = req.params;
+  const questionId = await pendingQuestionService.convertPendingQuestionToQuestion(id);
+  
+  res.json({
+    success: true,
+    questionId,
+    message: "Pending question converted to approved question successfully",
+  });
+});
 
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid pending question ID" });
-    }
+const getPendingQuestions = asyncHandler(async (req, res) => {
+  // Using the higher limit from develop branch (200 instead of 100)
+  const limit = Math.max(1, Math.min(200, parseInt(req.query.limit) || 200));
+  const offset = Math.max(0, parseInt(req.query.offset) || 0);
 
-    const pendingQuestion = await pendingQuestionService.getPendingQuestionById(parseInt(id));
-    res.json(pendingQuestion);
-  } catch (error) {
-    if (error.message === "Pending Question not found") {
-      res.status(404).json({ message: error.message });
-    } else {
-      res.status(400).json({
-        message: "Failed to fetch pending question",
-        error: error.message,
-      });
-    }
+  const filters = {};
+
+  if (req.query.topic_id && !isNaN(parseInt(req.query.topic_id))) {
+    filters.topic_id = parseInt(req.query.topic_id);
   }
-};
 
-const updatePendingQuestion = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid pending question ID" });
-    }
-
-    const requiredFields = [
-      "question_text",
-      "answer_format",
-      "correct_answer",
-      "distractors",
-      "topic_id",
-      "difficulty_id",
-      "explanation"
-    ];
-    const missingFields = requiredFields.filter((field) => !req.body[field]);
-
-    if (missingFields.length > 0) {
-      return res.status(400).json({
-        message: "Missing required fields",
-        missingFields,
-      });
-    }
-
-    await pendingQuestionService.updatePendingQuestion(parseInt(id), req.body);
-    const updatedPendingQuestion = await pendingQuestionService.getPendingQuestionById(parseInt(id));
-    res.json({
-      message: "Pending Question updated successfully",
-      question: updatedPendingQuestion,
-    });
-  } catch (error) {
-    if (error.message === "Pending Question not found") {
-      res.status(404).json({ message: error.message });
-    } else {
-      res.status(400).json({
-        message: "Failed to update pending question",
-        error: error.message,
-      });
-    }
+  if (req.query.difficulty_id && !isNaN(parseInt(req.query.difficulty_id))) {
+    filters.difficulty_id = parseInt(req.query.difficulty_id);
   }
-};
 
-const deletePendingQuestion = async (req, res) => {
-  try {
-    const { id } = req.params;
+  const pendingQuestions = await pendingQuestionService.getPendingQuestions(
+    filters,
+    limit,
+    offset
+  );
+  res.json({
+    success: true,
+    data: pendingQuestions,
+  });
+});
 
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: "Invalid pending question ID" });
-    }
+const getPendingQuestionById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
 
-    await pendingQuestionService.deletePendingQuestion(parseInt(id));
-    res.json({ message: "Pending Question deleted successfully" });
-  } catch (error) {
-    if (error.message === "Pending Question not found") {
-      res.status(404).json({ message: error.message });
-    } else {
-      res.status(400).json({
-        message: "Failed to delete pending question",
-        error: error.message,
-      });
-    }
+  if (!id || isNaN(id)) {
+    throw new ApiError(400, "Invalid pending question ID");
   }
-};
+
+  const pendingQuestion = await pendingQuestionService.getPendingQuestionById(
+    parseInt(id)
+  );
+  res.json({
+    success: true,
+    data: pendingQuestion,
+  });
+});
+
+const updatePendingQuestion = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id || isNaN(id)) {
+    throw new ApiError(400, "Invalid pending question ID");
+  }
+
+  const requiredFields = [
+    "question_text",
+    "answer_format",
+    "correct_answer",
+    "distractors",
+    "topic_id",
+    "difficulty_id",
+    "explanation",
+  ];
+  const missingFields = requiredFields.filter((field) => !req.body[field]);
+
+  if (missingFields.length > 0) {
+    throw new ApiError(400, "Missing required fields", { missingFields });
+  }
+
+  await pendingQuestionService.updatePendingQuestion(parseInt(id), req.body);
+  const updatedPendingQuestion =
+    await pendingQuestionService.getPendingQuestionById(parseInt(id));
+  res.json({
+    success: true,
+    message: "Pending Question updated successfully",
+    question: updatedPendingQuestion,
+  });
+});
+
+const deletePendingQuestion = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id || isNaN(id)) {
+    throw new ApiError(400, "Invalid pending question ID");
+  }
+
+  await pendingQuestionService.deletePendingQuestion(parseInt(id));
+  res.json({
+    success: true,
+    message: "Pending Question deleted successfully",
+  });
+});
 
 module.exports = {
   createPendingQuestion,

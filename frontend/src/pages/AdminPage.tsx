@@ -71,8 +71,8 @@ const AdminPage: React.FC = () => {
 	// ---------- Data Fetching ----------
 	const fetchPendingQuestions = async () => {
 		try {
-			const data = await adminAPI.getPendingQuestions(token);
-			setPendingQuestions(data);
+			const response = await adminAPI.getPendingQuestions(token);
+			setPendingQuestions(response.data);
 		} catch (error) {
 			console.error("Failed to fetch pending questions:", error);
 			setPendingQuestions([]);
@@ -718,20 +718,11 @@ const AdminPage: React.FC = () => {
 						</div>
 
 						<p className="mt-4 text-gray-700">
-							<strong>Answer:</strong> E) {viewData.correct_answer}
+							<strong>Answer:</strong> {viewData.correct_answer}
 						</p>
 
 						<p className="mt-2 text-gray-700">
-							<strong>Distractors:</strong>{" "}
-							{viewData.distractors.length >= 4 ? (
-								<>
-									A) {viewData.distractors[0]}, B) {viewData.distractors[1]}, C){" "}
-									{viewData.distractors[2]}, D) {viewData.distractors[3]}
-								</>
-							) : (
-								// fallback if < 4 items
-								viewData.distractors.join(", ")
-							)}
+							<strong>Distractors:</strong> {viewData.distractors.join(", ")}
 						</p>
 
 						<div className="mt-4">

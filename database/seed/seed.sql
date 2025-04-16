@@ -1,13 +1,10 @@
 USE vrc;
 
--- Seed Roles table
-INSERT INTO Roles (role_id, role_name) VALUES (1, 'admin') (2, 'parent') (3, 'other');
-
 -- Seed Users table
 INSERT INTO Users (username, email, password_hash, role_id, date_created) VALUES 
-('parent1', 'parent1@example.com', '$2b$10$7QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8', 1, NOW()),
-('parent2', 'parent2@example.com', '$2b$10$7QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8', 1, NOW()),
-('parent3', 'parent3@example.com', '$2b$10$7QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8', 1, NOW());
+('parent1', 'parent1@example.com', '$2b$10$7QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8', 2, NOW()),
+('parent2', 'parent2@example.com', '$2b$10$7QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8', 2, NOW()),
+('parent3', 'parent3@example.com', '$2b$10$7QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8', 2, NOW());
 
 -- Seed Children table
 INSERT INTO Children (user_id, child_name, age, education_level, date_created) VALUES 

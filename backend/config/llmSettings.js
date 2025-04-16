@@ -1,5 +1,12 @@
 require("dotenv").config();
 
+const TOPIC_MODEL_MAPPINGS = {
+  anagram: process.env.ANAGRAM_MODEL,
+  rule: process.env.RULE_MODEL,
+  word_ladders: process.env.LADDER_MODEL,
+  word_pair: process.env.PAIR_MODEL,
+};
+
 const getLLMConfig = () => {
   return {
     model: process.env.LLM_MODEL || "gpt-4o",
@@ -10,6 +17,10 @@ const getLLMConfig = () => {
     presencePenalty: parseFloat(process.env.LLM_PRESENCE_PENALTY || "0"),
     reasoningEffort: process.env.LLM_REASONING_EFFORT || "medium",
   };
+};
+
+const getModelForTopic = (topicKey) => {
+  return TOPIC_MODEL_MAPPINGS[topicKey] || getLLMConfig().model;
 };
 
 const getQuestionGenConfig = () => {
@@ -31,4 +42,6 @@ module.exports = {
   getLLMConfig,
   getQuestionGenConfig,
   hasOpenAIAPIKey,
+  getModelForTopic,
+  TOPIC_MODEL_MAPPINGS,
 };

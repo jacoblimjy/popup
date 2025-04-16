@@ -62,7 +62,7 @@ const QuestionsPage = () => {
         difficulty_id
       );
 
-      const questions: Question[] = apiResponse.map((question: QuestionApiResponse) => {
+      const questions: Question[] = apiResponse.data.map((question: QuestionApiResponse) => {
         return {
           question_id: question.question_id,
           question_text: question.question_text,
@@ -99,7 +99,7 @@ const QuestionsPage = () => {
     setTimeout(async () => {
       const apiResponse = await QuestionApi.getQuestionsBySetId(set_id);
 
-      const questions: Question[] = apiResponse.map((question: QuestionApiResponse) => {
+      const questions: Question[] = apiResponse.data.map((question: QuestionApiResponse) => {
         if (!topicId) {
           setTopicId(question.topic_id.toString());
         }

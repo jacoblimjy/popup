@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, PolarAngleAxis, PolarAngleAxisProps, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, YAxis } from "recharts"
 import { useChildrenList } from "../hooks/useChildrenList"
 import ChildPerformanceApi from "../api/ChildPerformanceApi"
-import { ChildPerformance, OverallPerformance } from "../types/ChildPerformanceTypes"
+import { ChildPerformance, ChildPerformanceResponse, OverallPerformance } from "../types/ChildPerformanceTypes"
 import Loader from "../components/Loader"
 import { topics } from "../utils"
 import NoChildModal from "../components/NoChildModal"
@@ -78,13 +78,13 @@ const AnalyticsPage = () => {
         return;
       }
 
-      const data = performanceResponse.data.map((item: ChildPerformance) => ({
+      const data = performanceResponse.data.map((item: ChildPerformanceResponse) => ({
         child_id: item.child_id,
         topic_id: item.topic_id,
-        total_time_spent: parseFloat((item.total_time_spent / 1000).toFixed(2)), // Convert ms to s
-        total_questions_attempted: item.total_questions_attempted,
-        average_accuracy_score: item.average_accuracy_score,
-        average_time_per_question: parseFloat((item.average_time_per_question / 1000).toFixed(2)), // Convert ms to s
+        total_time_spent: parseFloat((parseFloat(item.total_time_spent) / 1000).toFixed(2)), // Convert ms to s
+        total_questions_attempted: parseInt(item.total_questions_attempted, 10), // Convert to integer
+        average_accuracy_score: parseFloat(item.average_accuracy_score), // Convert to float
+        average_time_per_question: parseFloat((parseFloat(item.average_time_per_question) / 1000).toFixed(2)), // Convert ms to s
       })) as ChildPerformance[];
       updateAccuracyBarChartData(data);
       updateAverageTimePieChartData(data);

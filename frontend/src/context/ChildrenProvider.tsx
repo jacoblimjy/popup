@@ -13,6 +13,7 @@ export const ChildrenProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (activeChild) {
+      console.log("Problem")
       localStorage.setItem("activeChild", JSON.stringify(activeChild));
     }
   }, [activeChild]);
@@ -25,7 +26,7 @@ export const ChildrenProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await ChildrenApi.getChildrenByUserId();
       console.log(response);
-      setChildrenList(response);
+      setChildrenList(response.data);
       
       if (activeChild === null || !activeChild || refresh) {
         setActiveChild(response[0]);
