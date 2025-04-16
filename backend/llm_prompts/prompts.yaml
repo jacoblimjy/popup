@@ -5,9 +5,6 @@ prompts:
       1. Construct a sentence of no more than ten words, with a SIX letter word capitalised. 
          The SIX letter word chosen should be under one of these categories: Noun, verb, adjective or adverb.
       2. A short detailed explanation on why the capitalised word fits the context of the sentence.
-      3. Create four other words using the same set of letters as the capitalised SIX-letter word. These four words can be anagrams, misspellings by swapping the 
-         consonants around or made-up anagrams that resemble the spelling of real words.
-         Ensure that the letters A, B, C, D, E for the options only appear once.
 
       Requirements:
       - Ensure that the sentence is in proper English
@@ -15,11 +12,9 @@ prompts:
 
       Refer to the examples given and return the output as a json as follows.
       {
-         "question_text":
-         "answer_format": "multiple_choice"
-         "correct_answer":
-         "explanation":
-         "distractors":
+        "question_text":
+        "answer_format": "multiple_choice"
+        "explanation":
       }
 
     few_shot_examples: |
@@ -28,12 +23,7 @@ prompts:
       The GREEDY chicken ate all the corn.
 
       Explanation:
-      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
       The sentence describes a chicken that ate all the corn. A fitting adjective to describe this behaviour would be GREEDY.
-
-      Correct Answer: (A, GREEDY)
-
-      Distractors: [(B, YERGED), (C, GREYED), (D, DEGERY), (E, GREDYE)]
 
 
       ## EXAMPLE PUZZLE 2
@@ -41,15 +31,11 @@ prompts:
       It was quite CLOUDY and cold when we went to the park.
 
       Explanation:
-      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
       The sentence describes the weather as cold. A fitting adjective to describe the weather as well would be CLOUDY.
 
-      Correct Answer: (D, CLOUDY)
-
-      Distractors: [(A, CUDLOY), (B, YULCOD), (C, LOCUDY), (E, CLOYUD)]
-
     assignment: |
-      Ensure that the capitalised word must be EXACTLY SIX letters long.
+      - Ensure that the capitalised word must be EXACTLY SIX letters long.
+      - Write your explanation using the same format as the examples shown.
 
   - topic: "anagram"
     difficulty: "medium"
@@ -57,9 +43,6 @@ prompts:
       1. Construct a sentence of no more than fifteen words, with a SEVEN letter word capitalised. 
         The SEVEN letter word chosen should be under one of these categories: Noun, verb, adjective or adverb.
       2. A short detailed explanation on why the capitalised word fits the context of the sentence.
-      3. Create four other words using the same set of letters as the capitalised SEVEN-letter word. These four words can be anagrams, misspellings by swapping the 
-        consonants around or made-up anagrams that resemble the spelling of real words.
-        Ensure that the letters A, B, C, D, E for the options only appear once.
 
       Requirements:
       - Ensure that the sentence is in proper English
@@ -69,9 +52,7 @@ prompts:
       {
         "question_text":
         "answer_format": "multiple_choice"
-        "correct_answer":
         "explanation":
-        "distractors":
       }
 
     few_shot_examples: |
@@ -80,13 +61,8 @@ prompts:
       I ordered LASAGNA for dinner when I went to the Italian restaurant.
 
       Explanation:
-      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
       The sentence mentions an Italian restaurant and dinner, which suggests the food ordered is a well-known Italian dish. 
       LASAGNA is a fitting noun as it refers to a popular layered pasta dish.
-
-      Correct Answer: (D, LASAGNA)
-
-      Distractors: [(A, LASANGA), (B, LANSAGA), (C, SAGALNA), (E, LAGSANA)]
 
 
       ## EXAMPLE PUZZLE 2
@@ -94,16 +70,12 @@ prompts:
       My aunt has five nieces and NEPHEWS.
 
       Explanation:
-      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
       The sentence mentions nieces, which implies a reference to family members. A fitting noun to match 'nieces' in this context is 'NEPHEWS,' 
       which refers to male relatives.
 
-      Correct Answer: (B, NEPHEWS)
-
-      Distractors: [(A, NEPHWES), (C, NEHPEWS), (D, PENHEWS), (E, NHEPEWS)]
-
     assignment: |
-      Ensure that the capitalised word must be EXACTLY SEVEN letters long.
+      - Ensure that the capitalised word must be EXACTLY SEVEN letters long.
+      - Write your explanation using the same format as the examples shown.
 
   - topic: "anagram"
     difficulty: "hard"
@@ -111,9 +83,6 @@ prompts:
       1. Construct a sentence of no more than fifteen words, with an EIGHT or NINE letter word capitalised. 
         The EIGHT or NINE letter word chosen should be under one of these categories: Noun, verb, adjective or adverb.
       2. A short detailed explanation on why the capitalised word fits the context of the sentence.
-      3. Create four other words using the same set of letters as the capitalised EIGHT or NINE letter word. These four words can be anagrams, misspellings by swapping the 
-        consonants around or made-up anagrams that resemble the spelling of real words.
-        Ensure that the letters A, B, C, D, E for the options only appear once.
 
       Requirements:
       - Ensure that the sentence is in proper English
@@ -123,23 +92,17 @@ prompts:
       {
         "question_text":
         "answer_format": "multiple_choice"
-        "correct_answer":
         "explanation":
-        "distractors":
       }
 
     few_shot_examples: |
       ## EXAMPLE PUZZLE 1
-      Question Text: I was SHOUTING when I lost my voice.
+      Question Text: 
+      I was SHOUTING when I lost my voice.
 
       Explanation:
-      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
       The sentence describes someone who has lost their voice. 
       The word SHOUTING is a fitting verb because you lose your voice when you talk a lot or shout.
-
-      Correct Answer: (E, SHOUTING)
-
-      Distractors: [(A, THOUSING), (B, GOUTHINS), (C, TOUSHIGN), (D, SNOUTIGH)]
 
 
       ## EXAMPLE PUZZLE 2
@@ -147,16 +110,12 @@ prompts:
       He walked CAREFULLY on the tightrope.
 
       Explanation:
-      Look at the rest of the sentence and try to find a clue about the meaning of the anagram.
       The sentence describes someone walking on a tightrope, which requires caution and precision. 
       The word CAREFULLY is a fitting adverb because it means to do something with caution to avoid mistakes or danger.
 
-      Correct Answer: (B, CAREFULLY)
-
-      Distractors: [(A, FAYCURELL), (C, CALLEFURY), (D, FURCELYAL), (E, RECALLUFY)]
-
     assignment: |
-      Ensure that the capitalised word is exactly EIGHT or NINE letters long.
+      - Ensure that the capitalised word is exactly EIGHT or NINE letters long.
+      - Write your explanation using the same format as the examples shown.
 
   - topic: "rule"
     difficulty: "easy"
@@ -250,24 +209,20 @@ prompts:
       Step 3: Combining them, the result is "nib"
 
     assignment: |
-      Now, create ONE brand new "Use a Rule to Make a Word" puzzle in the exact same format. Follow these guidelines:
-      1. Provide the title: "Use a Rule to Make a Word".
-      2. Give brief instructions like the examples above.
-      3. Provide a set of three words with the front and back words being three letters each, and the word in the brackets following a pattern 
-         as an example.
-      4. Provide an incomplete set with a question mark in the brackets.
-      5. Offer five multiple-choice options (A-E), with exactly one correct answer.
-      6. Include a short "DETAILED EXPLANATION" which explains the pattern step by step and why the chosen option is correct.
+      Now, create ONE brand new "Use a Rule to Make a Word" puzzle in the exact same format.
+      - For each set, ensure that the front and back words are exactly THREE letters each.
+      - Ensure that all words in the solved and unsolved set are real.
+      - Ensure that no word (front, back, or answer) in the solved example appears anywhere in the unsolved set, and vice versa.
+      - Ensure that the answer is definitive. There should be no alternative correct answer in the options.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-        "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer
-        "correct_answer": correct option LETTER
+        "question_text": TITLE and INSTRUCTIONS section without listing the options (follow the format strictly
+        without introducing words like "Solved Example" and strictly ends at "Which of the following is the missing word?")
+        "correct_answer": correct option WORD
         "answer_format": "multiple_choice"
-        "explanation": DETAILED EXPLANATION section
-        "distractors": list of incorrect option LETTERS (there should strictly be 4)
-        "solved_set": list of strings in the same order (length = 3)
-        "unsolved_set": list of strings in the same order and include the correct answer in within the brackets (length = 3)
+        "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
+        "distractors": list of incorrect option WORDS (there should strictly be 4)
       }
 
   - topic: "rule"
@@ -366,24 +321,24 @@ prompts:
 
     assignment: |
       Now, create ONE brand new "Use a Rule to Make a Word" puzzle in the exact same format. Follow these guidelines:
-      1. Provide the title: "Use a Rule to Make a Word".
-      2. Give brief instructions like the examples above.
-      3. Provide a set of three words with the front and back words being four letters each, and the word in the brackets following a pattern 
-         as an example.
-      4. Provide an incomplete set with a question mark in the brackets.
-      5. Offer five multiple-choice options (A-E), with exactly one correct answer.
-      6. Include a short "DETAILED EXPLANATION" which explains the pattern step by step and why the chosen option is correct.
+      - For each set, ensure that the front and back words are exactly FOUR letters each, with exactly EIGHT distinct letters in total.
+      - Ensure that all words in the solved and unsolved set are real.
+      - Ensure that no word (front, back, or answer) in the solved example appears anywhere in the unsolved set, and vice versa.
+      - Ensure that the answer is definitive. There should be no alternative correct answer in the options.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-        "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer
-        "correct_answer": correct option LETTER
+        "question_text": TITLE and INSTRUCTIONS section without listing the options (follow the format strictly
+        without introducing words like "Solved Example" and strictly ends at "Which of the following is the missing word?")
+        "correct_answer": correct option WORD
         "answer_format": "multiple_choice"
-        "explanation": DETAILED EXPLANATION section
-        "distractors": list of incorrect option LETTERS (there should strictly be 4)
-        "solved_set": list of strings in the same order (length = 3)
-        "unsolved_set": list of strings in the same order and include the correct answer in within the brackets (length = 3)
+        "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
+        "distractors": list of incorrect option WORDS (there should strictly be 4)
       }
+
+      Reminder: 
+      - Ensure that all words in the solved and unsolved set are real.
+      - Ensure that no word (front, back, or answer) in the solved example appears anywhere in the unsolved set, and vice versa.
 
   - topic: "rule"
     difficulty: "hard"
@@ -521,26 +476,22 @@ prompts:
       Step 6: Out of all these possible combinations, only "seat" is a real word, so "seat" is the answer.
 
       The correct answer is "seat".
- 
+
     assignment: |
       Now, create ONE brand new "Use a Rule to Make a Word" puzzle in the exact same format. Follow these guidelines:
-      1. Provide the title: "Use a Rule to Make a Word".
-      2. Give brief instructions like the examples above.
-      3. Provide a set of three words with the front and back words being four letters each, and the word in the brackets following a pattern 
-      as an example.
-      4. Provide an incomplete set with a question mark in the brackets.
-      5. Offer five multiple-choice options (A-E), with exactly one correct answer.
-      6. Include a short "DETAILED EXPLANATION" which explains the pattern step by step and why the chosen option is correct.
+      - For each set, ensure that the front and back words are exactly FOUR letters each, with strictly less than EIGHT distinct letters in total.
+      - Ensure that all words in the solved and unsolved set are real.
+      - Ensure that no word (front, back, or answer) in the solved example appears anywhere in the unsolved set, and vice versa.
+      - Ensure that the answer is definitive. There should be no alternative correct answer in the options.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-        "question_text": TITLE and INSTRUCTIONS section without identifying which is the correct answer
-        "correct_answer": correct option LETTER
+        "question_text": TITLE and INSTRUCTIONS section without listing the options (follow the format strictly
+        without introducing words like "Solved Example" and strictly ends at "Which of the following is the missing word?")
+        "correct_answer": correct option WORD
         "answer_format": "multiple_choice"
-        "explanation": DETAILED EXPLANATION section
-        "distractors": list of incorrect option LETTERS (there should strictly be 4)
-        "solved_set": list of strings in the same order (length = 3)
-        "unsolved_set": list of strings in the same order and include the correct answer in within the brackets (length = 3)
+        "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
+        "distractors": list of incorrect option WORDS (there should strictly be 4)
       }
 
       Reminder: 
@@ -560,13 +511,13 @@ prompts:
       Each puzzle must have:
       1. A short introduction explaining the task.
       2. A question that demonstrates a letter change in each step. The letter change must occur at different positions in each step.
-        For example, if the first step changes the first letter, the next step must change a different letter.
+         For example, if the first step changes the first letter, the next step must change a different letter.
       3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers.
       4. A short detailed explanation highlighting the steps and why the correct answer is correct.
 
       Requirements:
       - Ensure that the question has only one missing word in the format `X ____ Z`, where X and Z are placeholders.
-      - Ensure that X and Z are common and easily recognisable four-letter words.
+      - Ensure that X, Z and the missing word are common and easily recognisable four-letter words.
 
       Constraints of the Correct Answer:
       - A real four-letter word that fits the word ladder pattern, following the one-letter change rule.
@@ -620,20 +571,20 @@ prompts:
       DETAILED EXPLANATION:
       PLAN → CLAN: Change the first letter from 'P' to 'C' to form "CLAN"  
       CLAN → CLAP: Change the last letter from 'N' to 'P' to form "CLAP"
- 
+
     assignment: |
-      Ensure that all words in the ladder are exactly four letters long, and are simple and commonly known words.
+      Ensure that all words in the ladder are exactly four letters long, and are simple and commonly used everyday words.
       There should be only ONE missing word that needs to be filled in.
       Each word in the sequence should differ from the next by only one letter.
       Every word in the ladder must be a valid English word.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-          "question_text": TITLE and INSTRUCTIONS section WITHOUT identifying which is the correct answer
-          "correct_answer": correct option LETTER
+          "question_text": TITLE and INSTRUCTIONS section WITHOUT listing the options (strictly ends at "Which of the following is the missing word?")
+          "correct_answer": correct option WORD without the option letter in CAPITAL LETTERS
           "answer_format": "multiple_choice"
-          "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
+          "distractors": ["list of incorrect option WORDS without the option letters in CAPITAL LETTERS (strictly 4)"]
           "set": ["X", "correct answer", "Z"]
       }
 
@@ -645,16 +596,16 @@ prompts:
       Each puzzle must have:
       1. A short introduction explaining the task.
       2. A question that demonstrates a letter change in each step. The letter change must occur at different positions in each step.
-        For example, if the first step changes the first letter, the next step must change a different letter.
+         For example, if the first step changes the first letter, the next step must change a different letter.
       3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers.
       4. A short detailed explanation highlighting the steps and why the correct answer is correct.
 
       Requirements:
       - Ensure that the question has only one missing word in the format `X ____ Z`, where X and Z are placeholders.
+      - Ensure that the missing word is a more complex or less commonly known four-letter word.
 
       Constraints of the Correct Answer:
       - A real four-letter word that fits the word ladder pattern, following the one-letter change rule.
-      - Ensure that the correct answer is a more complex or less commonly known four-letter word.
       - The word must correctly connect X to Z without skipping an intermediate step.
 
       Constraints of an Incorrect Answer:
@@ -705,20 +656,21 @@ prompts:
       DETAILED EXPLANATION:
       RIFT → RIFE: Change the last letter from 'T' to 'E' to form "RIFE"  
       RIFE → RITE: Change the third letter from 'F' to 'T' to form "RITE"
- 
+
     assignment: |
-      Ensure that all words in the ladder are exactly four letters long, and more complex or less commonly known word.
+      Ensure that all words in the ladder are exactly four letters long.
+      Especially for the missing word, ensure it is more complex or less commonly used word.
       There should be only ONE missing word that needs to be filled in.
       Each word in the sequence should differ from the next by only one letter.
       Every word in the ladder must be a valid English word.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-          "question_text": TITLE and INSTRUCTIONS section WITHOUT identifying which is the correct answer
-          "correct_answer": correct option LETTER
+          "question_text": TITLE and INSTRUCTIONS section WITHOUT listing the options (strictly ends at "Which of the following is the missing word?")
+          "correct_answer": correct option WORD without the option letter in CAPITAL LETTERS
           "answer_format": "multiple_choice"
-          "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
+          "distractors": ["list of incorrect option WORDS without the option letters in CAPITAL LETTERS (strictly 4)"]
           "set": ["X", "correct answer", "Z"]
       }
 
@@ -729,30 +681,28 @@ prompts:
 
       Each puzzle must have:
       1. A short introduction explaining the task.
-      2. A question that demonstrates a letter change in each step (eg. "LOOK" → "LOCK"). 
+      2. A question that demonstrates a letter change in each step (eg. "LOOK" → "LOCK").
+         The ladder consist of four 4-letter English words: START, MISSING1, MISSING2, END
+         The question must show: START ____ ____ END
       3. Five multiple-choice options (A-E) with exactly one correct answer and four incorrect answers. Generate the options as as well.
       4. A short detailed explanation highlighting the steps and why the correct answer is correct.
 
       Requirements (To be enforced strictly):
-      - You can only change one letter at a time.
-      - The position of the letter changed must be different in every step.
-        - That means the first, second, and third steps must each modify a unique letter index (from 0 to 3).
-        - For example, if Step 1 changes the 2nd letter (index 1), Step 2 cannot change index 1 again, and Step 3 must also change a new 
-          letter position not already used in Steps 1 or 2.
-        - Ensure each of the 3 transitions (X → A → B → Z) uses 3 different letter positions.
-      - Ensure that the question has strictly two missing words in the format X ____ ____ Z, where X and Z are placeholders.  
-      - The generated options should be formatted as A, B.
+      - Only one letter changes at each step.
+      - Each position (1st, 2nd, 3rd, 4th) is changed exactly once.
+        - Ensure each of the 3 transitions (START → MISSING1 → MISSING2 → END) uses 3 different letter positions.
+      - All four words must be valid English words.
 
       Constraints of the Correct Answer:
       - Two real four-letter word that fits the word ladder pattern, following the one-letter change rule.
-      - The two words must correctly connect X to Z without skipping an intermediate step.
+      - The two words must correctly connect START to END without skipping an intermediate step.
       - Both A and B must be correct for the option to be considered fully accurate.
 
       Constraints of an Incorrect Answer:
-      - Must be four-letter words, but cannot be X or Z.
-      - May follow the one-letter change rule but in the wrong position
-      - May change more than one letter
-      - May not be a real word
+      - Must be four-letter words, but cannot be START or END.
+      - May follow the one-letter change rule but in the wrong position.
+      - May change more than one letter.
+      - May not be a real word.
 
     few_shot_examples: |
       ## EXAMPLE PUZZLE 1
@@ -799,21 +749,22 @@ prompts:
       First, identify the letter that appears in both the first and last word in the same position.
       SPED → SLED: Change the second letter from 'P' to 'L' to form "SLED"  
       SLED → FLED: Change the first letter from 'S' to 'F' to form "FLED" 
-      FLED → FLEA: Change the last letter from 'D' to 'A' to form "FLEA"  
- 
+      FLED → FLEA: Change the last letter from 'D' to 'A' to form "FLEA"
+
     assignment: |
       Ensure that all words in the ladder are exactly four letters long. There should have two missing words that need to be filled in.
       Each word in the sequence should differ from the next by only one letter. Ensure the position that the letter changes differ each step.
       Every word in the ladder must be a valid English word.
+      Ensure that the wrong answers are not the start or end word. They must be a different word.
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
-          "correct_answer": correct option LETTER
+          "question_text": TITLE and INSTRUCTIONS section WITHOUT listing the options (strictly ends at "Which of the following is the missing word?")
+          "correct_answer": "MISSING1, MISSING2"
           "answer_format": "multiple_choice"
-          "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
-          "set": ["X", "correct answer", "Z"] -> length = 4 (For example, [COPE, CORE, FORE, FORT])
+          "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
+          "distractors": ["WRONG1", "WRONG2", "WRONG3, WRONG4", "WRONG5, WRONG6", "WRONG7, WRONG8"]
+          "set": ["START", "MISSING1", "MISSING2", "END"]
       }
 
   - topic: "word_pair"
@@ -867,21 +818,22 @@ prompts:
       • “marks” → “arm”: Remove the last two letters “ks”, then move “m” to the end of “ar” → “arm”
       • “ready” → “ear”: Remove the last two letters “dy”, then move “r” to the end of “ea” → “ear”
       • “glove” → “log”: Remove the last two letters “ve”, then move “g” to the end of “lo” → “log”
- 
+
     assignment: |
       Using any ONE of the textbook patterns (removing and rearranging letters, reversing) or a simple variant, create ONE new puzzle in the same format
       Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
       If you decide to go with the "removing and rearranging letters" pattern, ensure that first word in each pair MUST strictly be a valid FIVE-letter word and the second 
       word in each pair MUST strictly be a valid THREE-letter word.
       Ensure that ALL SIX words in the question are real words.
+      Ensure that the question output is in the exact format specified in the example given (eg. marks arm   ready ear   glove (?)).
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
-          "correct_answer": correct option LETTER
+          "question_text": TITLE and INSTRUCTIONS section without listing the options (follow the format strictly and strictly ends at "Which of the following is the missing word?")
+          "correct_answer": correct option WORD
           "answer_format": "multiple_choice"
-          "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
+          "distractors": ["list of incorrect option WORDS (strictly 4)"]
           "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
       }
 
@@ -935,21 +887,22 @@ prompts:
       • “extent” → “ten”: Take the first, third and fifth letters "e", "t", "n" → "ten"
       • “places” → “ape”: Take the first, third and fifth letters "p", "a", "e" → "ape"
       • “inform” → “fir”: Take the first, third and fifth letters "i", "f", "r" → "fir"
- 
+
     assignment: |
       Using any ONE of the textbook patterns (removing and rearranging letters, removing first and last letters) or a simple variant, create ONE new puzzle in the same format
       Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
       If you decide to go with the "removing and rearranging letters" pattern, ensure that first word in each pair MUST strictly be a valid SIX-letter word and the second 
       word in each pair MUST strictly be a valid THREE-letter or FOUR-letter word.
       Every word in the question must be a real word.
+      Ensure that the question output is in the exact format specified in the example given (eg. extent ten  places ape  inform (?)).
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
-          "correct_answer": correct option LETTER
+          "question_text": TITLE and INSTRUCTIONS section without listing the options (follow the format strictly and strictly ends at "Which of the following is the missing word?")
+          "correct_answer": correct option WORD
           "answer_format": "multiple_choice"
-          "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
+          "distractors": ["list of incorrect option WORDS (strictly 4)"]
           "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
       }
 
@@ -1001,24 +954,22 @@ prompts:
       • “cabbages” → “sage”: Take the second, sixth, seventh and last letters "a", "g", "e", "s" → "sage"
       • “wandered” → “dare”: Take the second, sixth, seventh and last letters "a", "r", "e", "d" → "dare"
       • “focussed” → “dose”: Take the second, sixth, seventh and last letters "o", "s", "e", "d" → "dose"
- 
+
     assignment: |
-      Using any ONE of the textbook patterns (removing and rearranging letters) or a simple variant, create ONE new puzzle in the same format
-      Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
-      If you decide to go with the "removing and rearranging letters" pattern, ensure that first word in each pair MUST strictly be a valid 
-      EIGHT-letter word and the second word in each pair MUST strictly be a valid FOUR-letter word. Positions chosen for extraction can vary,
-      as long as it is consistent across ALL three pairs. Ensure that there is a rearrangment of letters.
-      Every word in the question must be a real word.
+      Create ONE new puzzle in the same format.
+      - Ensure that the puzzle is consistent, with all of the word pairs following the same pattern (no mixing patterns).
+      - Ensure that first word in each pair MUST strictly be a valid EIGHT-letter word and the second word in each pair MUST strictly be a 
+        valid FOUR-letter word. Positions chosen for extraction can vary, as long as it is consistent across ALL three pairs. 
+      - In each pair, the second word must be formed by rearranging some or all of the letters from the first word.
+      - Every word in the question must be a real word.
+      - Ensure that the question output is in the exact format specified in the example given (eg. cabbages sage  wandered dare  focussed (?)).
 
       Give the output in the following json string format, escaping all the double quotes inside strings:
       {
-          "question_text": TITLE and INSTRUCTIONS section. List all the options as well WITHOUT identifying which is the correct answer.
-          "correct_answer": correct option LETTER
+          "question_text": TITLE and INSTRUCTIONS section without listing the options (follow the format strictly and strictly ends at "Which of the following is the missing word?")
+          "correct_answer": correct option WORD
           "answer_format": "multiple_choice"
-          "explanation": DETAILED EXPLANATION section
-          "distractors": ["list of incorrect option LETTERS (strictly 4)"]
+          "explanation": DETAILED EXPLANATION section (strictly follow the format from the example given)
+          "distractors": ["list of incorrect option WORDS (strictly 4)"]
           "set": [given word pair 1, given word pair 2, word pair 3 replaced with the correct answer] -> length = 6
       }
-
-
-      

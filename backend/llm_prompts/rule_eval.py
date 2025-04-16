@@ -1,3 +1,6 @@
+import sys
+import json
+
 def letter_positions(front_word, middle_word, back_word):
     positions = {}
     for i, letter in enumerate(middle_word):
@@ -11,6 +14,7 @@ def letter_positions(front_word, middle_word, back_word):
         for k, b_letter in enumerate(back_word):
             if letter == b_letter:
                 positions[letter]['back'].append(k)
+                
     return positions
 
 def position_match(solved_set, unsolved_set):
@@ -56,4 +60,15 @@ def rule_eval(input):
     output.pop("unsolved_set", None)
     return output
 
-    
+if __name__ == "__main__":
+    try:
+        input_path = sys.argv[1]
+        with open(input_path, 'r') as f:
+            input_data = json.load(f)
+
+        result = rule_eval(input_data)
+        print(json.dumps(result))  # Output to stdout for JS to parse
+
+    except Exception as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        sys.exit(1)

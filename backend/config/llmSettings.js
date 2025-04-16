@@ -15,6 +15,7 @@ const getLLMConfig = () => {
     topP: parseFloat(process.env.LLM_TOP_P || "1"),
     frequencyPenalty: parseFloat(process.env.LLM_FREQUENCY_PENALTY || "0"),
     presencePenalty: parseFloat(process.env.LLM_PRESENCE_PENALTY || "0"),
+    reasoningEffort: process.env.LLM_REASONING_EFFORT || "medium",
   };
 };
 

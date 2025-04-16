@@ -3,6 +3,10 @@ const db = require("../db");
 const yaml = require("js-yaml");
 const fs = require("fs");
 const path = require("path");
+const { exec } = require("child_process");
+const util = require("util");
+const execPromise = util.promisify(exec);
+const os = require("os");
 const pendingQuestionService = require("./pendingQuestionService");
 const { WordNet } = require("natural");
 const {
@@ -24,6 +28,20 @@ const DIFFICULTY_MAPPINGS = {
   2: "medium",
   3: "hard",
 };
+
+function cleanText(text) {
+  if (!text) return "";
+  // Replace all \n with spaces
+  return (
+    text
+      .replace(/\\n/g, " ")
+      // Also replace actual newlines
+      .replace(/\n/g, " ")
+      // Remove excess spaces
+      .replace(/\s+/g, " ")
+      .trim()
+  );
+}
 
 /**
  * Calculate text similarity between two strings using Jaccard similarity
@@ -53,6 +71,239 @@ function calculateTextSimilarity(text1, text2) {
 
   // Jaccard similarity = size of intersection / size of union
   return union.size === 0 ? 0 : intersection.size / union.size;
+}
+
+/**
+ * Execute a Python evaluator script with the given input data
+ * @param {string} scriptName - Name of the Python script without extension
+ * @param {Object} inputData - Data to pass to the script
+ * @returns {Promise<Object>} - Processed result from the script
+ */
+async function runPythonEvaluator(scriptName, inputData) {
+  try {
+    // Create temporary input file
+    const tempFile = path.join(os.tmpdir(), `${Date.now()}_input.json`);
+    fs.writeFileSync(tempFile, JSON.stringify(inputData));
+
+    // Path to Python script
+    const scriptPath = path.join(
+      __dirname,
+      "..",
+      "llm_prompts",
+      `${scriptName}.py`
+    );
+
+    // Execute Python script with input file
+    const command = `python "${scriptPath}" "${tempFile}"`;
+    console.log(`Executing: ${command}`);
+
+    const { stdout, stderr } = await execPromise(command);
+
+    // Clean up temp file
+    fs.unlinkSync(tempFile);
+
+    // This seems to never catch the error at all, its always caught in the catch block
+    if (stderr && !stderr.includes("Warning")) {
+      console.error(`Python script error (${scriptName}.py):`, stderr);
+      throw new Error(`Error in Python evaluator: ${stderr}`);
+    }
+
+    // Parse and return the result
+    return JSON.parse(stdout);
+  } catch (error) {
+    // TODO: Improve error message handling
+    console.error(`Failed to run Python evaluator ${scriptName}.py:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Extract anagram data from question
+ * @param {Object} question - Question object
+ * @returns {Object} - Data needed for anagram.py
+ */
+function extractAnagramData(question) {
+  // Find the capitalized word in the question text
+  const capitalWordMatch = question.question_text.match(/\b([A-Z]{6,})\b/);
+  const capitalizedWord = capitalWordMatch ? capitalWordMatch[1] : null;
+
+  if (!capitalizedWord) {
+    throw new Error("No capitalized word found in anagram question");
+  }
+
+  return {
+    question_text: question.question_text,
+    correct_answer: question.correct_answer,
+    explanation: question.explanation,
+    answer_format: question.answer_format,
+  };
+}
+
+/**
+ * Extract word ladder data from question
+ * @param {Object} question - Question object
+ * @returns {Object} - Data for ladder_eval.py
+ */
+function extractWordLadderData(question) {
+  // If a "set" is already provided, just normalize and return it.
+  if (question.set && Array.isArray(question.set)) {
+    return { set: question.set.map((word) => word.toUpperCase()) };
+  }
+
+  let set = [];
+  // Attempt to match a two-blank pattern, e.g. "BEND ____ ____ BARK"
+  const twoBlankPattern =
+    /([A-Z]{4})\s*(?:____|\?)\s*(?:____|\?)\s*([A-Z]{4})/i;
+  let matchTwo = question.question_text.match(twoBlankPattern);
+
+  if (matchTwo) {
+    const firstWord = matchTwo[1].toUpperCase();
+    const lastWord = matchTwo[2].toUpperCase();
+    // Split the correct_answer by comma to obtain the middle words.
+    // For example, "BAND, BARD" becomes ["BAND", "BARD"]
+    let midWords = question.correct_answer
+      .split(",")
+      .map((w) => w.trim().toUpperCase());
+
+    set = [firstWord, ...midWords, lastWord];
+  } else {
+    // Fallback: try to match a one-blank pattern, e.g. "GAME ____ CODE"
+    const oneBlankPattern = /([A-Z]{4})\s*(?:____|\?)\s*([A-Z]{4})/i;
+    let matchOne = question.question_text.match(oneBlankPattern);
+
+    if (matchOne) {
+      set = [
+        matchOne[1].toUpperCase(),
+        question.correct_answer.toUpperCase(),
+        matchOne[2].toUpperCase(),
+      ];
+    }
+  }
+
+  // Ensure we successfully extracted a ladder.
+  if (!set || set.length === 0) {
+    throw new Error("Could not extract word ladder set from question");
+  }
+
+  // Optionally, enforce that all words are four letters long.
+  if (!set.every((word) => word.length === 4)) {
+    throw new Error("Not all ladder words are 4 letters long");
+  }
+
+  return { set };
+}
+function extractWordLadderData(question) {
+  // If a "set" is already provided, just normalize and return it.
+  if (question.set && Array.isArray(question.set)) {
+    return { set: question.set.map((word) => word.toUpperCase()) };
+  }
+
+  let set = [];
+  // Attempt to match a two-blank pattern, e.g. "BEND ____ ____ BARK"
+  const twoBlankPattern =
+    /([A-Z]{4})\s*(?:____|\?)\s*(?:____|\?)\s*([A-Z]{4})/i;
+  let matchTwo = question.question_text.match(twoBlankPattern);
+
+  if (matchTwo) {
+    const firstWord = matchTwo[1].toUpperCase();
+    const lastWord = matchTwo[2].toUpperCase();
+    // Split the correct_answer by comma to obtain the middle words.
+    // For example, "BAND, BARD" becomes ["BAND", "BARD"]
+    let midWords = question.correct_answer
+      .split(",")
+      .map((w) => w.trim().toUpperCase());
+
+    set = [firstWord, ...midWords, lastWord];
+  } else {
+    // Fallback: try to match a one-blank pattern, e.g. "GAME ____ CODE"
+    const oneBlankPattern = /([A-Z]{4})\s*(?:____|\?)\s*([A-Z]{4})/i;
+    let matchOne = question.question_text.match(oneBlankPattern);
+
+    if (matchOne) {
+      set = [
+        matchOne[1].toUpperCase(),
+        question.correct_answer.toUpperCase(),
+        matchOne[2].toUpperCase(),
+      ];
+    }
+  }
+
+  // Ensure we successfully extracted a ladder.
+  if (!set || set.length === 0) {
+    throw new Error("Could not extract word ladder set from question");
+  }
+
+  // Optionally, enforce that all words are four letters long.
+  if (!set.every((word) => word.length === 4)) {
+    throw new Error("Not all ladder words are 4 letters long");
+  }
+
+  return { set };
+}
+
+/**
+ * Extract word pair data from question
+ * @param {Object} question - Question object
+ * @returns {Object} - Data for pair_eval.py
+ */
+function extractWordPairData(question) {
+  const questionText = question.question_text;
+
+  // Match all word-like tokens including "(?)"
+  const tokens = questionText.match(/\b\w+\b|\(\?\)/g);
+  if (!tokens) throw new Error("No tokens found in question");
+
+  // Find index of "(?)" only
+  const questionMarkIndex = tokens.findIndex((token) => token === "(?)");
+  if (questionMarkIndex < 5) {
+    throw new Error("Not enough words before (?) in word pair question");
+  }
+  // Get the 5 words before "(?)"
+  const wordsBefore = tokens.slice(questionMarkIndex - 5, questionMarkIndex);
+
+  // Append correct answer as the missing word
+  const set = [...wordsBefore, question.correct_answer];
+
+  if (set.length !== 6) {
+    throw new Error(`Invalid word pair set length: ${set.length}`);
+  }
+
+  return { set };
+}
+
+/**
+ * Extract rule data from question
+ * @param {Object} question - Question object
+ * @returns {Object} - Data for rule_eval.py
+ */
+function extractRuleData(question) {
+  // Look for solved and unsolved sets
+  // Example: "cat (cot) dog       pen (?) rat"
+  const text = question.question_text;
+
+  // Extract solved set
+  const solvedMatch = text.match(/([a-z]+)\s+\(([a-z]+)\)\s+([a-z]+)/i);
+  if (!solvedMatch) {
+    throw new Error("Could not extract solved set from rule question");
+  }
+  const solvedSet = [solvedMatch[1], solvedMatch[2], solvedMatch[3]];
+
+  // Extract unsolved set
+  const unsolvedMatch = text.match(/([a-z]+)\s+\(\?\)\s+([a-z]+)/i);
+  if (!unsolvedMatch) {
+    throw new Error("Could not extract unsolved set from rule question");
+  }
+
+  const unsolvedSet = [
+    unsolvedMatch[1],
+    question.correct_answer,
+    unsolvedMatch[2],
+  ];
+
+  return {
+    solved_set: solvedSet,
+    unsolved_set: unsolvedSet,
+  };
 }
 
 /**
@@ -229,6 +480,9 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
   const skippedQuestions = []; // Track skipped questions for reporting
   const wordnet = new WordNet();
 
+  // Get the topic type based on I
+  const topicType = TOPIC_MAPPINGS[topic_id];
+
   // Helper function to check if a word exists using WordNet
   const wordExists = async (word) => {
     return new Promise((resolve) => {
@@ -239,7 +493,7 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
   };
 
   console.log(
-    `Processing ${questions.length} generated questions for topic ID ${topic_id}, difficulty ID ${difficulty_id}`
+    `Processing ${questions.length} generated questions for topic ID ${topic_id} (${topicType}), difficulty ID ${difficulty_id}`
   );
 
   // Validate each question
@@ -277,33 +531,97 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
         continue;
       }
 
-      // 3. Validate the correct answer is a real word/phrase
-      const words = question.correct_answer.split(/\s+/);
-      let allWordsValid = true;
+      // 3. Validate the correct answer is a real word/phrase (if not a multiple-choice letter)
+      if (!question.correct_answer.match(/^[A-E]$/)) {
+        const words = question.correct_answer.split(/\s+/);
+        let allWordsValid = true;
 
-      for (const word of words) {
-        // Skip very short words, punctuation, numbers, etc.
-        if (word.length <= 1 || !isNaN(word) || /[^\w]/.test(word)) continue;
+        for (const word of words) {
+          // Skip very short words, punctuation, numbers, etc.
+          if (word.length <= 1 || !isNaN(word) || /[^\w]/.test(word)) continue;
 
-        const isValid = await wordExists(word);
-        if (!isValid) {
-          validationInfo.status = "rejected";
-          validationInfo.reason = `Invalid word detected in answer: "${word}"`;
-          allWordsValid = false;
-          break;
+          const isValid = await wordExists(word);
+          if (!isValid) {
+            validationInfo.status = "rejected";
+            validationInfo.reason = `Invalid word detected in answer: "${word}"`;
+            allWordsValid = false;
+            break;
+          }
+        }
+
+        if (!allWordsValid) {
+          skippedQuestions.push(validationInfo);
+          console.warn(`Skipping question - invalid word detected in answer`);
+          continue;
         }
       }
 
-      if (!allWordsValid) {
+      // 4. Process based on question type
+      let processedQuestion = { ...question };
+
+      try {
+        if (topicType === "anagram") {
+          // Process anagram with Python script
+          const anagramData = extractAnagramData(question);
+          processedQuestion = await runPythonEvaluator("anagram", anagramData);
+          console.log("Anagram question processed successfully");
+        } else if (topicType === "word_ladders") {
+          // Validate word ladder with Python script
+          const ladderData = extractWordLadderData(question);
+          await runPythonEvaluator("ladder_eval", ladderData);
+          console.log("Word ladder validated successfully");
+        } else if (topicType === "word_pair") {
+          // Validate word pair with Python script
+          const pairData = extractWordPairData(question);
+          await runPythonEvaluator("pair_eval", pairData);
+          console.log("Word pair validated successfully");
+        } else if (topicType === "rule") {
+          const ruleData = extractRuleData(question);
+          let processedOutput = await runPythonEvaluator("rule_eval", ruleData);
+          console.log("Rule question validated successfully");
+          const correctAnswerRaw = processedOutput.correct_answer;
+          const distractors = processedOutput.distractors;
+          const options = distractors.concat([correctAnswerRaw]);
+
+          for (let i = options.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [options[i], options[j]] = [options[j], options[i]];
+          }
+
+          let correctLetter = null;
+          const formattedOptions = options
+            .map((opt, index) => {
+              const letter = String.fromCharCode(65 + index);
+              if (opt === correctAnswerRaw) {
+                correctLetter = letter;
+              }
+              return `${letter}) ${opt}`;
+            })
+            .join("\n");
+
+          if (!correctLetter) {
+            throw new Error(
+              "Could not determine the correct answer's option label"
+            );
+          }
+          const finalQuestionText = `${processedOutput.question_text}\n\nWhich of the following is the correct answer?\n${formattedOptions}`;
+          processedOutput.question_text = finalQuestionText;
+          processedOutput.correct_answer = correctLetter;
+          processedQuestion = processedOutput;
+        }
+      } catch (evalError) {
+        console.error(`${topicType} evaluation failed:`, evalError);
+        validationInfo.status = "rejected";
+        validationInfo.reason = `${topicType} evaluation failed: ${evalError.message}`;
         skippedQuestions.push(validationInfo);
-        console.warn(`Skipping question - invalid word detected in answer`);
+        console.warn(`Skipping question - ${topicType} evaluation failed`);
         continue;
       }
 
-      // 4. Check for duplicate questions based on answer and question similarity
+      // 5. Check for duplicate questions based on answer and question similarity
       const questionToCheck = {
-        question_text: question.question_text,
-        correct_answer: question.correct_answer,
+        question_text: processedQuestion.question_text,
+        correct_answer: processedQuestion.correct_answer,
         topic_id: topic_id,
       };
 
@@ -318,21 +636,25 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
         continue;
       }
 
-      // 5. Format the question for database insertion
+      // 6. Format the question for database insertion
       validQuestions.push({
-        question_text: question.question_text,
-        answer_format: question.answer_format || "multiple_choice",
-        correct_answer: question.correct_answer,
-        distractors: distractors,
+        question_text: cleanText(processedQuestion.question_text),
+        answer_format: processedQuestion.answer_format || "multiple_choice",
+        correct_answer: processedQuestion.correct_answer,
+        distractors: Array.isArray(processedQuestion.distractors)
+          ? processedQuestion.distractors
+          : [processedQuestion.distractors],
         topic_id: topic_id,
         difficulty_id: difficulty_id,
-        explanation: question.explanation || "No explanation provided",
+        explanation: cleanText(
+          processedQuestion.explanation || "No explanation provided"
+        ),
         is_llm_generated: true,
       });
 
       validationInfo.status = "accepted";
       console.log(
-        `Question validated and accepted: "${question.question_text.substring(
+        `Question validated and accepted: "${processedQuestion.question_text.substring(
           0,
           50
         )}..."`
@@ -389,7 +711,7 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
     const { maxQuestionsPerBatch } = getQuestionGenConfig();
 
     // Cap number of questions
-    const questionCount = Math.min(
+    const requestedCount = Math.min(
       Math.max(1, parseInt(num_questions)),
       maxQuestionsPerBatch
     );
@@ -399,7 +721,7 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
     const difficultyInfo = await getDifficultyInfo(difficulty_id);
 
     console.log(
-      `Generating ${questionCount} ${difficultyInfo.label} questions for topic: ${topicInfo.topic_name}`
+      `Generating ${requestedCount} ${difficultyInfo.label} questions for topic: ${topicInfo.topic_name}`
     );
 
     // 3. Get the topic and difficulty keys for the YAML prompt
@@ -425,47 +747,109 @@ async function generateQuestions(topic_id, difficulty_id, num_questions) {
     // 4. Get the appropriate prompt template
     const prompt = await getPromptFromYaml(topicKey, difficultyKey);
 
-    // 5. Generate questions (either with API or mock data)
-    let rawQuestions;
+    // Track our results
+    let validQuestions = [];
+    let allSkippedQuestions = [];
+    let totalGenerated = 0;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 5; // Maximum attempts if all questions fail evaluation
 
-    // Check if we have an API key for OpenAI
-    if (hasOpenAIAPIKey()) {
-      console.log("Using OpenAI API for question generation");
-      // Pass the topicKey to the generateQuestionsWithOpenAI function
-      rawQuestions = await generateQuestionsWithOpenAI(
-        prompt,
-        questionCount,
-        topicKey
+    // 5. Generate and validate questions until we get at least one valid question
+    //    (Now we only ask for exactly the requested count per attempt.)
+    while (attempts < MAX_ATTEMPTS && validQuestions.length < requestedCount) {
+      attempts++;
+
+      // Calculate how many more questions we need
+      const remainingCount = requestedCount - validQuestions.length;
+
+      console.log(
+        `Attempt ${attempts}: Generating ${remainingCount} more questions (${validQuestions.length}/${requestedCount} collected so far)...`
       );
-    } else {
-      console.log("Using mock data for question generation");
-      rawQuestions = await generateQuestionsMock(topicKey, questionCount);
+
+      let rawQuestions;
+      if (hasOpenAIAPIKey()) {
+        console.log("Using OpenAI API for question generation");
+        // Always request the full remaining count to maximize chances of getting valid questions
+        rawQuestions = await generateQuestionsWithOpenAI(
+          prompt,
+          remainingCount
+        );
+      } else {
+        console.log("Using mock data for question generation");
+        rawQuestions = await generateQuestionsMock(topicKey, remainingCount);
+      }
+
+      totalGenerated += rawQuestions.length;
+
+      // Validate and process the questions from this attempt
+      const processedQuestions = await processAndValidateQuestions(
+        rawQuestions,
+        topic_id,
+        difficulty_id
+      );
+
+      // Add newly validated questions to our collection
+      if (processedQuestions.validQuestions.length > 0) {
+        validQuestions = validQuestions.concat(
+          processedQuestions.validQuestions
+        );
+        console.log(
+          `Added ${processedQuestions.validQuestions.length} valid questions, total now: ${validQuestions.length}/${requestedCount}`
+        );
+      } else {
+        console.warn(
+          `Attempt ${attempts} yielded no valid questions. Trying again...`
+        );
+      }
+
+      // Track all skipped questions for reporting
+      allSkippedQuestions = allSkippedQuestions.concat(
+        processedQuestions.skippedQuestions
+      );
     }
 
-    // 6. Validate and process questions
-    const processedQuestions = await processAndValidateQuestions(
-      rawQuestions,
-      topic_id,
-      difficulty_id
-    );
-
-    if (processedQuestions.validQuestions.length === 0) {
-      throw new Error("No valid questions could be generated");
+    // After all attempts, check if we have at least some valid questions
+    if (validQuestions.length === 0) {
+      throw new Error(
+        "No valid questions could be generated after multiple attempts"
+      );
     }
+
+    // Log a warning if we couldn't get the full requested count
+    if (validQuestions.length < requestedCount) {
+      console.warn(
+        `Could only generate ${validQuestions.length}/${requestedCount} valid questions after ${attempts} attempts`
+      );
+    }
+
+    // 6. Trim to the requested count if we have more valid questions than requested
+    // (This should rarely happen now with the improved logic, but kept as a safety check)
+    if (validQuestions.length > requestedCount) {
+      validQuestions = validQuestions.slice(0, requestedCount);
+    }
+
     // 7. Save to pending questions collection
     const result = await pendingQuestionService.createPendingQuestionsBulk(
-      processedQuestions.validQuestions
+      validQuestions
     );
 
     return {
       successful: result.successful,
       failed: result.failed,
-      totalRequested: questionCount,
+      totalRequested: requestedCount,
+      totalGenerated: totalGenerated,
       totalProcessed: result.totalProcessed,
       successCount: result.successCount,
       failureCount: result.failureCount,
-      validationStats: processedQuestions.stats,
-      skippedQuestions: processedQuestions.skippedQuestions,
+      validationStats: {
+        total: totalGenerated,
+        accepted: validQuestions.length,
+        rejected: allSkippedQuestions.length,
+        duplicates: allSkippedQuestions.filter((q) => q.status === "duplicate")
+          .length,
+      },
+      skippedQuestions: allSkippedQuestions,
+      attempts: attempts,
     };
   } catch (error) {
     console.error("Error generating questions:", error);
@@ -510,11 +894,12 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions, topicKey) {
               `\n\nGenerate exactly ${numQuestions} questions in JSON format.`,
           },
         ],
-        temperature: llmConfig.temperature,
-        max_tokens: llmConfig.maxTokens,
+        // temperature: llmConfig.temperature,
+        max_completion_tokens: llmConfig.maxTokens,
         top_p: llmConfig.topP,
         frequency_penalty: llmConfig.frequencyPenalty,
         presence_penalty: llmConfig.presencePenalty,
+        reasoning_effort: llmConfig.reasoningEffort,
         response_format: {
           type: "json_schema",
           json_schema: {
@@ -539,6 +924,19 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions, topicKey) {
                         type: "array",
                         items: { type: "string" },
                       },
+                      // Add additional fields needed for python evaluators
+                      // set: {
+                      //   type: "array",
+                      //   items: { type: "string" },
+                      // },
+                      // solved_set: {
+                      //   type: "array",
+                      //   items: { type: "string" },
+                      // },
+                      // unsolved_set: {
+                      //   type: "array",
+                      //   items: { type: "string" },
+                      // },
                     },
                     required: [
                       "question_text",
@@ -546,6 +944,9 @@ async function generateQuestionsWithOpenAI(prompt, numQuestions, topicKey) {
                       "correct_answer",
                       "explanation",
                       "distractors",
+                      // "set",
+                      // "solved_set",
+                      // "unsolved_set",
                     ],
                     additionalProperties: false,
                   },
@@ -602,47 +1003,50 @@ async function generateQuestionsMock(topicKey, numQuestions) {
     rule: [
       {
         question_text:
-          "The words in the second set follow the same pattern as the first set. What word completes the second set? cat (cot) dog       pen (?) rat",
+          "The words in the second set follow the same pattern as the first set. What word completes the second set? tap (pod) nod       son (?) rib",
         answer_format: "multiple_choice",
-        correct_answer: "pot",
+        correct_answer: "nib",
         explanation:
-          "Take the first letter of the first word and the last two letters of the second word. c + ot = cot, and p + ot = pot",
-        distractors: ["pat", "per", "pog", "pan"],
+          "Take the last letter of the first word and the last two letters of the back word. p + od = pod, and n + ib = nib",
+        distractors: ["sob", "bin", "rob", "sin"],
       },
       {
         question_text:
-          "The words in the second set follow the same pattern as the first set. What word completes the second set? fox (fit) ten       bed (?) sun",
+          "The words in the second set follow the same pattern as the first set. What word completes the second set? fox (fit) tit       bed (?) sun",
         answer_format: "multiple_choice",
-        correct_answer: "bin",
+        correct_answer: "bun",
         explanation:
-          "Take the first letter of the first word and the last two letters of the second word. f + it = fit, and b + in = bin",
+          "Take the first letter of the first word and the last two letters of the back word. f + it = fit, and b + un = bun",
         distractors: ["but", "bat", "bot", "bus"],
       },
       {
         question_text:
-          "The words in the second set follow the same pattern as the first set. What word completes the second set? red (rim) man       top (?) sit",
+          "The words in the second set follow the same pattern as the first set. What word completes the second set? red (ran) man       top (?) sit",
         answer_format: "multiple_choice",
         correct_answer: "tit",
         explanation:
-          "Take the first letter of the first word and the last two letters of the second word. r + im = rim, and t + it = tit",
+          "Take the first letter of the first word and the last two letters of the back word. r + an = ran, and t + it = tit",
         distractors: ["tip", "tap", "tom", "ten"],
       },
     ],
     word_pair: [
       {
-        question_text: "Complete the pair: Hot is to Cold as Happy is to _____",
+        question_text:
+          "Find the word that completes the third pair of words so that it follows the same pattern as the first two pairs. marks arm   ready ear   glove (?) Which of the following is the missing word?",
         answer_format: "multiple_choice",
-        correct_answer: "Sad",
+        correct_answer: "log",
         explanation:
-          "Hot and Cold are opposites, so Happy and Sad are also opposites",
-        distractors: ["Warm", "Joy", "Excited", "Smile"],
+          "The pattern is to remove the last two letters, then move the first letter to end of the word",
+        distractors: ["vex", "goy", "gel", "vex"],
       },
       {
-        question_text: "Complete the pair: Car is to Road as Train is to _____",
+        question_text:
+          "Find the word that completes the third pair of words so that it follows the same pattern as the first two pairs. extent ten  places ape  inform (?) Which of the following is the missing word?",
         answer_format: "multiple_choice",
-        correct_answer: "Track",
-        explanation: "Cars travel on roads, and trains travel on tracks",
-        distractors: ["Station", "Conductor", "Engine", "Wheel"],
+        correct_answer: "fir",
+        explanation:
+          "The pattern is to take the first, third and fifth letters of the word and arrange them in the order 3rd, 1st, 5th.",
+        distractors: ["for", "nor", "fin", "ion"],
       },
     ],
     anagram: [
@@ -668,12 +1072,12 @@ async function generateQuestionsMock(topicKey, numQuestions) {
     word_ladders: [
       {
         question_text:
-          "Complete this word ladder from COLD to WARM: COLD → CORD → CARD → _____ → WARM",
+          "Change one letter at a time to make the first word into the final word. The answer must be a real word. CASE ____ LASH",
         answer_format: "multiple_choice",
-        correct_answer: "WARD",
+        correct_answer: "CASH",
         explanation:
-          "In a word ladder, you change one letter at a time to make a new word. CARD → WARD (change C to W)",
-        distractors: ["WARP", "WART", "WORD", "WORM"],
+          "      CASE → CASH: Change the last letter from 'E' to 'H' to form CASH CASH → LASH: Change the first letter from 'C' to 'L' to form LASH",
+        distractors: ["CAST", "LUSH", "LACK", "LASS"],
       },
       {
         question_text:

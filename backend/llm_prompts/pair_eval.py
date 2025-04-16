@@ -1,3 +1,6 @@
+import sys
+import json
+
 # Find the positions of letters in derived word from the base word
 def get_letter_positions(base_word):
     char_positions = {}
@@ -47,4 +50,15 @@ def pair_eval(input):
     output.pop("set", None)
     return output
 
+if __name__ == "__main__":
+    try:
+        input_path = sys.argv[1]
+        with open(input_path, 'r') as f:
+            input_data = json.load(f)
 
+        result = pair_eval(input_data)
+        print(json.dumps(result))  # Output to stdout for JS to parse
+
+    except Exception as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        sys.exit(1)
