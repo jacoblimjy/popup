@@ -1,61 +1,99 @@
-# vrc
+# Popup Verbal Reasoning Challenge (VRC)
+
+## Overview
+An AI-powered platform for practising 11+ verbal reasoning. Parents create child profiles, launch tailored or quick‑start practice sessions, and monitor progress with analytics. Administrators manage and approve LLM‑generated questions via a dedicated dashboard.
+
+---
 
 ## Prerequisites
 
-- [Docker](https://www.docker.com/get-started)
-- [Node.js](https://nodejs.org/) (for running the backend locally)
-- [npm](https://www.npmjs.com/) (comes with Node.js)
+- **Docker**: For running the MySQL database container.  
+- **Node.js**: Version 16+ (for backend and frontend).  
+- **npm**: Comes bundled with Node.js.  
 
-## Running the Application for Local Development
+---
 
-### Running the SQL Database
-The SQL database is set up using Docker. The initialization script is located in the `database/database/init` directory.
+## Local Development
 
-Navigate to the project root directory
+### 1. Database (MySQL)
 
-   ```sh
-   docker-compose up -d
-   ```
+Initialization scripts live in `database/init/init.sql`.
 
-### Running the Backend
-1. Navigate to the backend directory
+```bash
+# From project root:
+docker-compose up -d
+```
 
-    ```sh
-    cd backend
-    ```
+This will start a MySQL container with the VRC schema and seed data.
 
-2. Install Dependencies:
+### 2. Backend (Express)
 
-    ```sh
-    npm install
-    ```
+```bash
+cd backend         # Navigate into backend folder
+npm install        # Install dependencies
+cp .env.example .env  # Copy sample environment file
+# Add your OpenAI API key:
+# OPEN_AI_KEY=<your-key-here>
+node server.js
+```
 
-3. Start the Express server
+- The server listens on `http://localhost:3000` by default.
 
-    ```sh
-    node server.js
-    ```
+### 3. Frontend (Vite + React)
 
-### Running the Frontend
+```bash
+cd frontend        # Navigate into frontend folder
+npm install        # Install dependencies
+npm run dev        # Start Vite development server
+```
 
-1. Navigate to the frontend directory:
+- The app runs at `http://localhost:5173`.
 
-    ```sh
-    cd frontend
-    ```
+---
 
-2. Install dependencies:
+## Environment Variables
+Ensure you create a `.env` in the **backend** directory with:
 
-    ```sh
-    npm install
-    ```
+```ini
+# OpenAI API Key (must be set for question generation)
+OPEN_AI_KEY=
+```
 
-3. Start the frontend server:
+---
 
-    ```sh
-    npm run dev
-    ```
+## Default Admin Account
+To access the Admin Dashboard (question management and approval), use:
 
-4. Open the frontend in your browser:
+- **Email:** `parent3@example.com`  
+- **Password:** `test`
 
-    Open your browser and navigate to `http://localhost:5173` to view the frontend.
+
+---
+
+## Project Structure
+
+```
+/backend
+  ├─ config/            # App and role settings
+  ├─ controllers/       # Express route handlers
+  ├─ services/          # Business logic (including LLM integration)
+  ├─ llm_prompts/       # YAML prompts + Python validators
+  ├─ routes/            # Route definitions
+  └─ server.js          # Entry point
+
+/frontend
+  ├─ public/            # Static assets
+  ├─ src/
+  │   ├─ api/           # TypeScript API clients
+  │   ├─ components/    # Reusable UI components
+  │   ├─ context/       # React contexts
+  │   ├─ hooks/         # Custom hooks
+  │   └─ pages/         # Route views
+  └─ vite.config.ts     # Vite configuration
+
+/database
+  └─ init/              # SQL schema & seed scripts
+
+docker-compose.yml     # Database service definition
+
+```
