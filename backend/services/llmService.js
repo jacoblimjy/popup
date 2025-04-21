@@ -517,7 +517,7 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
       }
 
       // 2. Ensure distractors are present and in array format
-      const distractors = Array.isArray(question.distractors)
+      let distractors = Array.isArray(question.distractors)
         ? question.distractors
         : question.distractors
         ? [question.distractors]
@@ -577,37 +577,8 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
           console.log("Word pair validated successfully");
         } else if (topicType === "rule") {
           const ruleData = extractRuleData(question);
-          let processedOutput = await runPythonEvaluator("rule_eval", ruleData);
+          await runPythonEvaluator("rule_eval", ruleData);
           console.log("Rule question validated successfully");
-          const correctAnswerRaw = processedOutput.correct_answer;
-          const distractors = processedOutput.distractors;
-          const options = distractors.concat([correctAnswerRaw]);
-
-          for (let i = options.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [options[i], options[j]] = [options[j], options[i]];
-          }
-
-          let correctLetter = null;
-          const formattedOptions = options
-            .map((opt, index) => {
-              const letter = String.fromCharCode(65 + index);
-              if (opt === correctAnswerRaw) {
-                correctLetter = letter;
-              }
-              return `${letter}) ${opt}`;
-            })
-            .join("\n");
-
-          if (!correctLetter) {
-            throw new Error(
-              "Could not determine the correct answer's option label"
-            );
-          }
-          const finalQuestionText = `${processedOutput.question_text}\n\nWhich of the following is the correct answer?\n${formattedOptions}`;
-          processedOutput.question_text = finalQuestionText;
-          processedOutput.correct_answer = correctLetter;
-          processedQuestion = processedOutput;
         }
       } catch (evalError) {
         console.error(`${topicType} evaluation failed:`, evalError);
@@ -618,7 +589,39 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
         continue;
       }
 
-      // 5. Check for duplicate questions based on answer and question similarity
+      // 5. Scramble options
+      const correctAnswerRaw = processedQuestion.correct_answer.toUpperCase();
+      distractors = processedQuestion.distractors.map((distractor) => distractor.toUpperCase());
+      processedQuestion.distractors = distractors;
+      const options = distractors.concat([correctAnswerRaw]);
+
+
+      for (let i = options.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [options[i], options[j]] = [options[j], options[i]];
+      }
+
+      let correctLetter = null;
+      const formattedOptions = options
+        .map((opt, index) => {
+          const letter = String.fromCharCode(65 + index);
+          if (opt === correctAnswerRaw) {
+            correctLetter = letter;
+          }
+          return `${letter}) ${opt}`;
+        })
+        .join("\n");
+
+      if (!correctLetter) {
+        throw new Error(
+          "Could not determine the correct answer's option label"
+        );
+      }
+      const finalQuestionText = `${processedQuestion.question_text}\n\nWhich of the following is the correct answer?\n${formattedOptions}`;
+      processedQuestion.question_text = finalQuestionText;
+      processedQuestion.correct_answer = correctLetter;
+
+      // 6. Check for duplicate questions based on answer and question similarity
       const questionToCheck = {
         question_text: processedQuestion.question_text,
         correct_answer: processedQuestion.correct_answer,
@@ -636,7 +639,7 @@ async function processAndValidateQuestions(questions, topic_id, difficulty_id) {
         continue;
       }
 
-      // 6. Format the question for database insertion
+      // 7. Format the question for database insertion
       validQuestions.push({
         question_text: cleanText(processedQuestion.question_text),
         answer_format: processedQuestion.answer_format || "multiple_choice",
@@ -1052,7 +1055,7 @@ async function generateQuestionsMock(topicKey, numQuestions) {
     anagram: [
       {
         question_text:
-          "Find the anagram in this sentence: The teacher told students to remain silent during the test.",
+          "Find the anagram in this sentence: The teacher told students to remain LISTEN during the test.",
         answer_format: "multiple_choice",
         correct_answer: "silent",
         explanation:
@@ -1061,7 +1064,7 @@ async function generateQuestionsMock(topicKey, numQuestions) {
       },
       {
         question_text:
-          "Find the anagram in this sentence: Please listen to the story about the dusty items in the study.",
+          "Find the anagram in this sentence: Please SILENT to the story about the dusty items in the study.",
         answer_format: "multiple_choice",
         correct_answer: "listen",
         explanation:
