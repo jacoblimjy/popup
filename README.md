@@ -1,5 +1,10 @@
 # Popup Verbal Reasoning Challenge (VRC)
 
+- [Final Report](https://drive.google.com/file/d/1nbuqH8wYpg-6U3Qz0ALbijlJ3hJPbgKE/view?usp=drive_link)
+- [Presentation Slides](https://drive.google.com/file/d/1wj81NPRFcBv_nLUEZNqyYxDf9rqrhoun/view?usp=sharing)
+
+---
+
 ## Overview
 An AI-powered platform for practising 11+ verbal reasoning. Parents create child profiles, launch tailored or quick‑start practice sessions, and monitor progress with analytics. Administrators manage and approve LLM‑generated questions via a dedicated dashboard.
 
